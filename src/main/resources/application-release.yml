@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://svc.sel3.cloudtype.app:30403/officefinder
+    username: root
+    password: root
+
+  jwt:
+    secret: emVyb2Jhc2Utc3ByaW5nLWJvb3QtYXNzaWdubWVudC1kYXRhLXdpdGgtand0LXNlY3JldC1rZXk=
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: dev
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+logging:
+  level:
+    org.hibernate.SQL: debug
