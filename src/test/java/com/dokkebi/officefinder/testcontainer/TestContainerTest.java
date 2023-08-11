@@ -8,17 +8,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 
-@SpringBootTest(classes = OfficefinderApplication.class)
+@SpringBootTest
 public class TestContainerTest {
 
   @Autowired
   private RedisTemplate<String, String> redisTemplate;
 
-  @DisplayName("container test")
+  @DisplayName("embedded redis test")
   @Test
   public void myTest() {
     redisTemplate.opsForValue().set("key", "key");
 
     Assertions.assertThat(redisTemplate.opsForValue().get("key")).isEqualTo("key");
+  }
+
+  @DisplayName("embedded redis test2")
+  @Test
+  public void myTest2() {
+    // given
+    redisTemplate.opsForValue().set("key", "123");
+
+    // when
+    redisTemplate.opsForValue().increment("key", 10);
+    redisTemplate.opsForValue().increment("key", -20);
+
+    // then
+    Assertions.assertThat(redisTemplate.opsForValue().get("key")).isEqualTo("113");
   }
 }
