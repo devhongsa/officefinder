@@ -13,11 +13,15 @@ on:
   pull_request:
     branches: [ "master" ]
 
+#-------------------- envs start ----------------------------
+
 env:
   PROJECT_NAME: officefinder
   BUCKET_NAME: officefinder-cicd-bucket
   CODE_DEPLOY_APP_NAME: officefinder_cicd
   DEPLOYMENT_GROUP_NAME: officefinder_instance
+
+#-------------------- envs end ----------------------------
 
 jobs:
   build:
@@ -39,7 +43,7 @@ jobs:
       - name: Build and Test
         run: ./gradlew build test
 
-      #------------ deploy
+      #---------------------------- deploy start ------------------------------------
       - name: Make Zip File
         run: zip -qq -r ./$GITHUB_SHA.zip .
         shell: bash
