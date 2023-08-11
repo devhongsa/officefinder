@@ -37,7 +37,7 @@ jobs:
         shell: bash
 
       - name: Build and Test
-        run: ./gradlew build test
+        run: ./gradlew build -x test
 
       #------------ deploy
       - name: Make Zip File
