@@ -30,4 +30,20 @@ class TestRepositoryTest {
     // then
     Assertions.assertThat(result.getName()).isEqualTo("test name");
   }
+
+  @DisplayName("repository Test 2")
+  @Test
+  public void repositoryTest2() {
+    // given
+    TestEntity testEntity = TestEntity.builder()
+        .name("test name")
+        .build();
+
+    // when
+    TestEntity savedTest = testRepository.save(testEntity);
+    testRepository.delete(savedTest);
+
+    // then
+    Assertions.assertThat(testRepository.existsById(savedTest.getId())).isFalse();
+  }
 }
