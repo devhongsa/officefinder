@@ -25,7 +25,7 @@ public class RedisConfig {
   private int port;
 
   @Bean
-  public RedisConnectionFactory redisConnectionFactory(){
+  public RedisConnectionFactory redisConnectionFactory() {
     RedisStandaloneConfiguration conf = new RedisStandaloneConfiguration();
     conf.setHostName(host);
     conf.setPort(port);
@@ -52,7 +52,7 @@ public class RedisConfig {
   }
 
   @Bean
-  public RedisTemplate<String, ?> redisTemplate(){
+  public RedisTemplate<String, ?> redisTemplate() {
     RedisTemplate<String, ?> redisTemplate = new RedisTemplate<>();
     redisTemplate.setConnectionFactory(redisConnectionFactory());
 

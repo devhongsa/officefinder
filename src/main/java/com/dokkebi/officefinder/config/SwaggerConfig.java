@@ -41,7 +41,7 @@ public class SwaggerConfig {
         .build();
   }
 
-  private ApiKey apiKey(){
+  private ApiKey apiKey() {
     return new ApiKey("apiKey", "Authorization", "header");
   }
 
@@ -80,7 +80,7 @@ public class SwaggerConfig {
         .build();
   }
 
-  private List<SecurityReference> securityReference(){
+  private List<SecurityReference> securityReference() {
     AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
     AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
     authorizationScopes[0] = authorizationScope;

@@ -1,7 +1,5 @@
 package com.dokkebi.officefinder;
 
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
@@ -11,7 +9,7 @@ public abstract class TestContainerConfig {
   static final String REDIS_IMAGE = "redis:6-alpine";
   static final GenericContainer REDIS_CONTAINER;
 
-  static{
+  static {
     REDIS_CONTAINER = new GenericContainer<>(REDIS_IMAGE)
         .withExposedPorts(6379)
         .withReuse(true);
@@ -19,7 +17,7 @@ public abstract class TestContainerConfig {
   }
 
   @DynamicPropertySource
-  public static void overrideProps(DynamicPropertyRegistry registry){
+  public static void overrideProps(DynamicPropertyRegistry registry) {
     System.out.println("host :" + REDIS_CONTAINER.getHost());
     System.out.println("port :" + REDIS_CONTAINER.getMappedPort(6379));
 

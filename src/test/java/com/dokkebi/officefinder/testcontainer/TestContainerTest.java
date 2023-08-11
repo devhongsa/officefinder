@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 
 @SpringBootTest
-public class TestContainerTest extends TestContainerConfig{
+public class TestContainerTest extends TestContainerConfig {
 
   @Autowired
   private RedisTemplate<String, String> redisTemplate;
