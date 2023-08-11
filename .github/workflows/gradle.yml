@@ -8,7 +8,7 @@
 name: Build and deploy to EC2 Instance
 
 on:
-  merge:
+  pull_request:
     branches: [ "master" ]
 
 #-------------------- envs start ----------------------------
