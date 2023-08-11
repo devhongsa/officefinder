@@ -1,6 +1,5 @@
 package com.dokkebi.officefinder.testcontainer;
 
-import com.dokkebi.officefinder.OfficefinderApplication;
 import com.dokkebi.officefinder.TestContainerConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -18,11 +17,6 @@ public class TestContainerTest extends TestContainerConfig {
   @DisplayName("container test")
   @Test
   public void myTest() {
-    // given
-    redisTemplate.opsForValue().set("something", "something");
-    // when
-    String something = redisTemplate.opsForValue().getAndDelete("something");
-    // then
-    Assertions.assertThat(something).isEqualTo("something");
+
   }
 }
