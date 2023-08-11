@@ -39,18 +39,11 @@ dependencies {
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
 	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
 
-	// https://mvnrepository.com/artifact/org.testcontainers/junit-jupiter
-	testImplementation 'org.testcontainers:junit-jupiter:1.17.2'
-
-	// https://mvnrepository.com/artifact/org.testcontainers/testcontainers
-	testImplementation 'org.testcontainers:testcontainers:1.17.6'
-
 	// https://mvnrepository.com/artifact/com.github.gavlyukovskiy/p6spy-spring-boot-starter
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.8.1'
 
 	// https://mvnrepository.com/artifact/io.springfox/springfox-boot-starter
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
-
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
@@ -61,6 +54,8 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	// https://mvnrepository.com/artifact/it.ozimov/embedded-redis
+	testImplementation('it.ozimov:embedded-redis:0.7.3'){ exclude group: "org.slf4j", module: "slf4j-simple" }
 
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
