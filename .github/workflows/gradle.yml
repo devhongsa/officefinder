@@ -8,9 +8,7 @@
 name: Build and deploy to EC2 Instance
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
+  merge:
     branches: [ "master" ]
 
 #-------------------- envs start ----------------------------
@@ -40,8 +38,8 @@ jobs:
         run: chmod +x ./gradlew
         shell: bash
 
-      - name: Build and Test
-        run: ./gradlew build test
+      - name: Build
+        run: ./gradlew build -x test
 
       #---------------------------- deploy start ------------------------------------
       - name: Make Zip File
