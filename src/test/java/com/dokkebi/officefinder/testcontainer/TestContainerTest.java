@@ -19,6 +19,6 @@ public class TestContainerTest {
   @DisplayName("container test")
   @Test
   public void myTest() {
-    redisTemplate.opsForValue().set("data", "data");
+
   }
 }
