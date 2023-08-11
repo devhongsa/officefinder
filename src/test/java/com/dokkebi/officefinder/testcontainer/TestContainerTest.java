@@ -35,4 +35,18 @@ public class TestContainerTest {
     // then
     Assertions.assertThat(redisTemplate.opsForValue().get("key")).isEqualTo("113");
   }
+
+  @DisplayName("embedded redis test3")
+  @Test
+  public void myTest3() {
+    // given
+    redisTemplate.opsForValue().set("key", "90");
+
+    // when
+    redisTemplate.opsForValue().increment("key", 10);
+    redisTemplate.opsForValue().increment("key", 10);
+
+    // then
+    Assertions.assertThat(redisTemplate.opsForValue().get("key")).isEqualTo("110");
+  }
 }
