@@ -1,0 +1,57 @@
+spring:
+  profiles:
+    active: release
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://svc.sel3.cloudtype.app:30403/officefinder
+    username: root
+    password: root
+
+  jwt:
+    secret: emVyb2Jhc2Utc3ByaW5nLWJvb3QtYXNzaWdubWVudC1kYXRhLXdpdGgtand0LXNlY3JldC1rZXk=
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: dev
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+
+---
+
+spring:
+  profiles:
+    active: local
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:tcp://localhost/~/officefinder
+    username: sa
+    password:
+
+  jwt:
+    secret: emVyb2Jhc2Utc3ByaW5nLWJvb3QtYXNzaWdubWVudC1kYXRhLXdpdGgtand0LXNlY3JldC1rZXk=
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: dev
+
+logging:
+  level:
+    org.hibernate.SQL: debug
