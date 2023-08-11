@@ -16,11 +16,16 @@ spring:
     properties:
       hibernate:
         format_sql: true
+    open-in-view: false
 
   redis:
     host: ${REDIS_HOST:localhost}
     port: ${REDIS_PORT:6379}
     password: dev
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 logging:
   level:
@@ -51,6 +56,10 @@ spring:
     host: ${REDIS_HOST:localhost}
     port: ${REDIS_PORT:6379}
     password: dev
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 logging:
   level:
