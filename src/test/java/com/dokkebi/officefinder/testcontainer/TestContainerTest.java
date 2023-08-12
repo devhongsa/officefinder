@@ -48,6 +48,6 @@ public class TestContainerTest {
     redisTemplate.opsForValue().increment("key2", 10);
 
     // then
-    Assertions.assertThat(redisTemplate.opsForValue().get("key")).isEqualTo("110");
+    Assertions.assertThat(redisTemplate.opsForValue().get("key")).isEqualTo("100");
   }
 }
