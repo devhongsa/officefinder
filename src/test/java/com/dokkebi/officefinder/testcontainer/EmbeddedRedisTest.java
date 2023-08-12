@@ -19,13 +19,16 @@ public class EmbeddedRedisTest {
     // given
     redisTemplate.opsForValue().set("new Key", "123");
     redisTemplate.opsForValue().set("new Key 2", "100");
+    redisTemplate.opsForValue().set("new Key 3", "100");
 
     // when
     redisTemplate.opsForValue().increment("new Key", 15);
     redisTemplate.opsForValue().increment("new Key 2", -10);
+    redisTemplate.opsForValue().increment("new Key 3", -50);
 
     // then
     Assertions.assertThat(redisTemplate.opsForValue().get("new Key")).isEqualTo("138");
     Assertions.assertThat(redisTemplate.opsForValue().get("new Key 2")).isEqualTo("90");
+    Assertions.assertThat(redisTemplate.opsForValue().get("new Key 3")).isEqualTo("50");
   }
 }
