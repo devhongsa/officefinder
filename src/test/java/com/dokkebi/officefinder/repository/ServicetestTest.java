@@ -29,4 +29,20 @@ public class ServicetestTest {
     // then
     Assertions.assertThat(testRepository.existsById(savedTest.getId())).isFalse();
   }
+
+  @DisplayName("Service test 2")
+  @Test
+  public void ServiceTest2() {
+    // given
+    TestEntity testEntity = TestEntity.builder()
+        .name("test name")
+        .build();
+
+    // when
+    TestEntity savedTest = testRepository.save(testEntity);
+    testRepository.delete(savedTest);
+
+    // then
+    Assertions.assertThat(testRepository.existsById(savedTest.getId())).isFalse();
+  }
 }
