@@ -92,8 +92,6 @@ public class LocalRedisConfig {
     } catch (IOException e) {
     }
 
-    String a = "test";
-
     return StringUtils.hasText(pidInfo.toString());
   }
 }
