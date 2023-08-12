@@ -41,12 +41,13 @@ public class TestContainerTest {
   public void myTest3() {
     // given
     redisTemplate.opsForValue().set("key", "90");
+    redisTemplate.opsForValue().set("key2", "90");
 
     // when
     redisTemplate.opsForValue().increment("key", 10);
-    redisTemplate.opsForValue().increment("key", 10);
+    redisTemplate.opsForValue().increment("key2", 10);
 
     // then
-    Assertions.assertThat(redisTemplate.opsForValue().get("key")).isEqualTo("110");
+    Assertions.assertThat(redisTemplate.opsForValue().get("key")).isEqualTo("100");
   }
 }

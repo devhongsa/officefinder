@@ -27,6 +27,7 @@ public class EmbeddedRedisTest {
     redisTemplate.opsForValue().increment("new Key 3", -50);
 
 
+
     // then
     Assertions.assertThat(redisTemplate.opsForValue().get("new Key")).isEqualTo("138");
     Assertions.assertThat(redisTemplate.opsForValue().get("new Key 2")).isEqualTo("90");
