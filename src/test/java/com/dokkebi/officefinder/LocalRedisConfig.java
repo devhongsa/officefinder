@@ -94,4 +94,8 @@ public class LocalRedisConfig {
 
     return StringUtils.hasText(pidInfo.toString());
   }
+  
+  public void something(){
+    return;
+  }
 }
