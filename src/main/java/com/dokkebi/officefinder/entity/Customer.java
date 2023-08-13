@@ -23,7 +23,7 @@ public class Customer extends BaseEntity {
   @Column(name = "customer_id", nullable = false)
   private Long id;
 
-  @Column(name = "customer_name", nullable = false)
+  @Column(name = "customer_name", nullable = false, length = 12)
   private String name;
 
   @Column(name = "customer_email", nullable = false, unique = true)
