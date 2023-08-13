@@ -26,10 +26,10 @@ public class Customer extends BaseEntity {
   @Column(name = "customer_name", nullable = false, length = 12)
   private String name;
 
-  @Column(name = "customer_email", nullable = false, unique = true)
+  @Column(name = "customer_email", nullable = false, unique = true, length = 50)
   private String email;
 
-  @Column(name = "customer_password", nullable = false)
+  @Column(name = "customer_password", nullable = false, length = 50)
   private String password;
 
   @Column(name = "customer_point", nullable = false)

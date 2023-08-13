@@ -29,7 +29,7 @@ public class OfficeOwner extends BaseEntity {
   @Column(name = "owner_name", nullable = false, length = 12)
   private String name;
 
-  @Column(name = "owner_email", nullable = false)
+  @Column(name = "owner_email", nullable = false, length = 50)
   private String email;
 
   @Column(name = "owner_password", nullable = false)
