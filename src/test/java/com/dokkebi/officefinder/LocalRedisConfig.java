@@ -94,8 +94,8 @@ public class LocalRedisConfig {
 
     return StringUtils.hasText(pidInfo.toString());
   }
-
-  private boolean isReal(){
-    return false;
+  
+  public void something(){
+    return;
   }
 }
