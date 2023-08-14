@@ -25,14 +25,26 @@ public class AuthController {
     private final AuthService authService;
 
     /*
-        회원가입
+        Customer 회원가입
         1. 회원가입에 필요한 정보들(SignUpCustomer Dto) Valid check
         2. 회원가입에 성공하면 SignUpResponse Dto 응답
      */
     @PostMapping("/customers/signup")
     public ResponseEntity<?> singUpUser(@RequestBody @Valid Auth.SignUpCustomer signupRequest){
-        Auth.SignUpResponse signUpResponse = authService.register(signupRequest);
-        log.info("user signup -> " + signUpResponse.getEmail());
+        Auth.SignUpResponseCustomer signUpResponse = authService.register(signupRequest);
+        log.info("user signup -> " + signUpResponse.getName());
+        return ResponseEntity.ok(new ResponseDto<>("success",signUpResponse));
+    }
+
+    /*
+        OfficeOwner 회원가입
+        1. 회원가입에 필요한 정보들(SignUpOfficeOwner Dto) Valid check
+        2. 회원가입에 성공하면 SignUpResponse Dto 응답
+     */
+    @PostMapping("/agents/signup")
+    public ResponseEntity<?> singUpUser(@RequestBody @Valid Auth.SignUpOfficeOwner signupRequest){
+        Auth.SignUpResponseOfficeOwner signUpResponse = authService.register(signupRequest);
+        log.info("user signup -> " + signUpResponse.getName());
         return ResponseEntity.ok(new ResponseDto<>("success",signUpResponse));
     }
 }

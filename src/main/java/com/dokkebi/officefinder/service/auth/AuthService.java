@@ -2,9 +2,11 @@ package com.dokkebi.officefinder.service.auth;
 
 import com.dokkebi.officefinder.controller.auth.dto.Auth;
 import com.dokkebi.officefinder.entity.Customer;
+import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
+import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final CustomerRepository customerRepository;
+    private final OfficeOwnerRepository officeOwnerRepository;
     private final PasswordEncoder passwordEncoder;
 
     /*
@@ -30,13 +33,25 @@ public class AuthService {
         5. SignUpResponse Dto를 controller에 리턴
      */
     @Transactional
-    public Auth.SignUpResponse register(Auth.SignUpCustomer signupRequest) {
+    public Auth.SignUpResponseCustomer register(Auth.SignUpCustomer signupRequest) {
         if (customerRepository.existsByEmail(signupRequest.getEmail())) {
             throw new CustomException(CustomErrorCode.EMAIL_ALREADY_REGISTERED);
         }
 
-        signupRequest.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
+        signupRequest.encodePassword(passwordEncoder);
         Customer customer = customerRepository.save(signupRequest.toEntity());
-        return Auth.SignUpResponse.builder().customer(customer).build();
+        return Auth.SignUpResponseCustomer.builder().customer(customer).build();
+    }
+
+
+    @Transactional
+    public Auth.SignUpResponseOfficeOwner register(Auth.SignUpOfficeOwner signupRequest) {
+        if (officeOwnerRepository.existsByEmail(signupRequest.getEmail())) {
+            throw new CustomException(CustomErrorCode.EMAIL_ALREADY_REGISTERED);
+        }
+
+        signupRequest.encodePassword(passwordEncoder);
+        OfficeOwner officeOwner = officeOwnerRepository.save(signupRequest.toEntity());
+        return Auth.SignUpResponseOfficeOwner.builder().officeOwner(officeOwner).build();
     }
 }
