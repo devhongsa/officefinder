@@ -2,8 +2,10 @@ package com.dokkebi.officefinder.controller.office.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
 public class OfficeDetailSearchCond {
 
@@ -26,4 +28,5 @@ public class OfficeDetailSearchCond {
   Boolean haveWifi;
   Boolean haveShowerBooth;
   Boolean haveStorage;
+  Boolean haveHeater;
 }
