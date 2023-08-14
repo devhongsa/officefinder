@@ -1,5 +1,6 @@
-package com.dokkebi.officefinder.entity.type;
+package com.dokkebi.officefinder.entity.office;
 
+import com.dokkebi.officefinder.entity.BaseEntity;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Office {
+public class Office extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

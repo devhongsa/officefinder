@@ -23,7 +23,7 @@ public class OfficeOwner extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "onwer_id")
+  @Column(name = "owner_id")
   private Long id;
 
   @Column(name = "owner_name", nullable = false, length = 12)
