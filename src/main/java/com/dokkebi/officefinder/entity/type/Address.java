@@ -32,4 +32,11 @@ public class Address {
     this.buildingNumber = buildingNumber;
     this.zipcode = zipcode;
   }
+
+  /*
+  주소 객체 생성 메서드
+   */
+  public static Address fromRequestDto(){
+    return null;
+  }
 }
