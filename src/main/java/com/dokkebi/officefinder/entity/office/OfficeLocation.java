@@ -6,6 +6,8 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapsId;
@@ -21,13 +23,9 @@ import lombok.NoArgsConstructor;
 public class OfficeLocation extends BaseEntity {
 
   @Id
-  @Column(name = "office_id")
+  @Column(name = "office_location_id")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-
-  @OneToOne(fetch = FetchType.LAZY)
-  @MapsId
-  @JoinColumn(name = "office_id")
-  private Office office;
 
   @Embedded
   private Address address;
@@ -36,12 +34,18 @@ public class OfficeLocation extends BaseEntity {
   private double longitude;
 
   @Builder
-  private OfficeLocation(Long id, Office office, Address address, double latitude,
+  private OfficeLocation(Long id, Address address, double latitude,
       double longitude) {
     this.id = id;
-    this.office = office;
     this.address = address;
     this.latitude = latitude;
     this.longitude = longitude;
+  }
+
+  /*
+  엔티티 생성 메서드
+   */
+  public static OfficeLocation fromRequestDto(){
+    return null;
   }
 }
