@@ -1,11 +1,11 @@
 package com.dokkebi.officefinder.entity;
 
-import com.dokkebi.officefinder.entity.type.UserRole;
+import com.dokkebi.officefinder.utils.Converter;
+import java.util.Set;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -41,20 +41,28 @@ public class OfficeOwner extends BaseEntity {
   @Column(name = "owner_point", nullable = false)
   private long point;
 
-  @Column(name = "owner_role", nullable = false)
-  @Enumerated(EnumType.STRING)
-  private UserRole role;
+  @Column(name = "owner_roles", nullable = false)
+  @Convert(converter = Converter.RoleConverter.class)
+  private Set<String> roles;
 
   @Builder
-  private OfficeOwner(Long id, String name, String email, String password, String businessNumber,
-      long point, UserRole role) {
-    this.id = id;
+  private OfficeOwner(String name, String email, String password, String businessNumber, long point, Set<String> roles) {
     this.name = name;
     this.email = email;
     this.password = password;
     this.businessNumber = businessNumber;
     this.point = point;
-    this.role = role;
+    this.roles = roles;
+  }
+
+  @Builder
+  private OfficeOwner(String name, String email, String password, String businessNumber) {
+    this.name = name;
+    this.email = email;
+    this.password = password;
+    this.businessNumber = businessNumber;
+    this.point = 0;
+    this.roles = Set.of("ROLE_OFFICE_OWNER");
   }
 
   public void changePassword(String newPassword) {
