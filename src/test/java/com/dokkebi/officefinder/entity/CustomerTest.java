@@ -3,7 +3,7 @@ package com.dokkebi.officefinder.entity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.dokkebi.officefinder.entity.type.UserRole;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ class CustomerTest {
   @Test
   public void changePasswordTest() {
     // given
-    Customer customer = createCustomer("customer", "test1@naver.com", "1234", 0, UserRole.CUSTOMER);
+    Customer customer = createCustomer("customer", "test1@naver.com", "1234", 0, Set.of("ROLE_CUSTOMER"));
     entityManager.persist(customer);
 
     entityManager.flush();
@@ -42,7 +42,7 @@ class CustomerTest {
   @Test
   public void chargePointTest() {
     // given
-    Customer customer = createCustomer("test1", "test2@naver.com", "5678", 0, UserRole.CUSTOMER);
+    Customer customer = createCustomer("test1", "test2@naver.com", "5678", 0, Set.of("ROLE_CUSTOMER"));
     entityManager.persist(customer);
 
     entityManager.flush();
@@ -65,7 +65,7 @@ class CustomerTest {
   public void usePointTest() {
     // given
     Customer customer = createCustomer("test1", "test2@naver.com", "5678", 150000,
-        UserRole.CUSTOMER);
+        Set.of("ROLE_CUSTOMER"));
     entityManager.persist(customer);
 
     entityManager.flush();
@@ -88,7 +88,7 @@ class CustomerTest {
   public void usePointTestWithNotEnoughPoint() {
     // given
     Customer customer = createCustomer("test1", "test2@naver.com", "5678", 150000,
-        UserRole.CUSTOMER);
+        Set.of("ROLE_CUSTOMER"));
     entityManager.persist(customer);
 
     entityManager.flush();
@@ -103,13 +103,13 @@ class CustomerTest {
   }
 
   private static Customer createCustomer(String name, String email, String password, long point,
-      UserRole userRole) {
+      Set<String> roles) {
     return Customer.builder()
         .name(name)
         .email(email)
         .password(password)
         .point(point)
-        .role(userRole)
+        .roles(roles)
         .build();
   }
 }
