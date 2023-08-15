@@ -2,8 +2,10 @@ package com.dokkebi.officefinder.controller.auth.dto;
 
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.OfficeOwner;
+import java.util.Set;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +18,7 @@ public class Auth {
    */
   @Getter
   @NoArgsConstructor
+  @AllArgsConstructor
   public static class SignUpCustomer {
     @NotBlank
     private String name;
@@ -30,6 +33,8 @@ public class Auth {
           .name(name)
           .password(password)
           .email(email)
+          .point(0)
+          .roles(Set.of("ROLE_CUSTOMER"))
           .build();
     }
 
@@ -57,6 +62,7 @@ public class Auth {
    */
   @Getter
   @NoArgsConstructor
+  @AllArgsConstructor
   public static class SignUpOfficeOwner {
     @NotBlank
     private String name;
@@ -74,6 +80,8 @@ public class Auth {
           .password(password)
           .email(email)
           .businessNumber(businessNumber)
+          .point(0)
+          .roles(Set.of("ROLE_OFFICE_OWNER"))
           .build();
     }
 

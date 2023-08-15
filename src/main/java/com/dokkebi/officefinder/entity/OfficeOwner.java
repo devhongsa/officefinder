@@ -55,16 +55,6 @@ public class OfficeOwner extends BaseEntity {
     this.roles = roles;
   }
 
-  @Builder
-  private OfficeOwner(String name, String email, String password, String businessNumber) {
-    this.name = name;
-    this.email = email;
-    this.password = password;
-    this.businessNumber = businessNumber;
-    this.point = 0;
-    this.roles = Set.of("ROLE_OFFICE_OWNER");
-  }
-
   public void changePassword(String newPassword) {
     this.password = newPassword;
   }
