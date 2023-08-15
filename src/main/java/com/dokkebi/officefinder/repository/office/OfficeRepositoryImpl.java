@@ -1,14 +1,18 @@
 package com.dokkebi.officefinder.repository.office;
 
 import static com.dokkebi.officefinder.entity.office.QOffice.office;
+import static com.dokkebi.officefinder.entity.office.QOfficeCondition.officeCondition;
+import static com.dokkebi.officefinder.entity.office.QOfficeLocation.officeLocation;
 
 import com.dokkebi.officefinder.controller.office.dto.OfficeBasicSearchCond;
 import com.dokkebi.officefinder.controller.office.dto.OfficeDetailSearchCond;
 import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.entity.office.QOffice;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -109,6 +113,17 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
         );
 
     return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
+  }
+
+  @Override
+  public Optional<Office> findByOfficeId(Long id) {
+    Office office = queryFactory.selectFrom(QOffice.office)
+        .join(QOffice.office.officeLocation, officeLocation).fetchJoin()
+        .join(QOffice.office.officeCondition, officeCondition).fetchJoin()
+        .where(QOffice.office.id.eq(id))
+        .fetchOne();
+
+    return Optional.ofNullable(office);
   }
 
   private BooleanExpression legionEquals(String legion) {
