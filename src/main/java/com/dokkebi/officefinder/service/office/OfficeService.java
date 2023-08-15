@@ -29,25 +29,28 @@ public class OfficeService {
   private final OfficeLocationRepository officeLocationRepository;
   private final OfficeConditionRepository officeConditionRepository;
   private final OfficeOwnerRepository ownerRepository;
+  private final OfficeRedisService officeRedisService;
 
   @Transactional
   public Long createOfficeInfo(OfficeCreateRequestDto request, String ownerEmail) {
     OfficeOwner officeOwner = ownerRepository.findByEmail(ownerEmail)
         .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
 
+    Office office = Office.createFromRequest(request, officeOwner);
+
     OfficeCondition officeCondition = OfficeCondition.createFromRequest(
-        OfficeConditionDto.fromRequest(request)
+        office, OfficeConditionDto.fromRequest(request)
     );
 
     OfficeLocation officeLocation = OfficeLocation.createFromRequest(
-        OfficeLocationDto.fromRequest(request)
+        office, OfficeLocationDto.fromRequest(request)
     );
 
-    Office office = Office.createFromRequest(request, officeLocation, officeCondition, officeOwner);
-
+    Office savedOffice = officeRepository.save(office);
     officeLocationRepository.save(officeLocation);
     officeConditionRepository.save(officeCondition);
-    Office savedOffice = officeRepository.save(office);
+
+    officeRedisService.setRemainRoom(request.getOfficeName(), request.getRemainRoom());
 
     return savedOffice.getId();
   }
@@ -64,6 +67,8 @@ public class OfficeService {
     modifyOfficeLocation(office.getOfficeLocation(), OfficeLocationDto.fromRequest(request));
 
     office.modifyFromRequest(request);
+
+    officeRedisService.setRemainRoom(request.getOfficeName(), request.getRemainRoom());
 
     return office.getId();
   }
@@ -89,8 +94,6 @@ public class OfficeService {
     Office office = officeRepository.findByOfficeId(officeId)
         .orElseThrow(() -> new IllegalArgumentException("해당 오피스는 존재하지 않습니다."));
 
-    officeLocationRepository.delete(office.getOfficeLocation());
-    officeConditionRepository.delete(office.getOfficeCondition());
     officeRepository.delete(office);
   }
 
