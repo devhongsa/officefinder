@@ -1,6 +1,7 @@
 package com.dokkebi.officefinder.entity.office;
 
 import com.dokkebi.officefinder.entity.BaseEntity;
+import com.dokkebi.officefinder.service.office.dto.OfficeConditionDto;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -90,16 +91,47 @@ public class OfficeCondition extends BaseEntity {
   }
 
   /*
-    오피스 상태 변경
-     */
-  public void changeOfficeCondition() {
-    return;
+  엔티티 생성 메서드
+   */
+  public static OfficeCondition createFromRequest(OfficeConditionDto request) {
+    return OfficeCondition.builder()
+        .airCondition(request.isHaveAirCondition())
+        .heaterCondition(request.isHaveHeater())
+        .cafe(request.isHaveCafe())
+        .printer(request.isHavePrinter())
+        .packageSendService(request.isPackageSendServiceAvailable())
+        .doorLock(request.isHaveDoorLock())
+        .fax(request.isFaxServiceAvailable())
+        .publicKitchen(request.isHavePublicKitchen())
+        .publicLounge(request.isHavePublicLounge())
+        .privateLocker(request.isHavePrivateLocker())
+        .tvProjector(request.isHaveTvProjector())
+        .whiteboard(request.isHaveWhiteBoard())
+        .wifi(request.isHaveWifi())
+        .showerBooth(request.isHaveShowerBooth())
+        .storage(request.isHaveStorage())
+        .build();
   }
 
   /*
-  엔티티 생성 메서드
+  엔티티 수정 메서드
    */
-  public static OfficeCondition fromRequestDto(){
-    return null;
+  public void modifyFromRequest(OfficeConditionDto request) {
+
+    this.airCondition = request.isHaveAirCondition();
+    this.heaterCondition = request.isHaveHeater();
+    this.cafe = request.isHaveCafe();
+    this.printer = request.isHavePrinter();
+    this.packageSendService = request.isPackageSendServiceAvailable();
+    this.doorLock = request.isHaveDoorLock();
+    this.fax = request.isFaxServiceAvailable();
+    this.publicKitchen = request.isHavePublicKitchen();
+    this.publicLounge = request.isHavePublicLounge();
+    this.privateLocker = request.isHavePrivateLocker();
+    this.tvProjector = request.isHaveTvProjector();
+    this.whiteboard = request.isHaveWhiteBoard();
+    this.wifi = request.isHaveWifi();
+    this.showerBooth = request.isHaveShowerBooth();
+    this.storage = request.isHaveStorage();
   }
 }

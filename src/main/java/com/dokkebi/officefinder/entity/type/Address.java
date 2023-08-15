@@ -1,5 +1,6 @@
 package com.dokkebi.officefinder.entity.type;
 
+import com.dokkebi.officefinder.service.office.dto.OfficeLocationDto;
 import javax.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -36,7 +37,16 @@ public class Address {
   /*
   주소 객체 생성 메서드
    */
-  public static Address fromRequestDto(){
-    return null;
+  public static Address fromRequestDto(OfficeLocationDto request){
+    return Address.builder()
+        .legion(request.getLegion())
+        .city(request.getCity())
+        .town(request.getTown())
+        .village(request.getVillage())
+        .bungi(request.getBungi())
+        .street(request.getStreet())
+        .buildingNumber(request.getBuildingNumber())
+        .zipcode(request.getZipcode())
+        .build();
   }
 }

@@ -2,16 +2,13 @@ package com.dokkebi.officefinder.entity.office;
 
 import com.dokkebi.officefinder.entity.BaseEntity;
 import com.dokkebi.officefinder.entity.type.Address;
+import com.dokkebi.officefinder.service.office.dto.OfficeLocationDto;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -45,7 +42,19 @@ public class OfficeLocation extends BaseEntity {
   /*
   엔티티 생성 메서드
    */
-  public static OfficeLocation fromRequestDto(){
-    return null;
+  public static OfficeLocation createFromRequest(OfficeLocationDto request) {
+    Address address = Address.fromRequestDto(request);
+
+    return OfficeLocation.builder()
+        .latitude(request.getLatitude())
+        .longitude(request.getLongitude())
+        .address(address)
+        .build();
+  }
+
+  public void modifyFromRequest(OfficeLocationDto request) {
+    this.address = Address.fromRequestDto(request);
+    this.latitude = request.getLatitude();
+    this.longitude = request.getLongitude();
   }
 }

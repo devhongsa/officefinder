@@ -1,5 +1,7 @@
 package com.dokkebi.officefinder.entity.office;
 
+import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
+import com.dokkebi.officefinder.controller.office.dto.OfficeModifyRequestDto;
 import com.dokkebi.officefinder.entity.BaseEntity;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import javax.persistence.Column;
@@ -62,7 +64,26 @@ public class Office extends BaseEntity {
   /*
   엔티티 생성 메서드
    */
-  public static Office fromRequestDto(){
-    return null;
+  public static Office createFromRequest(OfficeCreateRequestDto request, OfficeLocation location,
+      OfficeCondition condition, OfficeOwner officeOwner) {
+
+    return Office.builder()
+        .name(request.getOfficeName())
+        .owner(officeOwner)
+        .officeCondition(condition)
+        .officeLocation(location)
+        .maxCapacity(request.getMaxCapacity())
+        .leaseFee(request.getLeaseFee())
+        .build();
+  }
+
+  /*
+  엔티티 변경 메서드
+   */
+  public void modifyFromRequest(OfficeModifyRequestDto request) {
+
+    this.name = request.getOfficeName();
+    this.leaseFee = request.getLeaseFee();
+    this.maxCapacity = request.getMaxCapacity();
   }
 }
