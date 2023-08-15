@@ -4,6 +4,7 @@ import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeModifyRequestDto;
 import com.dokkebi.officefinder.entity.BaseEntity;
 import com.dokkebi.officefinder.entity.OfficeOwner;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,12 +36,10 @@ public class Office extends BaseEntity {
   @JoinColumn(name = "owner_id")
   private OfficeOwner owner;
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "office_condition_id")
+  @OneToOne(mappedBy = "office", cascade = CascadeType.REMOVE)
   private OfficeCondition officeCondition;
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "office_location_id")
+  @OneToOne(mappedBy = "office", cascade = CascadeType.REMOVE)
   private OfficeLocation officeLocation;
 
   @Column(name = "lease_fee")
@@ -64,14 +63,10 @@ public class Office extends BaseEntity {
   /*
   엔티티 생성 메서드
    */
-  public static Office createFromRequest(OfficeCreateRequestDto request, OfficeLocation location,
-      OfficeCondition condition, OfficeOwner officeOwner) {
-
+  public static Office createFromRequest(OfficeCreateRequestDto request, OfficeOwner officeOwner) {
     return Office.builder()
         .name(request.getOfficeName())
         .owner(officeOwner)
-        .officeCondition(condition)
-        .officeLocation(location)
         .maxCapacity(request.getMaxCapacity())
         .leaseFee(request.getLeaseFee())
         .build();
@@ -85,5 +80,13 @@ public class Office extends BaseEntity {
     this.name = request.getOfficeName();
     this.leaseFee = request.getLeaseFee();
     this.maxCapacity = request.getMaxCapacity();
+  }
+
+  public void setOfficeCondition(OfficeCondition officeCondition) {
+    this.officeCondition = officeCondition;
+  }
+
+  public void setOfficeLocation(OfficeLocation officeLocation) {
+    this.officeLocation = officeLocation;
   }
 }

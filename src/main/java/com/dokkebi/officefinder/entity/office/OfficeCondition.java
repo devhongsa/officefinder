@@ -4,9 +4,12 @@ import com.dokkebi.officefinder.entity.BaseEntity;
 import com.dokkebi.officefinder.service.office.dto.OfficeConditionDto;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,6 +24,10 @@ public class OfficeCondition extends BaseEntity {
   @Column(name = "office_condition_id")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "office_id")
+  private Office office;
 
   @Column(name = "air_conditioner_status")
   private boolean airCondition;
@@ -68,11 +75,15 @@ public class OfficeCondition extends BaseEntity {
   private boolean storage;
 
   @Builder
-  private OfficeCondition(Long id, boolean airCondition, boolean heaterCondition, boolean cafe,
+  private OfficeCondition(Long id, Office office, boolean airCondition, boolean heaterCondition, boolean cafe,
       boolean printer, boolean packageSendService, boolean doorLock, boolean fax,
       boolean publicKitchen, boolean publicLounge, boolean privateLocker, boolean tvProjector,
       boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage) {
     this.id = id;
+
+    this.office = office;
+    office.setOfficeCondition(this);
+
     this.airCondition = airCondition;
     this.heaterCondition = heaterCondition;
     this.cafe = cafe;
@@ -93,8 +104,9 @@ public class OfficeCondition extends BaseEntity {
   /*
   엔티티 생성 메서드
    */
-  public static OfficeCondition createFromRequest(OfficeConditionDto request) {
+  public static OfficeCondition createFromRequest(Office office, OfficeConditionDto request) {
     return OfficeCondition.builder()
+        .office(office)
         .airCondition(request.isHaveAirCondition())
         .heaterCondition(request.isHaveHeater())
         .cafe(request.isHaveCafe())
