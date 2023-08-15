@@ -14,6 +14,11 @@ import lombok.Setter;
 public class OfficeModifyRequestDto {
 
   String officeName;
+  Integer maxCapacity;
+  Long leaseFee;
+  Integer remainRoom;
+
+  // address
   String legion;
   String city;
   String town;
@@ -22,10 +27,6 @@ public class OfficeModifyRequestDto {
   String street;
   String buildingNumber;
   Integer zipcode;
-
-  Integer maxCapacity;
-  Long leaseFee;
-
   Double latitude;
   Double longitude;
 

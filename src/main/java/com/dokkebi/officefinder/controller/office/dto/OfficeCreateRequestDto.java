@@ -13,8 +13,12 @@ import lombok.Setter;
 @Builder
 public class OfficeCreateRequestDto {
 
-  // address
   String officeName;
+  Integer maxCapacity;
+  Long leaseFee;
+  Integer remainRoom;
+
+  // address
   String legion;
   String city;
   String town;
@@ -23,10 +27,6 @@ public class OfficeCreateRequestDto {
   String street;
   String buildingNumber;
   Integer zipcode;
-
-  Integer maxCapacity;
-  Long leaseFee;
-
   Double latitude;
   Double longitude;
 
