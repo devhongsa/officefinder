@@ -48,15 +48,6 @@ public class Customer extends BaseEntity {
     this.roles = roles;
   }
 
-  @Builder
-  private Customer(String name, String email, String password) {
-    this.name = name;
-    this.email = email;
-    this.password = password;
-    this.point = 0;
-    this.roles = Set.of("ROLE_CUSTOMER");
-  }
-
   /*
     회원 비밀번호 변경 메서드
      */
