@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
-import com.dokkebi.officefinder.entity.type.UserRole;
 import java.time.LocalDate;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class LeaseTest {
   @Test
   public void changeLeaseStatusTest() throws Exception {
     // given
-    Customer customer = createCustomer("kim", "test@test.com", "12345", 0, UserRole.CUSTOMER);
+    Customer customer = createCustomer("kim", "test@test.com", "12345", 0, Set.of("ROLE_CUSTOMER"));
     Office office = createOffice("office1", 50000, 5);
 
     Lease lease = createLease(customer, office, 1500000, LeaseStatus.AWAIT, LocalDate.now(),
@@ -48,13 +48,13 @@ class LeaseTest {
   }
 
   private Customer createCustomer(String name, String email, String password, long point,
-      UserRole userRole) {
+      Set<String> roles) {
     return Customer.builder()
         .name(name)
         .email(email)
         .password(password)
         .point(point)
-        .role(userRole)
+        .roles(roles)
         .build();
   }
 

@@ -1,10 +1,10 @@
 package com.dokkebi.officefinder.entity;
 
-import com.dokkebi.officefinder.entity.type.UserRole;
+import com.dokkebi.officefinder.utils.Converter;
+import java.util.Set;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -29,24 +29,24 @@ public class Customer extends BaseEntity {
   @Column(name = "customer_email", nullable = false, unique = true, length = 50)
   private String email;
 
-  @Column(name = "customer_password", nullable = false, length = 50)
+  @Column(name = "customer_password", nullable = false, length = 100)
   private String password;
 
   @Column(name = "customer_point", nullable = false)
   private long point;
 
-  @Column(name = "customer_role", nullable = false)
-  @Enumerated(EnumType.STRING)
-  private UserRole role;
+  @Column(name = "customer_roles", nullable = false)
+  @Convert(converter = Converter.RoleConverter.class)
+  private Set<String> roles;
 
   @Builder
-  private Customer(Long id, String name, String email, String password, Long point, UserRole role) {
+  private Customer(Long id, String name, String email, String password, long point, Set<String> roles) {
     this.id = id;
     this.name = name;
     this.email = email;
     this.password = password;
     this.point = point;
-    this.role = role;
+    this.roles = roles;
   }
 
   /*
