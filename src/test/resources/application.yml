@@ -18,6 +18,8 @@ spring:
 
   jwt:
     secret: Dnjfseiifwi
+    token-header: "Authorization"
+    token-prefix: "Bearer "
 
   redis:
     host: localhost
