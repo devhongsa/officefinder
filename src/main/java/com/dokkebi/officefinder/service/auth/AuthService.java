@@ -1,12 +1,16 @@
 package com.dokkebi.officefinder.service.auth;
 
 import com.dokkebi.officefinder.controller.auth.dto.Auth;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.LoginResponseCustomer;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.LoginResponseOfficeOwner;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.SignIn;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
+import com.dokkebi.officefinder.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +25,7 @@ public class AuthService {
 
     private final CustomerRepository customerRepository;
     private final OfficeOwnerRepository officeOwnerRepository;
+    private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
 
     /*
@@ -53,5 +58,50 @@ public class AuthService {
         signupRequest.encodePassword(passwordEncoder);
         OfficeOwner officeOwner = officeOwnerRepository.save(signupRequest.toEntity());
         return Auth.SignUpResponseOfficeOwner.builder().officeOwner(officeOwner).build();
+    }
+
+    /*
+        Customer 로그인
+        1. client에서 보내온 이메일, 비밀번호는 일치하는지 확인
+        2. jwt 토큰 발급
+        3. LoginReponse Dto 객체에 로그인 회원 정보와 jwt토큰을 실어서 controller에 전달
+     */
+    public LoginResponseCustomer loginCustomer(Auth.SignIn request){
+
+        Customer customer = customerRepository.findByEmail(request.getEmail())
+            .orElseThrow(() -> new CustomException(CustomErrorCode.EMAIL_NOT_REGISTERED));
+
+        if (!passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
+            throw new CustomException(CustomErrorCode.PASSWORD_NOT_MATCH);
+        }
+
+        String token = tokenProvider.generateToken(customer.getId(), customer.getName(), "customer");
+
+        return LoginResponseCustomer.builder()
+            .customer(customer)
+            .token(token)
+            .build();
+    }
+
+    /*
+        OfficeOwner 로그인
+        1. client에서 보내온 이메일, 비밀번호는 일치하는지 확인
+        2. jwt 토큰 발급
+        3. LoginReponse Dto 객체에 로그인 회원 정보와 jwt토큰을 실어서 controller에 전달
+     */
+    public LoginResponseOfficeOwner loginOfficeOwner(SignIn request) {
+        OfficeOwner officeOwner = officeOwnerRepository.findByEmail(request.getEmail())
+            .orElseThrow(() -> new CustomException(CustomErrorCode.EMAIL_NOT_REGISTERED));
+
+        if (!passwordEncoder.matches(request.getPassword(), officeOwner.getPassword())) {
+            throw new CustomException(CustomErrorCode.PASSWORD_NOT_MATCH);
+        }
+
+        String token = tokenProvider.generateToken(officeOwner.getId(), officeOwner.getName(), "agent");
+
+        return LoginResponseOfficeOwner.builder()
+            .officeOwner(officeOwner)
+            .token(token)
+            .build();
     }
 }

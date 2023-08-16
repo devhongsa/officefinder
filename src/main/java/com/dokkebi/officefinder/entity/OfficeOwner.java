@@ -46,23 +46,14 @@ public class OfficeOwner extends BaseEntity {
   private Set<String> roles;
 
   @Builder
-  private OfficeOwner(String name, String email, String password, String businessNumber, long point, Set<String> roles) {
+  private OfficeOwner(Long id, String name, String email, String password, String businessNumber, long point, Set<String> roles) {
+    this.id = id;
     this.name = name;
     this.email = email;
     this.password = password;
     this.businessNumber = businessNumber;
     this.point = point;
     this.roles = roles;
-  }
-
-  @Builder
-  private OfficeOwner(String name, String email, String password, String businessNumber) {
-    this.name = name;
-    this.email = email;
-    this.password = password;
-    this.businessNumber = businessNumber;
-    this.point = 0;
-    this.roles = Set.of("ROLE_OFFICE_OWNER");
   }
 
   public void changePassword(String newPassword) {

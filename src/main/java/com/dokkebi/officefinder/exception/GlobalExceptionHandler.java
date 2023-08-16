@@ -17,6 +17,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(CustomException.class)
   public ResponseEntity<ErrorResponse> handleAccountException(CustomException e) {
     ErrorResponse response = ErrorResponse.builder()
+        .status("error")
         .statusCode(e.getStatus().value())
         .errorCode(e.getErrorCode())
         .errorMessage(e.getErrorMessage())
@@ -31,6 +32,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(AccessDeniedException.class)
   public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
     ErrorResponse response = ErrorResponse.builder()
+        .status("error")
         .statusCode(HttpStatus.FORBIDDEN.value())
         .errorCode(CustomErrorCode.ACCESS_DENIED)
         .errorMessage(CustomErrorCode.ACCESS_DENIED.getErrorMessage())
