@@ -28,6 +28,9 @@ public class OfficeQueryServiceTest {
 
   @Autowired
   private OfficeService officeService;
+
+  @Autowired
+  private OfficeQueryService officeQueryService;
   @Autowired
   private OfficeOwnerRepository officeOwnerRepository;
   @Autowired
@@ -56,7 +59,7 @@ public class OfficeQueryServiceTest {
     PageRequest pageRequest = PageRequest.of(0, 5);
 
     // when
-    Page<Office> offices = officeService.searchOfficeByBasicCondition(cond, pageRequest);
+    Page<Office> offices = officeQueryService.searchOfficeByBasicCondition(cond, pageRequest);
     List<Office> content = offices.getContent();
 
     // then
@@ -126,7 +129,7 @@ public class OfficeQueryServiceTest {
     PageRequest pageRequest = PageRequest.of(0, 5);
 
     // when
-    Page<Office> offices = officeService.searchOfficeByBasicCondition(cond, pageRequest);
+    Page<Office> offices = officeQueryService.searchOfficeByBasicCondition(cond, pageRequest);
     List<Office> content = offices.getContent();
 
     // then
@@ -192,7 +195,7 @@ public class OfficeQueryServiceTest {
     PageRequest pageRequest = PageRequest.of(0, 5);
 
     // when
-    Page<Office> offices = officeService.searchOfficeByBasicCondition(cond, pageRequest);
+    Page<Office> offices = officeQueryService.searchOfficeByBasicCondition(cond, pageRequest);
     List<Office> content = offices.getContent();
 
     // then
@@ -248,7 +251,7 @@ public class OfficeQueryServiceTest {
     PageRequest pageRequest = PageRequest.of(0, 5);
 
     // when
-    Page<Office> offices = officeService.searchOfficeByDetailCondition(cond, pageRequest);
+    Page<Office> offices = officeQueryService.searchOfficeByDetailCondition(cond, pageRequest);
     List<Office> content = offices.getContent();
 
     // then
@@ -314,7 +317,7 @@ public class OfficeQueryServiceTest {
     PageRequest pageRequest = PageRequest.of(0, 5);
 
     // when
-    Page<Office> offices = officeService.searchOfficeByDetailCondition(cond, pageRequest);
+    Page<Office> offices = officeQueryService.searchOfficeByDetailCondition(cond, pageRequest);
     List<Office> content = offices.getContent();
 
     // then
