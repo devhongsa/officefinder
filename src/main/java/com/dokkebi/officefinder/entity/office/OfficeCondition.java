@@ -1,15 +1,14 @@
 package com.dokkebi.officefinder.entity.office;
 
 import com.dokkebi.officefinder.entity.BaseEntity;
-import com.dokkebi.officefinder.entity.type.AvailableStatus;
+import com.dokkebi.officefinder.service.office.dto.OfficeConditionDto;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,79 +21,71 @@ import lombok.NoArgsConstructor;
 public class OfficeCondition extends BaseEntity {
 
   @Id
-  @Column(name = "office_id")
+  @Column(name = "office_condition_id")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @OneToOne(fetch = FetchType.LAZY)
-  @MapsId
   @JoinColumn(name = "office_id")
   private Office office;
 
   @Column(name = "air_conditioner_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus airCondition;
+  private boolean airCondition;
+
+  @Column(name = "heater_status")
+  private boolean heaterCondition;
 
   @Column(name = "cafe_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus cafe;
+  private boolean cafe;
 
   @Column(name = "printer_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus printer;
+  private boolean printer;
 
   @Column(name = "package_send_service_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus packageSendService;
+  private boolean packageSendService;
 
   @Column(name = "door_lock_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus doorLock;
+  private boolean doorLock;
 
   @Column(name = "fax_available_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus fax;
+  private boolean fax;
 
   @Column(name = "public_kitchen_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus publicKitchen;
+  private boolean publicKitchen;
 
   @Column(name = "public_Lounge_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus publicLounge;
+  private boolean publicLounge;
 
   @Column(name = "private_locker_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus privateLocker;
+  private boolean privateLocker;
 
   @Column(name = "tv_projector_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus tvProjector;
+  private boolean tvProjector;
 
   @Column(name = "whiteboard_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus whiteboard;
+  private boolean whiteboard;
 
   @Column(name = "wifi_available_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus wifi;
+  private boolean wifi;
 
   @Column(name = "shower_available_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus showBooth;
+  private boolean showerBooth;
 
   @Column(name = "storage_available_status")
-  @Enumerated(EnumType.STRING)
-  private AvailableStatus storage;
+  private boolean storage;
 
   @Builder
-  private OfficeCondition(Long id, Office office, AvailableStatus airCondition, AvailableStatus cafe,
-      AvailableStatus printer, AvailableStatus packageSendService, AvailableStatus doorLock,
-      AvailableStatus fax, AvailableStatus publicKitchen, AvailableStatus publicLounge,
-      AvailableStatus privateLocker, AvailableStatus tvProjector, AvailableStatus whiteboard,
-      AvailableStatus wifi, AvailableStatus showBooth, AvailableStatus storage) {
+  private OfficeCondition(Long id, Office office, boolean airCondition, boolean heaterCondition, boolean cafe,
+      boolean printer, boolean packageSendService, boolean doorLock, boolean fax,
+      boolean publicKitchen, boolean publicLounge, boolean privateLocker, boolean tvProjector,
+      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage) {
     this.id = id;
+
     this.office = office;
+    office.setOfficeCondition(this);
+
     this.airCondition = airCondition;
+    this.heaterCondition = heaterCondition;
     this.cafe = cafe;
     this.printer = printer;
     this.packageSendService = packageSendService;
@@ -106,14 +97,53 @@ public class OfficeCondition extends BaseEntity {
     this.tvProjector = tvProjector;
     this.whiteboard = whiteboard;
     this.wifi = wifi;
-    this.showBooth = showBooth;
+    this.showerBooth = showerBooth;
     this.storage = storage;
   }
 
   /*
-  오피스 상태 변경
+  엔티티 생성 메서드
    */
-  public void changeOfficeCondition(){
-    return;
+  public static OfficeCondition createFromRequest(Office office, OfficeConditionDto request) {
+    return OfficeCondition.builder()
+        .office(office)
+        .airCondition(request.isHaveAirCondition())
+        .heaterCondition(request.isHaveHeater())
+        .cafe(request.isHaveCafe())
+        .printer(request.isHavePrinter())
+        .packageSendService(request.isPackageSendServiceAvailable())
+        .doorLock(request.isHaveDoorLock())
+        .fax(request.isFaxServiceAvailable())
+        .publicKitchen(request.isHavePublicKitchen())
+        .publicLounge(request.isHavePublicLounge())
+        .privateLocker(request.isHavePrivateLocker())
+        .tvProjector(request.isHaveTvProjector())
+        .whiteboard(request.isHaveWhiteBoard())
+        .wifi(request.isHaveWifi())
+        .showerBooth(request.isHaveShowerBooth())
+        .storage(request.isHaveStorage())
+        .build();
+  }
+
+  /*
+  엔티티 수정 메서드
+   */
+  public void modifyFromRequest(OfficeConditionDto request) {
+
+    this.airCondition = request.isHaveAirCondition();
+    this.heaterCondition = request.isHaveHeater();
+    this.cafe = request.isHaveCafe();
+    this.printer = request.isHavePrinter();
+    this.packageSendService = request.isPackageSendServiceAvailable();
+    this.doorLock = request.isHaveDoorLock();
+    this.fax = request.isFaxServiceAvailable();
+    this.publicKitchen = request.isHavePublicKitchen();
+    this.publicLounge = request.isHavePublicLounge();
+    this.privateLocker = request.isHavePrivateLocker();
+    this.tvProjector = request.isHaveTvProjector();
+    this.whiteboard = request.isHaveWhiteBoard();
+    this.wifi = request.isHaveWifi();
+    this.showerBooth = request.isHaveShowerBooth();
+    this.storage = request.isHaveStorage();
   }
 }
