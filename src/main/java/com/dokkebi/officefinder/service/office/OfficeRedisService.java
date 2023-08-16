@@ -47,4 +47,14 @@ public class OfficeRedisService {
 
     redisTemplate.opsForHash().increment(REMAIN_ROOM_KEY, officeName, 1);
   }
+
+  public String getRemainRoom(String officeName) {
+    Object o = redisTemplate.opsForHash().get(REMAIN_ROOM_KEY, officeName);
+
+    if (o == null) {
+      throw new IllegalArgumentException("해당 오피스가 존재하지 않습니다.");
+    }
+
+    return String.valueOf(o);
+  }
 }

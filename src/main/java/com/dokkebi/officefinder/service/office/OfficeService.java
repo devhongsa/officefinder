@@ -1,8 +1,6 @@
 package com.dokkebi.officefinder.service.office;
 
-import com.dokkebi.officefinder.controller.office.dto.OfficeBasicSearchCond;
 import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
-import com.dokkebi.officefinder.controller.office.dto.OfficeDetailSearchCond;
 import com.dokkebi.officefinder.controller.office.dto.OfficeModifyRequestDto;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
@@ -15,14 +13,12 @@ import com.dokkebi.officefinder.repository.office.location.OfficeLocationReposit
 import com.dokkebi.officefinder.service.office.dto.OfficeConditionDto;
 import com.dokkebi.officefinder.service.office.dto.OfficeLocationDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class OfficeService {
 
   private final OfficeRepository officeRepository;
@@ -31,7 +27,6 @@ public class OfficeService {
   private final OfficeOwnerRepository ownerRepository;
   private final OfficeRedisService officeRedisService;
 
-  @Transactional
   public Long createOfficeInfo(OfficeCreateRequestDto request, String ownerEmail) {
     OfficeOwner officeOwner = ownerRepository.findByEmail(ownerEmail)
         .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
@@ -55,7 +50,6 @@ public class OfficeService {
     return savedOffice.getId();
   }
 
-  @Transactional
   public Long modifyOfficeInfo(OfficeModifyRequestDto request, String ownerEmail, Long officeId) {
     Office office = officeRepository.findByOfficeId(officeId)
         .orElseThrow(() -> new IllegalArgumentException("해당 오피스는 존재하지 않습니다."));
@@ -79,33 +73,18 @@ public class OfficeService {
     }
   }
 
-  @Transactional
-  public void modifyOfficeCondition(OfficeCondition condition, OfficeConditionDto request) {
+  private void modifyOfficeCondition(OfficeCondition condition, OfficeConditionDto request) {
     condition.modifyFromRequest(request);
   }
 
-  @Transactional
-  public void modifyOfficeLocation(OfficeLocation location, OfficeLocationDto request) {
+  private void modifyOfficeLocation(OfficeLocation location, OfficeLocationDto request) {
     location.modifyFromRequest(request);
   }
 
-  @Transactional
   public void deleteOfficeInfo(Long officeId) {
     Office office = officeRepository.findByOfficeId(officeId)
         .orElseThrow(() -> new IllegalArgumentException("해당 오피스는 존재하지 않습니다."));
 
     officeRepository.delete(office);
-  }
-
-  public Page<Office> searchOfficeByBasicCondition(OfficeBasicSearchCond cond,
-      Pageable pageable) {
-
-    return officeRepository.findByBasicCondition(cond, pageable);
-  }
-
-  public Page<Office> searchOfficeByDetailCondition(OfficeDetailSearchCond cond,
-      Pageable pageable) {
-
-    return officeRepository.findByDetailCondition(cond, pageable);
   }
 }
