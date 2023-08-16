@@ -66,7 +66,7 @@ public class Customer extends BaseEntity {
   /*
   포인트 사용 메서드
    */
-  public void usePoint(int requiredPoint) {
+  public void usePoint(long requiredPoint) {
     if (this.point < requiredPoint) {
       throw new IllegalArgumentException("포인트가 부족합니다. 충전해 주세요");
     }
