@@ -18,10 +18,13 @@ spring:
 
   jwt:
     secret: Dnjfseiifwi
+    token-header: "Authorization"
+    token-prefix: "Bearer "
 
   redis:
     host: localhost
     port: 6379
+    password: dev
 
   mvc:
     pathmatch:

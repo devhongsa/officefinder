@@ -7,6 +7,8 @@ spring:
 
   jwt:
     secret: emVyb2Jhc2Utc3ByaW5nLWJvb3QtYXNzaWdubWVudC1kYXRhLXdpdGgtand0LXNlY3JldC1rZXk=
+    token-header: "Authorization"
+    token-prefix: "Bearer "
 
   jpa:
     hibernate:
