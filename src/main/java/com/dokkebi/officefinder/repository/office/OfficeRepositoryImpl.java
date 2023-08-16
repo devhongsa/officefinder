@@ -1,5 +1,6 @@
 package com.dokkebi.officefinder.repository.office;
 
+import static com.dokkebi.officefinder.entity.QOfficeOwner.officeOwner;
 import static com.dokkebi.officefinder.entity.office.QOffice.office;
 import static com.dokkebi.officefinder.entity.office.QOfficeCondition.officeCondition;
 import static com.dokkebi.officefinder.entity.office.QOfficeLocation.officeLocation;
@@ -110,6 +111,31 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
             townEquals(cond.getTown()),
             villageEquals(cond.getVillage()),
             maxCapacityLessThan(cond.getMaxCapacity())
+        );
+
+    return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
+  }
+
+  @Override
+  public Page<Office> findByOwnerEmail(String ownerEmail, Pageable pageable) {
+    List<Office> result = queryFactory.selectFrom(office)
+        .join(office.owner, officeOwner).fetchJoin()
+        .join(office.officeCondition, officeCondition).fetchJoin()
+        .join(office.officeLocation, officeLocation).fetchJoin()
+        .where(
+            office.owner.email.eq(ownerEmail)
+        )
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize())
+        .fetch();
+
+    JPAQuery<Long> countQuery = queryFactory.select(office.count())
+        .from(office)
+        .join(office.owner, officeOwner).fetchJoin()
+        .join(office.officeCondition, officeCondition).fetchJoin()
+        .join(office.officeLocation, officeLocation).fetchJoin()
+        .where(
+            office.owner.email.eq(ownerEmail)
         );
 
     return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);

@@ -13,5 +13,7 @@ public interface OfficeRepositoryCustom {
 
   Page<Office> findByBasicCondition(OfficeBasicSearchCond cond, Pageable pageable);
 
+  Page<Office> findByOwnerEmail(String ownerEmail, Pageable pageable);
+
   Optional<Office> findByOfficeId(Long id);
 }
