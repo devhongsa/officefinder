@@ -13,7 +13,7 @@ import com.dokkebi.officefinder.entity.type.Address;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
-import com.dokkebi.officefinder.service.office.dto.OfficeOverViewDto;
+import com.dokkebi.officefinder.controller.office.dto.OfficeOverViewDto;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;

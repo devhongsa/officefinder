@@ -1,4 +1,4 @@
-package com.dokkebi.officefinder.service.office.dto;
+package com.dokkebi.officefinder.controller.office.dto;
 
 import com.dokkebi.officefinder.entity.office.Office;
 import lombok.Builder;
