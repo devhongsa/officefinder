@@ -46,7 +46,8 @@ public class OfficeOwner extends BaseEntity {
   private Set<String> roles;
 
   @Builder
-  private OfficeOwner(String name, String email, String password, String businessNumber, long point, Set<String> roles) {
+  private OfficeOwner(Long id, String name, String email, String password, String businessNumber, long point, Set<String> roles) {
+    this.id = id;
     this.name = name;
     this.email = email;
     this.password = password;

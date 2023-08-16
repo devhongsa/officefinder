@@ -40,7 +40,8 @@ public class Customer extends BaseEntity {
   private Set<String> roles;
 
   @Builder
-  private Customer(String name, String email, String password, long point, Set<String> roles) {
+  private Customer(Long id, String name, String email, String password, long point, Set<String> roles) {
+    this.id = id;
     this.name = name;
     this.email = email;
     this.password = password;

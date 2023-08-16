@@ -103,4 +103,65 @@ public class Auth {
       this.name = officeOwner.getName();
     }
   }
+
+
+  /*
+   * 회원 로그인시 클라이언트 request Dto
+   */
+  @Getter
+  @AllArgsConstructor
+  public static class SignIn {
+    @NotBlank
+    @Email
+    private String email;
+    @NotBlank
+    private String password;
+  }
+
+  /*
+    로그인 성공시 응답 Dto
+  */
+  @Getter
+  @NoArgsConstructor
+  public static class LoginResponseCustomer {
+    private String name;
+    private String email;
+    private long point;
+    private String userType;
+    private String token;
+
+    @Builder
+    public LoginResponseCustomer(Customer customer, String token) {
+      this.name = customer.getName();
+      this.email = customer.getEmail();
+      this.point = customer.getPoint();
+      this.token = token;
+      this.userType = "customer";
+    }
+
+  }
+
+  /*
+    로그인 성공시 응답 Dto
+  */
+  @Getter
+  @NoArgsConstructor
+  public static class LoginResponseOfficeOwner {
+    private String name;
+    private String email;
+    private long point;
+    private String userType;
+    private String token;
+
+    @Builder
+    public LoginResponseOfficeOwner(OfficeOwner officeOwner, String token) {
+      this.name = officeOwner.getName();
+      this.email = officeOwner.getEmail();
+      this.point = officeOwner.getPoint();
+      this.token = token;
+      this.userType = "agent";
+    }
+
+  }
+
 }
