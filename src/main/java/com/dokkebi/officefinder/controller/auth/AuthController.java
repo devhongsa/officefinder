@@ -1,6 +1,8 @@
 package com.dokkebi.officefinder.controller.auth;
 
 import com.dokkebi.officefinder.controller.auth.dto.Auth;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.LoginResponseCustomer;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.LoginResponseOfficeOwner;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +34,7 @@ public class AuthController {
     @PostMapping("/customers/signup")
     public ResponseEntity<?> singUpUser(@RequestBody @Valid Auth.SignUpCustomer signupRequest){
         Auth.SignUpResponseCustomer signUpResponse = authService.register(signupRequest);
-        log.info("user signup -> " + signUpResponse.getName());
+        log.info("customer signup -> " + signUpResponse.getName());
         return ResponseEntity.ok(new ResponseDto<>("success",signUpResponse));
     }
 
@@ -44,8 +46,32 @@ public class AuthController {
     @PostMapping("/agents/signup")
     public ResponseEntity<?> singUpUser(@RequestBody @Valid Auth.SignUpOfficeOwner signupRequest){
         Auth.SignUpResponseOfficeOwner signUpResponse = authService.register(signupRequest);
-        log.info("user signup -> " + signUpResponse.getName());
+        log.info("agent signup -> " + signUpResponse.getName());
         return ResponseEntity.ok(new ResponseDto<>("success",signUpResponse));
+    }
+
+    /*
+        Customer 로그인
+        1. 클라이언트로부터 이메일, 비밀번호를 받아 Valid 체크
+        2. 로그인에 성공하면 LoginReponse Dto 객체 응답
+     */
+    @PostMapping("/customers/login")
+    public ResponseEntity<?> loginCustomer(@RequestBody @Valid Auth.SignIn loginRequest) {
+        LoginResponseCustomer customer = authService.loginCustomer(loginRequest);
+
+        return ResponseEntity.ok(new ResponseDto<>("success",customer));
+    }
+
+    /*
+        OfficeOwner 로그인
+        1. 클라이언트로부터 이메일, 비밀번호를 받아 Valid 체크
+        2. 로그인에 성공하면 LoginReponse Dto 객체 응답
+     */
+    @PostMapping("/agents/login")
+    public ResponseEntity<?> loginOfficeOwner(@RequestBody @Valid Auth.SignIn loginRequest) {
+        LoginResponseOfficeOwner officeOwner = authService.loginOfficeOwner(loginRequest);
+
+        return ResponseEntity.ok(new ResponseDto<>("success",officeOwner));
     }
 }
 
