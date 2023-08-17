@@ -44,7 +44,7 @@ public class LeaseServiceDto {
   @NoArgsConstructor
   @AllArgsConstructor
   @Builder
-  public static class LeaseServiceResponse{
+  public static class LeaseOfficeServiceResponse {
     private String customerEmail;
 
     private String officeName;
@@ -57,8 +57,8 @@ public class LeaseServiceDto {
 
     private LocalDate endDate;
 
-    public static LeaseServiceResponse of(Lease lease){
-      return LeaseServiceResponse.builder()
+    public static LeaseOfficeServiceResponse of(Lease lease){
+      return LeaseOfficeServiceResponse.builder()
           .customerEmail(lease.getCustomer().getEmail())
           .officeName(lease.getOffice().getName())
           .price(lease.getPrice())
@@ -68,4 +68,5 @@ public class LeaseServiceDto {
           .build();
     }
   }
+
 }
