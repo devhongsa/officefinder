@@ -9,9 +9,8 @@ import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
-import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseServiceResponse;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
-import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,7 +40,7 @@ public class LeaseService {
    *             - INSUFFICIENT_POINTS : 고객의 포인트가 부족한경우
    */
   @Transactional
-  public LeaseServiceResponse leaseOffice(LeaseOfficeRequestDto leaseOfficeRequestDto) {
+  public LeaseOfficeServiceResponse leaseOffice(LeaseOfficeRequestDto leaseOfficeRequestDto) {
     Customer customer = customerRepository.findByEmail(leaseOfficeRequestDto.getEmail())
         .orElseThrow(() -> new CustomException(CustomErrorCode.EMAIL_NOT_REGISTERED));
 
@@ -55,22 +54,22 @@ public class LeaseService {
 
     customer.usePoint(totalPrice);
 
-    Lease lease = saveLeaseInfo(customer, office, totalPrice, leaseOfficeRequestDto.getStartDate(),
-        leaseOfficeRequestDto.getMonths());
+    Lease lease = saveLeaseInfo(customer, office, totalPrice, leaseOfficeRequestDto);
 
-    return LeaseServiceResponse.of(lease);
+    return LeaseOfficeServiceResponse.of(lease);
   }
 
   private Lease saveLeaseInfo(Customer customer, Office office, long totalPrice,
-      LocalDate startDate, int months) {
+      LeaseOfficeRequestDto request) {
 
     Lease lease = Lease.builder()
         .customer(customer)
         .office(office)
         .price(totalPrice)
         .leaseStatus(LeaseStatus.AWAIT)
-        .leaseStartDate(startDate)
-        .leaseEndDate(startDate.plusMonths(months))
+        .leaseStartDate(request.getStartDate())
+        .leaseEndDate(request.getStartDate().plusMonths(request.getMonths()))
+        .isMonthlyPay(request.isMonthlyPay())
         .build();
 
     leaseRepository.save(lease);
