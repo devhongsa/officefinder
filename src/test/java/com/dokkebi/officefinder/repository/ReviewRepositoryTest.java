@@ -41,9 +41,9 @@ public class ReviewRepositoryTest {
         .lease(lease)
         .rate(5)
         .description("a").build();
-    reviewRepository.save(review);
+    Review savedReview = reviewRepository.save(review);
       //when
-    boolean found = reviewRepository.existsByLeaseId(1L);
+    boolean found = reviewRepository.existsByLeaseId(savedReview.getLease().getId());
       //then
     Assertions.assertTrue(found);
   }
