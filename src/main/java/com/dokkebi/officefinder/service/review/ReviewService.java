@@ -3,6 +3,7 @@ package com.dokkebi.officefinder.service.review;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
+import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.LeaseRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
@@ -23,7 +24,8 @@ public class ReviewService {
   private final LeaseRepository leaseRepository;
 
   public SubmitServiceResponse submit(SubmitServiceRequest submitServiceRequest) {
-    Lease lease = leaseRepository.getReferenceById(submitServiceRequest.getLeaseId());
+    Lease lease = leaseRepository.findByLeaseId(submitServiceRequest.getLeaseId())
+        .orElseThrow(()->new CustomException());
     if (!lease.getCustomer().getEmail().equals(submitServiceRequest.getCustomerEmail())) {
       throw new CustomException();
     }
@@ -43,6 +45,8 @@ public class ReviewService {
     reviewRepository.save(review);
     return new SubmitServiceResponse().from(review);
   }
+
+
 
 
 }
