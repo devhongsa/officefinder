@@ -29,7 +29,7 @@ public class LeaseRepositoryTest {
         Set.of("a")).point(0).build());
     Office office = officeRepository.save(Office.builder().name("1").build());
 
-    Lease lease = Lease.builder().id(1L)
+    Lease lease = Lease.builder()
         .customer(customer)
         .office(office)
         .build();
@@ -41,5 +41,4 @@ public class LeaseRepositoryTest {
     Assertions.assertEquals(lease.getCustomer(), foundLease.getCustomer());
     Assertions.assertEquals(lease.getOffice(), foundLease.getOffice());
   }
-
 }

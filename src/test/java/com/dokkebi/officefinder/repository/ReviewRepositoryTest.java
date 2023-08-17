@@ -32,7 +32,7 @@ public class ReviewRepositoryTest {
     Customer customer = customerRepository.save(Customer.builder().name("1").email("").password("").roles(
         Set.of("a")).point(0).build());
     Office office = officeRepository.save(Office.builder().name("1").build());
-    Lease lease = leaseRepository.save(Lease.builder().id(1L).office(office).customer(customer).leaseStatus(
+    Lease lease = leaseRepository.save(Lease.builder().office(office).customer(customer).leaseStatus(
         LeaseStatus.EXPIRED).build());
 
     Review review = Review.builder()
