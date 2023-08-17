@@ -2,6 +2,7 @@ package com.dokkebi.officefinder.entity.review;
 
 import com.dokkebi.officefinder.entity.BaseEntity;
 import com.dokkebi.officefinder.entity.Customer;
+import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,15 +36,20 @@ public class Review extends BaseEntity {
   @JoinColumn(name = "office_id")
   private Office office;
 
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "lease_id")
+  private Lease lease;
+
   @Column(name = "review_rating")
   private int rate;
   private String description;
 
   @Builder
-  private Review(Long id, Customer customer, Office office, int rate, String description) {
+  private Review(Long id, Customer customer, Office office, Lease lease, int rate, String description) {
     this.id = id;
     this.customer = customer;
     this.office = office;
+    this.lease = lease;
     this.rate = rate;
     this.description = description;
   }
