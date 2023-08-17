@@ -1,7 +1,9 @@
 package com.dokkebi.officefinder.entity;
 
 import com.dokkebi.officefinder.utils.Converter;
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -12,11 +14,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Customer extends BaseEntity {
+public class Customer extends BaseEntity implements UserDetails {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,21 +45,13 @@ public class Customer extends BaseEntity {
   private Set<String> roles;
 
   @Builder
-  private Customer(String name, String email, String password, long point, Set<String> roles) {
+  private Customer(Long id, String name, String email, String password, long point, Set<String> roles) {
+    this.id = id;
     this.name = name;
     this.email = email;
     this.password = password;
     this.point = point;
     this.roles = roles;
-  }
-
-  @Builder
-  private Customer(String name, String email, String password) {
-    this.name = name;
-    this.email = email;
-    this.password = password;
-    this.point = 0;
-    this.roles = Set.of("ROLE_CUSTOMER");
   }
 
   /*
@@ -74,10 +71,42 @@ public class Customer extends BaseEntity {
   /*
   포인트 사용 메서드
    */
-  public void usePoint(int requiredPoint) {
+  public void usePoint(long requiredPoint) {
     if (this.point < requiredPoint) {
       throw new IllegalArgumentException("포인트가 부족합니다. 충전해 주세요");
     }
     this.point -= requiredPoint;
+  }
+
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return roles.stream()
+        .map(SimpleGrantedAuthority::new)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public String getUsername() {
+    return this.email;
+  }
+
+  @Override
+  public boolean isAccountNonExpired() {
+    return false;
+  }
+
+  @Override
+  public boolean isAccountNonLocked() {
+    return false;
+  }
+
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return false;
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return false;
   }
 }
