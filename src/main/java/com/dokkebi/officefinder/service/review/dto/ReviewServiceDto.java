@@ -24,10 +24,10 @@ public class ReviewServiceDto {
       this.description = description;
     }
 
-    public SubmitServiceRequest from(SubmitControllerRequest submitControllerRequest, String customerEmail) {
+    public SubmitServiceRequest from(SubmitControllerRequest submitControllerRequest, String customerEmail, Long leaseId) {
       return SubmitServiceRequest.builder()
           .customerEmail(customerEmail)
-          .leaseId(submitControllerRequest.getLeaseId())
+          .leaseId(leaseId)
           .rate(submitControllerRequest.getRate())
           .description(submitControllerRequest.getDescription())
           .build();

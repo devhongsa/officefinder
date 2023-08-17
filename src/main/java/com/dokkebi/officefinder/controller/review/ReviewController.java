@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,17 +23,16 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/review")
 public class ReviewController {
 
   private final ReviewService reviewService;
 
-  @PostMapping("/submit")
+  @PostMapping("api/customers/info/leases/{leaseId}/reviews")
   @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseDto<?> submitReview(@RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitControllerRequest,
-      Principal principal) {
+      Principal principal, @PathVariable @Valid Long leaseId) {
     String customerEmail = principal.getName();
-    SubmitServiceRequest serviceRequest = new SubmitServiceRequest().from(submitControllerRequest, customerEmail);
+    SubmitServiceRequest serviceRequest = new SubmitServiceRequest().from(submitControllerRequest, customerEmail, leaseId);
     SubmitServiceResponse submitServiceResponse = reviewService.submit(serviceRequest);
 
     SubmitControllerResponse submitControllerResponse = new SubmitControllerResponse().from(submitServiceResponse);
@@ -42,19 +42,5 @@ public class ReviewController {
     return new ResponseDto<>("success", submitControllerResponse);
   }
 
-  @PostMapping("/fix")
-  @PreAuthorize("hasRole('CUSTOMER')")
-  public ResponseDto<?> fixReview(@RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitControllerRequest,
-      Principal principal) {
-    String customerEmail = principal.getName();
-    SubmitServiceRequest serviceRequest = new SubmitServiceRequest().from(submitControllerRequest, customerEmail);
-    SubmitServiceResponse submitServiceResponse = reviewService.submit(serviceRequest);
-
-    SubmitControllerResponse submitControllerResponse = new SubmitControllerResponse().from(submitServiceResponse);
-    log.info("review fix from : " + submitControllerResponse.getCustomerName()
-        + ", to : " + submitControllerResponse.getOfficeName());
-
-    return new ResponseDto<>("success", submitControllerResponse);
-  }
 
 }

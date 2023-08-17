@@ -3,7 +3,6 @@ package com.dokkebi.officefinder.service.review;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
-import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.LeaseRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
@@ -29,7 +28,7 @@ public class ReviewService {
     if (!lease.getCustomer().getEmail().equals(submitServiceRequest.getCustomerEmail())) {
       throw new CustomException();
     }
-    if (reviewRepository.existsByCustomerAndOffice(lease.getCustomer(), lease.getOffice())) {
+    if (reviewRepository.existsByLeaseId(lease.getId())) {
       throw new CustomException();
     }
     if (!lease.getLeaseStatus().equals(LeaseStatus.EXPIRED)) {
@@ -38,6 +37,7 @@ public class ReviewService {
     Review review = Review.builder()
         .customer(lease.getCustomer())
         .office(lease.getOffice())
+        .lease(lease)
         .rate(submitServiceRequest.getRate())
         .description(submitServiceRequest.getDescription())
         .build();

@@ -10,13 +10,11 @@ public class ReviewControllerDto {
   @Getter
   @NoArgsConstructor
   public static class SubmitControllerRequest {
-    private Long leaseId;
     private int rate;
     private String description;
 
     @Builder
-    public SubmitControllerRequest(Long leaseId, int rate, String description) {
-      this.leaseId = leaseId;
+    public SubmitControllerRequest(int rate, String description) {
       this.rate = rate;
       this.description = description;
     }

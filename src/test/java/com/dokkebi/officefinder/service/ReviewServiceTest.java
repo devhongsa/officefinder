@@ -8,8 +8,8 @@ import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.LeaseRepository;
-import com.dokkebi.officefinder.repository.OfficeRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
+import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.service.review.ReviewService;
 import com.dokkebi.officefinder.service.review.dto.ReviewServiceDto.SubmitServiceRequest;
 import com.dokkebi.officefinder.service.review.dto.ReviewServiceDto.SubmitServiceResponse;
@@ -79,7 +79,7 @@ public class ReviewServiceTest {
         .leaseId(3L)
         .rate(5)
         .description("테스트").build();
-    reviewRepository.save(Review.builder().customer(customer3).office(office3).build());
+    reviewRepository.save(Review.builder().customer(customer3).office(office3).lease(lease3).build());
 
     Customer customer4 = customerRepository.save(Customer.builder().name("4").email("test4@naver.com").password("").roles(
         Set.of("a")).point(0).build());

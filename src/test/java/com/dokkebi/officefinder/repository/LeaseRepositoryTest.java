@@ -3,6 +3,7 @@ package com.dokkebi.officefinder.repository;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

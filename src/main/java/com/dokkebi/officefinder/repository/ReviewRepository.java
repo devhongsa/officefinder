@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-  boolean existsByCustomerAndOffice(Customer customer, Office office);
+  boolean existsByLeaseId(Long leaseId);
 
 }
