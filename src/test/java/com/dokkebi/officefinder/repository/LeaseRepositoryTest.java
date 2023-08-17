@@ -35,7 +35,7 @@ public class LeaseRepositoryTest {
         .build();
     leaseRepository.save(lease);
       //when
-    Lease foundLease = leaseRepository.findByLeaseId(1L).orElseThrow(()->new Exception("계약이 없습니다"));
+    Lease foundLease = leaseRepository.findById(1L).orElseThrow(()->new Exception("계약이 없습니다"));
       //then
     Assertions.assertEquals(lease.getId(), foundLease.getId());
     Assertions.assertEquals(lease.getCustomer(), foundLease.getCustomer());

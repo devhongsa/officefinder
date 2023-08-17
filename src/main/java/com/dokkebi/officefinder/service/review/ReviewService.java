@@ -23,7 +23,7 @@ public class ReviewService {
   private final LeaseRepository leaseRepository;
 
   public SubmitServiceResponse submit(SubmitServiceRequest submitServiceRequest) {
-    Lease lease = leaseRepository.findByLeaseId(submitServiceRequest.getLeaseId())
+    Lease lease = leaseRepository.findById(submitServiceRequest.getLeaseId())
         .orElseThrow(()->new CustomException());
     if (!lease.getCustomer().getEmail().equals(submitServiceRequest.getCustomerEmail())) {
       throw new CustomException();

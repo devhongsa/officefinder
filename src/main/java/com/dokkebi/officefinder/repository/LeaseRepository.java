@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.Query;
 public interface LeaseRepository extends JpaRepository<Lease, Long> {
 
   @Query("select l from Lease l join fetch l.customer join fetch l.office where l.id = :leaseId")
-  Optional<Lease> findByLeaseId(Long leaseId);
+  Optional<Lease> findById(Long leaseId);
 }
