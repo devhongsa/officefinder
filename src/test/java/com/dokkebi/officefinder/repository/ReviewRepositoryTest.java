@@ -8,6 +8,7 @@ import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -25,12 +26,13 @@ public class ReviewRepositoryTest {
   private LeaseRepository leaseRepository;
 
   @Test
+  @DisplayName("leaseId로 리뷰를 찾을 수 있다.")
   public void existsByLeaseId() throws Exception {
       //given
     Customer customer = customerRepository.save(Customer.builder().name("1").email("").password("").roles(
         Set.of("a")).point(0).build());
     Office office = officeRepository.save(Office.builder().name("1").build());
-    Lease lease = leaseRepository.save(Lease.builder().office(office).customer(customer).leaseStatus(
+    Lease lease = leaseRepository.save(Lease.builder().id(1L).office(office).customer(customer).leaseStatus(
         LeaseStatus.EXPIRED).build());
 
     Review review = Review.builder()
