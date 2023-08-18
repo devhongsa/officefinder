@@ -34,11 +34,7 @@ public class OfficeModifyRequestDto {
   @NotNull
   String village;
   @NotEmpty
-  String bungi;
-  @NotEmpty
   String street;
-  @NotEmpty
-  String buildingNumber;
   @NotNull
   Integer zipcode;
   @NotNull

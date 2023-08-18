@@ -12,6 +12,7 @@ import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepos
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
 import com.dokkebi.officefinder.service.office.dto.OfficeConditionDto;
 import com.dokkebi.officefinder.service.office.dto.OfficeLocationDto;
+import com.dokkebi.officefinder.utils.AddressConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,8 @@ public class OfficeService {
     OfficeLocation officeLocation = OfficeLocation.createFromRequest(
         office, OfficeLocationDto.fromRequest(request)
     );
+
+    office.setOfficeAddress(AddressConverter.getAddress(officeLocation));
 
     Office savedOffice = officeRepository.save(office);
     officeLocationRepository.save(officeLocation);
