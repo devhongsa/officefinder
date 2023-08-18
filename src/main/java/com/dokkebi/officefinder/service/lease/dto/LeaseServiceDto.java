@@ -2,6 +2,8 @@ package com.dokkebi.officefinder.service.lease.dto;
 
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.LeaseOfficeRequest;
 import com.dokkebi.officefinder.entity.lease.Lease;
+import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.entity.type.Address;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -69,4 +71,58 @@ public class LeaseServiceDto {
     }
   }
 
+  @Getter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  public static class LeaseLookUpServiceResponse{
+    private Long leaseId;
+
+    private String name;
+
+    private String location;
+
+    private LeaseStatus leaseStatus;
+
+    private LocalDate paymentDate;
+
+    private LocalDate startDate;
+
+    private LocalDate endDate;
+
+    private boolean isMonthlyPay;
+
+    private boolean isReviewed;
+
+    public static LeaseLookUpServiceResponse of(Lease lease, boolean isReviewed){
+
+      Office office = lease.getOffice();
+
+      return LeaseLookUpServiceResponse.builder()
+          .leaseId(lease.getId())
+          .name(office.getName())
+          .location(getOfficeName(office))
+          .leaseStatus(lease.getLeaseStatus())
+          .paymentDate(lease.getCreatedAt().toLocalDate())
+          .startDate(lease.getLeaseStartDate())
+          .endDate(lease.getLeaseEndDate())
+          .isReviewed(isReviewed)
+          .build();
+    }
+
+    private static String getOfficeName(Office office) {
+      StringBuilder sb = new StringBuilder();
+      Address address = office.getOfficeLocation().getAddress();
+
+      sb.append(address.getLegion() + " ");
+      sb.append(address.getCity() + " ");
+      sb.append(address.getTown() + " ");
+      sb.append(address.getVillage() + " ");
+      sb.append(address.getBungi() + " ");
+      sb.append(address.getStreet() + " ");
+      sb.append(address.getBuildingNumber() + " ");
+
+      return sb.toString();
+    }
+  }
 }
