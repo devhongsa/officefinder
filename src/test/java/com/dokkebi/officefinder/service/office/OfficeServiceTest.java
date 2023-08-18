@@ -58,8 +58,7 @@ class OfficeServiceTest {
 
     OfficeCreateRequestDto request = new OfficeCreateRequestDto();
     setOfficeInfo(request, "office1", 5, 500000, 5);
-    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "1234-4", "삼계로",
-        "12-34", 12345, 127.1315, 37.4562);
+    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
     setOfficeCondition(request, false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true);
 
@@ -74,17 +73,16 @@ class OfficeServiceTest {
     OfficeLocation resultOfficeLocation = result.getOfficeLocation();
 
     assertThat(result)
-        .extracting("name", "maxCapacity", "leaseFee")
+        .extracting("name", "maxCapacity", "leaseFee", "officeAddress")
         .contains(
-            "office1", 5, 500000L
+            "office1", 5, 500000L, "경상남도 김해시 삼계동 삼계로"
         );
 
     assertThat(resultOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "bungi", "street", "buildingNumber",
-            "zipcode")
+        .extracting("legion", "city", "town", "village", "street", "zipcode")
         .contains(
-            "경상남도", "김해시", "삼계동", "", "1234-4", "삼계로", "12-34", 12345
+            "경상남도", "김해시", "삼계동", "", "삼계로", 12345
         );
 
     assertThat(resultOfficeLocation)
@@ -113,8 +111,7 @@ class OfficeServiceTest {
     // set office create request dto
     OfficeCreateRequestDto request = new OfficeCreateRequestDto();
     setOfficeInfo(request, "office1", 5, 500000, 5);
-    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "1234-4", "삼계로",
-        "12-34", 12345, 127.1315, 37.4562);
+    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
     setOfficeCondition(request, false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true);
 
@@ -123,8 +120,7 @@ class OfficeServiceTest {
     // set office modify request dto
     OfficeModifyRequestDto modifyRequest = new OfficeModifyRequestDto();
     setOfficeInfo(modifyRequest, "office1", 5, 1000000, 5);
-    setOfficeLocation(modifyRequest, "경상남도", "김해시", "삼계동", "", "1234-4", "삼계로",
-        "12-34", 12345, 127.1315, 37.4562);
+    setOfficeLocation(modifyRequest, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
     setOfficeCondition(modifyRequest, true, true, true, true, true, true,
         true, true, true, true, true, true, true, true, true);
 
@@ -140,17 +136,16 @@ class OfficeServiceTest {
     OfficeLocation resultOfficeLocation = result.getOfficeLocation();
 
     assertThat(result)
-        .extracting("name", "maxCapacity", "leaseFee")
+        .extracting("name", "maxCapacity", "leaseFee", "officeAddress")
         .contains(
-            "office1", 5, 1000000L
+            "office1", 5, 1000000L, "경상남도 김해시 삼계동 삼계로"
         );
 
     assertThat(resultOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "bungi", "street", "buildingNumber",
-            "zipcode")
+        .extracting("legion", "city", "town", "village", "street", "zipcode")
         .contains(
-            "경상남도", "김해시", "삼계동", "", "1234-4", "삼계로", "12-34", 12345
+            "경상남도", "김해시", "삼계동", "", "삼계로", 12345
         );
 
     assertThat(resultOfficeLocation)
@@ -184,8 +179,7 @@ class OfficeServiceTest {
     // set office create request dto
     OfficeCreateRequestDto request = new OfficeCreateRequestDto();
     setOfficeInfo(request, "office1", 5, 500000, 5);
-    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "1234-4", "삼계로",
-        "12-34", 12345, 127.1315, 37.4562);
+    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
     setOfficeCondition(request, false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true);
 
@@ -194,8 +188,7 @@ class OfficeServiceTest {
     // set office modify request dto
     OfficeModifyRequestDto modifyRequest = new OfficeModifyRequestDto();
     setOfficeInfo(modifyRequest, "office1", 5, 1000000, 5);
-    setOfficeLocation(modifyRequest, "경상남도", "김해시", "삼계동", "", "1234-4", "삼계로",
-        "12-34", 12345, 127.1315, 37.4562);
+    setOfficeLocation(modifyRequest, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
     setOfficeCondition(modifyRequest, true, true, true, true, true, true,
         true, true, true, true, true, true, true, true, true);
 
@@ -218,8 +211,7 @@ class OfficeServiceTest {
 
     OfficeCreateRequestDto request = new OfficeCreateRequestDto();
     setOfficeInfo(request, "office1", 5, 500000, 5);
-    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "1234-4", "삼계로",
-        "12-34", 12345, 127.1315, 37.4562);
+    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
     setOfficeCondition(request, false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true);
 
@@ -260,16 +252,13 @@ class OfficeServiceTest {
   }
 
   private void setOfficeLocation(OfficeCreateRequestDto request, String legion, String city,
-      String town, String village, String bungi, String street, String buildingNumber,
-      int zipcode, double latitude, double longitude) {
+      String town, String village, String street, int zipcode, double latitude, double longitude) {
 
     request.setLegion(legion);
     request.setCity(city);
     request.setTown(town);
     request.setVillage(village);
-    request.setBungi(bungi);
     request.setStreet(street);
-    request.setBuildingNumber(buildingNumber);
     request.setZipcode(zipcode);
     request.setLatitude(latitude);
     request.setLongitude(longitude);
@@ -307,16 +296,13 @@ class OfficeServiceTest {
   }
 
   private void setOfficeLocation(OfficeModifyRequestDto request, String legion, String city,
-      String town, String village, String bungi, String street, String buildingNumber,
-      int zipcode, double latitude, double longitude) {
+      String town, String village, String street, int zipcode, double latitude, double longitude) {
 
     request.setLegion(legion);
     request.setCity(city);
     request.setTown(town);
     request.setVillage(village);
-    request.setBungi(bungi);
     request.setStreet(street);
-    request.setBuildingNumber(buildingNumber);
     request.setZipcode(zipcode);
     request.setLatitude(latitude);
     request.setLongitude(longitude);
