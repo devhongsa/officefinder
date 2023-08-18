@@ -20,7 +20,7 @@ import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
-import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseServiceResponse;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -85,7 +85,7 @@ class LeaseServiceTest {
     given(officeRepository.findById(anyLong())).willReturn(Optional.of(testOffice));
 
     // When
-    LeaseServiceResponse resp = leaseService.leaseOffice(requestDto);
+    LeaseOfficeServiceResponse resp = leaseService.leaseOffice(requestDto);
 
     // Then
     verify(leaseRepository, times(1)).save(any());

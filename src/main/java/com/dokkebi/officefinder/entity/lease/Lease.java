@@ -47,9 +47,11 @@ public class Lease extends BaseEntity {
   private LocalDate leaseStartDate;
   private LocalDate leaseEndDate;
 
+  private Boolean isMonthlyPay;
+
   @Builder
   private Lease(Long id, Customer customer, Office office, long price, LeaseStatus leaseStatus,
-      LocalDate leaseStartDate, LocalDate leaseEndDate) {
+      LocalDate leaseStartDate, LocalDate leaseEndDate, Boolean isMonthlyPay) {
     this.id = id;
     this.customer = customer;
     this.office = office;
@@ -57,6 +59,7 @@ public class Lease extends BaseEntity {
     this.leaseStatus = leaseStatus;
     this.leaseStartDate = leaseStartDate;
     this.leaseEndDate = leaseEndDate;
+    this.isMonthlyPay = isMonthlyPay;
   }
 
   /*
