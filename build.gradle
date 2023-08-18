@@ -44,6 +44,8 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/io.springfox/springfox-boot-starter
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	// https://mvnrepository.com/artifact/org.redisson/redisson
+	implementation 'org.redisson:redisson:3.17.7'
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
