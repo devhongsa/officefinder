@@ -24,7 +24,8 @@ public class ReviewServiceDto {
       this.description = description;
     }
 
-    public SubmitServiceRequest from(SubmitControllerRequest submitControllerRequest, String customerEmail, Long leaseId) {
+    public SubmitServiceRequest from(SubmitControllerRequest submitControllerRequest,
+        String customerEmail, Long leaseId) {
       return SubmitServiceRequest.builder()
           .customerEmail(customerEmail)
           .leaseId(leaseId)
@@ -48,11 +49,33 @@ public class ReviewServiceDto {
 
     public SubmitServiceResponse from(Review review) {
       return SubmitServiceResponse.builder()
-          .customerName(review.getCustomer().getName())
-          .officeName(review.getOffice().getName())
+          .customerName(review.getLease().getCustomer().getName())
+          .officeName(review.getLease().getOffice().getName())
           .build();
     }
+  }
 
+  @Getter
+  @NoArgsConstructor
+  public static class UpdateServiceRequest {
+    private String customerEmail;
+    private int rate;
+    private String description;
+
+    @Builder
+    public UpdateServiceRequest(String customerEmail, int rate, String description) {
+      this.customerEmail = customerEmail;
+      this.rate = rate;
+      this.description = description;
+    }
+
+    public UpdateServiceRequest from(SubmitControllerRequest submitControllerRequest, String customerEmail) {
+      return UpdateServiceRequest.builder()
+          .customerEmail(customerEmail)
+          .rate(submitControllerRequest.getRate())
+          .description(submitControllerRequest.getDescription())
+          .build();
+    }
   }
 
 }

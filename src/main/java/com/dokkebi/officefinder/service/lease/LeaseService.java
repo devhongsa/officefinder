@@ -3,17 +3,19 @@ package com.dokkebi.officefinder.service.lease;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
-import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
-import com.dokkebi.officefinder.repository.LeaseRepository;
+import com.dokkebi.officefinder.repository.ReviewRepository;
+import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
-import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseServiceResponse;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
-import java.time.LocalDate;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,8 @@ public class LeaseService {
   private final LeaseRepository leaseRepository;
   private final CustomerRepository customerRepository;
   private final OfficeRepository officeRepository;
+
+  private final ReviewRepository reviewRepository;
 
   /**
    * 오피스 임대 서비스를 처리하는 메서드입니다.
@@ -41,7 +45,7 @@ public class LeaseService {
    *             - INSUFFICIENT_POINTS : 고객의 포인트가 부족한경우
    */
   @Transactional
-  public LeaseServiceResponse leaseOffice(LeaseOfficeRequestDto leaseOfficeRequestDto) {
+  public LeaseOfficeServiceResponse leaseOffice(LeaseOfficeRequestDto leaseOfficeRequestDto) {
     Customer customer = customerRepository.findByEmail(leaseOfficeRequestDto.getEmail())
         .orElseThrow(() -> new CustomException(CustomErrorCode.EMAIL_NOT_REGISTERED));
 
@@ -55,27 +59,10 @@ public class LeaseService {
 
     customer.usePoint(totalPrice);
 
-    Lease lease = saveLeaseInfo(customer, office, totalPrice, leaseOfficeRequestDto.getStartDate(),
-        leaseOfficeRequestDto.getMonths());
+    Lease lease = Lease.fromRequest(customer, office, totalPrice, leaseOfficeRequestDto);
+    Lease savedLease = leaseRepository.save(lease);
 
-    return LeaseServiceResponse.of(lease);
-  }
-
-  private Lease saveLeaseInfo(Customer customer, Office office, long totalPrice,
-      LocalDate startDate, int months) {
-
-    Lease lease = Lease.builder()
-        .customer(customer)
-        .office(office)
-        .price(totalPrice)
-        .leaseStatus(LeaseStatus.AWAIT)
-        .leaseStartDate(startDate)
-        .leaseEndDate(startDate.plusMonths(months))
-        .build();
-
-    leaseRepository.save(lease);
-
-    return lease;
+    return LeaseOfficeServiceResponse.of(savedLease);
   }
 
   private void checkOfficeCapacity(Office office, int customerCount) {
@@ -88,5 +75,16 @@ public class LeaseService {
     if (customer.getPoint() < totalPrice) {
       throw new CustomException(CustomErrorCode.INSUFFICIENT_POINTS);
     }
+  }
+
+  @Transactional(readOnly = true)
+  public Page<LeaseLookUpServiceResponse> lookupLease(String email, Pageable pageable) {
+    Customer customer = customerRepository.findByEmail(email)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.EMAIL_NOT_REGISTERED));
+
+    Page<Lease> leases = leaseRepository.findByCustomerId(customer.getId(), pageable);
+
+    return leases.map(lease -> LeaseLookUpServiceResponse.of(lease,
+        reviewRepository.existsByLeaseId(lease.getId())));
   }
 }

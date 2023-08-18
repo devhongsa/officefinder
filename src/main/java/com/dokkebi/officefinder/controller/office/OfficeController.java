@@ -8,7 +8,6 @@ import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.service.office.OfficeQueryService;
 import com.dokkebi.officefinder.service.office.OfficeRedisService;
-import com.dokkebi.officefinder.service.office.OfficeService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/offices")
 public class OfficeController {
 
-  private final OfficeService officeService;
   private final OfficeQueryService officeQueryService;
   private final OfficeRedisService officeRedisService;
 
