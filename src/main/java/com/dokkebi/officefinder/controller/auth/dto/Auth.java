@@ -110,6 +110,7 @@ public class Auth {
    */
   @Getter
   @AllArgsConstructor
+  @NoArgsConstructor
   public static class SignIn {
     @NotBlank
     @Email

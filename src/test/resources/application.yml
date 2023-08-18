@@ -30,5 +30,13 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
 
+  oauth2:
+    google:
+      client-id: 767358295321-d9akkeh90t0u2uakttjah33qvplpgtru.apps.googleusercontent.com
+      client-secret: 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
+      redirect-uri: http://localhost:8080/login/oauth2/code/google
+      token-uri: https://oauth2.googleapis.com/token
+      resource-uri: https://www.googleapis.com/oauth2/v2/userinfo
+
 logging.level:
   org.hibernate.SQL: debug

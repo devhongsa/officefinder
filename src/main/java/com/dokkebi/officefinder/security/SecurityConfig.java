@@ -28,12 +28,14 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http    .httpBasic().disable()
+    http
+        .httpBasic().disable()
         .csrf().disable()
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeHttpRequests((authz) -> authz
-            .antMatchers("/**/signup", "/**/login").permitAll()
+            .antMatchers("/api/**").permitAll() // 개발환경에서만 우선 설정
+            .antMatchers("/**/signup", "/**/login/**").permitAll()
             .anyRequest().authenticated()
         )
         .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
