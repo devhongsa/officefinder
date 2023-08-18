@@ -19,8 +19,7 @@ public class AddressConverter {
       sb.append(address.getVillage()).append(" ");
     }
 
-    sb.append(address.getStreet()).append(" ");
-    sb.append(address.getBuildingNumber());
+    sb.append(address.getStreet());
 
     return sb.toString();
   }

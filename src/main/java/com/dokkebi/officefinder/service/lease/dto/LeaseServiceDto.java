@@ -101,28 +101,13 @@ public class LeaseServiceDto {
       return LeaseLookUpServiceResponse.builder()
           .leaseId(lease.getId())
           .name(office.getName())
-          .location(getOfficeName(office))
+          .location(office.getOfficeAddress())
           .leaseStatus(lease.getLeaseStatus())
           .paymentDate(lease.getCreatedAt().toLocalDate())
           .startDate(lease.getLeaseStartDate())
           .endDate(lease.getLeaseEndDate())
           .isReviewed(isReviewed)
           .build();
-    }
-
-    private static String getOfficeName(Office office) {
-      StringBuilder sb = new StringBuilder();
-      Address address = office.getOfficeLocation().getAddress();
-
-      sb.append(address.getLegion() + " ");
-      sb.append(address.getCity() + " ");
-      sb.append(address.getTown() + " ");
-      sb.append(address.getVillage() + " ");
-      sb.append(address.getBungi() + " ");
-      sb.append(address.getStreet() + " ");
-      sb.append(address.getBuildingNumber() + " ");
-
-      return sb.toString();
     }
   }
 }

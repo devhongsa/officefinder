@@ -1,29 +1,29 @@
 package com.dokkebi.officefinder.service.lease;
 
+import static com.dokkebi.officefinder.entity.type.LeaseStatus.AWAIT;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
 import com.dokkebi.officefinder.entity.Customer;
+import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
-import com.dokkebi.officefinder.entity.office.OfficeLocation;
 import com.dokkebi.officefinder.entity.review.Review;
-import com.dokkebi.officefinder.entity.type.Address;
-import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.repository.CustomerRepository;
-import com.dokkebi.officefinder.repository.LeaseRepository;
+import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
-import com.dokkebi.officefinder.repository.office.OfficeRepository;
-import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
-import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
+import com.dokkebi.officefinder.service.office.OfficeService;
 import java.time.LocalDate;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -32,64 +32,120 @@ import org.springframework.transaction.annotation.Transactional;
 public class LeaseServiceIntegrationTest {
 
   @Autowired
-  private OfficeLocationRepository officeLocationRepository;
-
+  private OfficeService officeService;
   @Autowired
   private LeaseService leaseService;
-
+  @Autowired
+  private OfficeOwnerRepository officeOwnerRepository;
   @Autowired
   private CustomerRepository customerRepository;
-
-  @Autowired
-  private OfficeRepository officeRepository;
-
-  @Autowired
-  private LeaseRepository leaseRepository;
-
   @Autowired
   private ReviewRepository reviewRepository;
 
-  private Customer testCustomer;
-  private Office testOffice1, testOffice2;
+  @Autowired
+  private RedisTemplate<String, String> redisTemplate;
+  private static final String REMAIN_ROOM_KEY = "remain-room";
 
+  @AfterEach
+  void tearDown() {
+    redisTemplate.delete(REMAIN_ROOM_KEY);
+  }
+
+  @DisplayName("임대 계약을 수행한다. 결재 시 가격만큼 회원의 포인트가 감소하고 오피스 주인의 포인트가 증가한다.")
   @Test
-  @DisplayName("임대 정보 정상 조회 테스트")
-  public void lookupLeaseTest() {
+  public void createLeaseData() {
+    // given
+    Customer savedCustomer = createCustomer("customer1", "test@test.com", "1234",
+        Set.of("ROLE_CUSTOMER"), 1000000);
 
-    // Given
-    initializeTestData();
-    Pageable pageable = PageRequest.of(0, 10);
+    OfficeOwner officeOwner = createOfficeOwner("kim", "owner@test.com", "12345", "123-45", 1000L,
+        Set.of("ROLE_OFFICE_OWNER"));
+    OfficeOwner savedOfficeOwner = officeOwnerRepository.save(officeOwner);
 
-    // When
-    Page<LeaseLookUpServiceResponse> result = leaseService.lookupLease(testCustomer.getEmail(), pageable);
+    // set office create request dto
+    OfficeCreateRequestDto request = new OfficeCreateRequestDto();
+    setOfficeInfo(request, "office1", 5, 500000, 5);
+    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
+    setOfficeCondition(request, false, false, true, true, true, true,
+        true, true, true, true, true, true, true, true, true);
 
-    // Then
-    assertThat(result).isNotEmpty().hasSize(2);
-    LeaseLookUpServiceResponse firstResult = result.getContent().get(0);
-    LeaseLookUpServiceResponse secondResult = result.getContent().get(1);
+    Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
 
-    // 첫번째 임대 결과는 리뷰가 있어야 함
-    assertThat(firstResult.isReviewed()).isTrue();
-    assertThat(secondResult.isReviewed()).isFalse();
+    // set lease data
+    LocalDate leaseDate = LocalDate.now();
+    LeaseOfficeRequestDto leaseRequest = createLeaseRequest("test@test.com", savedId, leaseDate, 1,
+        4, false);
 
-    assertThat(firstResult.getName()).isEqualTo(testOffice1.getName());
-    assertThat(secondResult.getName()).isEqualTo(testOffice2.getName());
+    // when
+    LeaseOfficeServiceResponse response = leaseService.leaseOffice(leaseRequest);
+
+    // then
+    assertThat(response)
+        .extracting("customerEmail", "officeName", "price", "leaseStatus", "startDate", "endDate")
+        .contains(
+            "test@test.com", "office1", 500000L, AWAIT, leaseDate, leaseDate.plusMonths(1)
+        );
+
+    assertThat(savedCustomer.getPoint()).isEqualTo(500000L);
   }
 
-  private void initializeTestData() {
-    // 테스트 데이터 설정
-    testCustomer = createCustomer("TestCustomer", "test@Example.com", "", Set.of("a"), 0);
-    testOffice1 = createOffice("TestOffice1");
-    testOffice2 = createOffice("TestOffice2");
-    Lease lease1 = createLease(testCustomer, testOffice1, LeaseStatus.AWAIT, LocalDate.now(),
-        LocalDate.now().plusDays(10), false, 1000000);
-    createLease(testCustomer, testOffice2, LeaseStatus.ACCEPTED, LocalDate.now().plusDays(5), LocalDate.now().plusDays(20), true, 1500000);
+  @DisplayName("회원이 진행중이거나 진행했던 임대 계약을 페이징으로 조회할 수 있다.")
+  @Test
+  public void getLeaseInfoList() {
+    // given
+    Customer savedCustomer = createCustomer("customer1", "test@test.com", "1234",
+        Set.of("ROLE_CUSTOMER"), 1000000);
 
-    // 첫 번째 임대에 대해 리뷰 생성
-    createReview(testCustomer, testOffice1, lease1, 5, "Great place!");
+    OfficeOwner officeOwner = createOfficeOwner("kim", "owner@test.com", "12345", "123-45", 1000L,
+        Set.of("ROLE_OFFICE_OWNER"));
+    OfficeOwner savedOfficeOwner = officeOwnerRepository.save(officeOwner);
+
+    // set office create request dto
+    OfficeCreateRequestDto request = new OfficeCreateRequestDto();
+    setOfficeInfo(request, "office1", 5, 500000, 5);
+    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
+    setOfficeCondition(request, false, false, true, true, true, true,
+        true, true, true, true, true, true, true, true, true);
+
+    Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
+
+
+    // set lease data
+    LocalDate leaseDate = LocalDate.now().minusDays(30);
+    LocalDate leaseDate2 = LocalDate.now();
+
+    LeaseOfficeRequestDto leaseRequest = createLeaseRequest("test@test.com", savedId, leaseDate, 1,
+        4, false);
+    LeaseOfficeRequestDto leaseRequest2 = createLeaseRequest("test@test.com", savedId, leaseDate2, 1,
+        4, false);
+    LeaseOfficeServiceResponse response = leaseService.leaseOffice(leaseRequest);
+    LeaseOfficeServiceResponse response2 = leaseService.leaseOffice(leaseRequest2);
+
+    // when
+
+    // then
+    assertThat(response)
+        .extracting("customerEmail", "officeName", "price", "leaseStatus", "startDate", "endDate")
+        .contains(
+            "test@test.com", "office1", 500000L, AWAIT, leaseDate, leaseDate.plusMonths(1)
+        );
   }
 
-  private void createReview(Customer customer, Office office, Lease lease, int rate, String description) {
+  private LeaseOfficeRequestDto createLeaseRequest(String email, Long officeId, LocalDate startDate,
+      int months, int customerCount, boolean isMonthlyPay) {
+
+    return LeaseOfficeRequestDto.builder()
+        .email(email)
+        .officeId(officeId)
+        .startDate(startDate)
+        .months(months)
+        .customerCount(customerCount)
+        .isMonthlyPay(isMonthlyPay)
+        .build();
+  }
+
+  private void createReview(Customer customer, Office office, Lease lease, int rate,
+      String description) {
     reviewRepository.save(Review.builder()
         .customer(customer)
         .office(office)
@@ -99,7 +155,21 @@ public class LeaseServiceIntegrationTest {
         .build());
   }
 
-  private Customer createCustomer(String name, String email, String password, Set<String> roles, int point) {
+  private OfficeOwner createOfficeOwner(String name, String email, String password,
+      String businessNumber, long point, Set<String> roles) {
+
+    return OfficeOwner.builder()
+        .name(name)
+        .email(email)
+        .password(password)
+        .businessNumber(businessNumber)
+        .point(point)
+        .roles(roles)
+        .build();
+  }
+
+  private Customer createCustomer(String name, String email, String password, Set<String> roles,
+      int point) {
     return customerRepository.save(Customer.builder()
         .name(name)
         .email(email)
@@ -109,45 +179,48 @@ public class LeaseServiceIntegrationTest {
         .build());
   }
 
-  private Office createOffice(String name) {
-
-    Office office = Office.builder().name(name).build();
-    officeRepository.save(office);
-
-    Address address = Address.builder()
-        .legion("TestLegion")
-        .city("TestCity")
-        .town("TestTown")
-        .village("TestVillage")
-        .bungi("TestBungi")
-        .street("TestStreet")
-        .buildingNumber("TestBuildingNumber")
-        .zipcode(123)
-        .build();
-
-    OfficeLocation officeLocation = OfficeLocation.builder()
-        .office(office)
-        .address(address)
-        .build();
-
-    officeLocationRepository.save(officeLocation);
-
-    office.setOfficeLocation(officeLocation);
-
-    return office;
+  private void setOfficeInfo(OfficeCreateRequestDto request, String officeName, int maxCapacity,
+      long leaseFee, int remainRoom) {
+    request.setOfficeName(officeName);
+    request.setMaxCapacity(maxCapacity);
+    request.setLeaseFee(leaseFee);
+    request.setRemainRoom(remainRoom);
   }
 
+  private void setOfficeLocation(OfficeCreateRequestDto request, String legion, String city,
+      String town, String village, String street, int zipcode, double latitude, double longitude) {
 
-  private Lease createLease(Customer customer, Office office, LeaseStatus status, LocalDate start, LocalDate end, boolean isMonthly, long price) {
-    return leaseRepository.save(Lease.builder()
-        .customer(customer)
-        .office(office)
-        .leaseStatus(status)
-        .leaseStartDate(start)
-        .leaseEndDate(end)
-        .isMonthlyPay(isMonthly)
-        .price(price)
-        .build());
+    request.setLegion(legion);
+    request.setCity(city);
+    request.setTown(town);
+    request.setVillage(village);
+    request.setStreet(street);
+    request.setZipcode(zipcode);
+    request.setLatitude(latitude);
+    request.setLongitude(longitude);
+  }
+
+  private void setOfficeCondition(OfficeCreateRequestDto request, boolean airCondition,
+      boolean heaterCondition, boolean cafe,
+      boolean printer, boolean packageSendService, boolean doorLock, boolean fax,
+      boolean publicKitchen, boolean publicLounge, boolean privateLocker, boolean tvProjector,
+      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage) {
+
+    request.setHaveAirCondition(airCondition);
+    request.setHaveHeater(heaterCondition);
+    request.setHaveCafe(cafe);
+    request.setHavePrinter(printer);
+    request.setPackageSendServiceAvailable(packageSendService);
+    request.setHaveDoorLock(doorLock);
+    request.setFaxServiceAvailable(fax);
+    request.setHavePublicKitchen(publicKitchen);
+    request.setHavePublicLounge(publicLounge);
+    request.setHavePrivateLocker(privateLocker);
+    request.setHaveTvProjector(tvProjector);
+    request.setHaveWhiteBoard(whiteboard);
+    request.setHaveWifi(wifi);
+    request.setHaveShowerBooth(showerBooth);
+    request.setHaveStorage(storage);
   }
 }
 

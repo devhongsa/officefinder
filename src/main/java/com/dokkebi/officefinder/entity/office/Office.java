@@ -48,9 +48,12 @@ public class Office extends BaseEntity {
   @Column(name = "maximum_capacity")
   private int maxCapacity;
 
+  @Column(name = "office_address")
+  private String officeAddress;
+
   @Builder
   private Office(Long id, String name, OfficeOwner owner, OfficeCondition officeCondition,
-      OfficeLocation officeLocation, long leaseFee, int maxCapacity) {
+      OfficeLocation officeLocation, long leaseFee, int maxCapacity, String officeAddress) {
     this.id = id;
     this.name = name;
     this.owner = owner;
@@ -58,6 +61,7 @@ public class Office extends BaseEntity {
     this.officeLocation = officeLocation;
     this.leaseFee = leaseFee;
     this.maxCapacity = maxCapacity;
+    this.officeAddress = officeAddress;
   }
 
   /*
@@ -88,5 +92,9 @@ public class Office extends BaseEntity {
 
   public void setOfficeLocation(OfficeLocation officeLocation) {
     this.officeLocation = officeLocation;
+  }
+
+  public void setOfficeAddress(String address){
+    this.officeAddress = address;
   }
 }
