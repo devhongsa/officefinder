@@ -47,7 +47,7 @@ public class LeaseController {
     // 기본적으로 임대 정보가 생성 되었던 시간에 따라 내림차순으로 정렬
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-    Page<LeaseLookUpServiceResponse> serviceResponses = leaseService.lookupLease(
+    Page<LeaseLookUpServiceResponse> serviceResponses = leaseService.getLeaseList(
         principal.getName(), pageable);
 
     return serviceResponses.map(LeaseLookUpResponse::of);
