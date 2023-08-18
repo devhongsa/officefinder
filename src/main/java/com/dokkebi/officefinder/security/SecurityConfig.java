@@ -34,8 +34,9 @@ public class SecurityConfig {
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeHttpRequests((authz) -> authz
-            .antMatchers("/**/signup", "/**/login/**","/**/test/**").permitAll()
-            .antMatchers("/api/**").authenticated()
+            .antMatchers("/api/**").permitAll() // 개발환경에서만 우선 설정
+            .antMatchers("/**/signup", "/**/login/**").permitAll()
+            .anyRequest().authenticated()
         )
         .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
