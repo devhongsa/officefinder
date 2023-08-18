@@ -17,20 +17,20 @@ public class OfficeDetailResponseDto {
 
   private String officeName;
   private String address;
-  private String remainOffices;
+  private int remainOffices;
   private long leaseFee;
   private int maxCapacity;
   private OfficeOptionDto officeOptionDto;
 
-  public static OfficeDetailResponseDto fromEntity(Office office, String remainOffices) {
+  public static OfficeDetailResponseDto fromEntity(Office office) {
     String address = AddressConverter.getAddress(office.getOfficeLocation());
 
     return OfficeDetailResponseDto.builder()
         .officeName(office.getName())
-        .remainOffices(remainOffices)
         .leaseFee(office.getLeaseFee())
         .maxCapacity(office.getMaxCapacity())
         .address(address)
+        .remainOffices(office.getRemainRoom())
         .officeOptionDto(OfficeOptionDto.fromEntity(office.getOfficeCondition()))
         .build();
   }

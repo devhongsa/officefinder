@@ -15,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class Office extends BaseEntity {
 
   @Id
@@ -36,10 +39,10 @@ public class Office extends BaseEntity {
   @JoinColumn(name = "owner_id")
   private OfficeOwner owner;
 
-  @OneToOne(mappedBy = "office", cascade = CascadeType.REMOVE)
+  @OneToOne(mappedBy = "office", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
   private OfficeCondition officeCondition;
 
-  @OneToOne(mappedBy = "office", cascade = CascadeType.REMOVE)
+  @OneToOne(mappedBy = "office", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
   private OfficeLocation officeLocation;
 
   @Column(name = "lease_fee")
@@ -51,18 +54,8 @@ public class Office extends BaseEntity {
   @Column(name = "office_address")
   private String officeAddress;
 
-  @Builder
-  private Office(Long id, String name, OfficeOwner owner, OfficeCondition officeCondition,
-      OfficeLocation officeLocation, long leaseFee, int maxCapacity, String officeAddress) {
-    this.id = id;
-    this.name = name;
-    this.owner = owner;
-    this.officeCondition = officeCondition;
-    this.officeLocation = officeLocation;
-    this.leaseFee = leaseFee;
-    this.maxCapacity = maxCapacity;
-    this.officeAddress = officeAddress;
-  }
+  @Column(name = "office_remain_room")
+  private int remainRoom;
 
   /*
   엔티티 생성 메서드
@@ -73,6 +66,7 @@ public class Office extends BaseEntity {
         .owner(officeOwner)
         .maxCapacity(request.getMaxCapacity())
         .leaseFee(request.getLeaseFee())
+        .remainRoom(request.getRemainRoom())
         .build();
   }
 
@@ -84,6 +78,7 @@ public class Office extends BaseEntity {
     this.name = request.getOfficeName();
     this.leaseFee = request.getLeaseFee();
     this.maxCapacity = request.getMaxCapacity();
+    this.remainRoom = request.getRemainRoom();
   }
 
   public void setOfficeCondition(OfficeCondition officeCondition) {
@@ -96,5 +91,13 @@ public class Office extends BaseEntity {
 
   public void setOfficeAddress(String address){
     this.officeAddress = address;
+  }
+
+  public void decreaseRemainRoom() {
+    if (this.remainRoom <= 0){
+      throw new IllegalArgumentException("room is full");
+    }
+
+    this.remainRoom--;
   }
 }
