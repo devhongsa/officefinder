@@ -4,7 +4,7 @@ import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.exception.CustomException;
-import com.dokkebi.officefinder.repository.LeaseRepository;
+import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.service.review.dto.ReviewServiceDto.SubmitServiceRequest;
 import com.dokkebi.officefinder.service.review.dto.ReviewServiceDto.SubmitServiceResponse;
