@@ -36,9 +36,9 @@ public class OAuthController {
   }
 
   @GetMapping("/login/oauth2/code/google")
-  public ResponseEntity<?> googleLogin(@RequestParam String code) {
+  public ResponseDto<?> googleLogin(@RequestParam String code) {
     LoginResponseCustomer customer = oAuthService.socialLogin(code);
 
-    return ResponseEntity.ok(new ResponseDto<>("success",customer));
+    return new ResponseDto<>("success",customer);
   }
 }

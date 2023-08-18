@@ -32,10 +32,10 @@ public class AuthController {
         2. 회원가입에 성공하면 SignUpResponse Dto 응답
      */
     @PostMapping("/customers/signup")
-    public ResponseEntity<?> singUpUser(@RequestBody @Valid Auth.SignUpCustomer signupRequest){
+    public ResponseDto<?> singUpUser(@RequestBody @Valid Auth.SignUpCustomer signupRequest){
         Auth.SignUpResponseCustomer signUpResponse = authService.register(signupRequest);
         log.info("customer signup -> " + signUpResponse.getName());
-        return ResponseEntity.ok(new ResponseDto<>("success",signUpResponse));
+        return new ResponseDto<>("success",signUpResponse);
     }
 
     /*
@@ -44,10 +44,10 @@ public class AuthController {
         2. 회원가입에 성공하면 SignUpResponse Dto 응답
      */
     @PostMapping("/agents/signup")
-    public ResponseEntity<?> singUpUser(@RequestBody @Valid Auth.SignUpOfficeOwner signupRequest){
+    public ResponseDto<?> singUpUser(@RequestBody @Valid Auth.SignUpOfficeOwner signupRequest){
         Auth.SignUpResponseOfficeOwner signUpResponse = authService.register(signupRequest);
         log.info("agent signup -> " + signUpResponse.getName());
-        return ResponseEntity.ok(new ResponseDto<>("success",signUpResponse));
+        return new ResponseDto<>("success",signUpResponse);
     }
 
     /*
@@ -56,10 +56,10 @@ public class AuthController {
         2. 로그인에 성공하면 LoginReponse Dto 객체 응답
      */
     @PostMapping("/customers/login")
-    public ResponseEntity<?> loginCustomer(@RequestBody @Valid Auth.SignIn loginRequest) {
+    public ResponseDto<?> loginCustomer(@RequestBody @Valid Auth.SignIn loginRequest) {
         LoginResponseCustomer customer = authService.loginCustomer(loginRequest);
 
-        return ResponseEntity.ok(new ResponseDto<>("success",customer));
+        return new ResponseDto<>("success",customer);
     }
 
     /*
@@ -68,10 +68,10 @@ public class AuthController {
         2. 로그인에 성공하면 LoginReponse Dto 객체 응답
      */
     @PostMapping("/agents/login")
-    public ResponseEntity<?> loginOfficeOwner(@RequestBody @Valid Auth.SignIn loginRequest) {
+    public ResponseDto<?> loginOfficeOwner(@RequestBody @Valid Auth.SignIn loginRequest) {
         LoginResponseOfficeOwner officeOwner = authService.loginOfficeOwner(loginRequest);
 
-        return ResponseEntity.ok(new ResponseDto<>("success",officeOwner));
+        return new ResponseDto<>("success",officeOwner);
     }
 }
 
