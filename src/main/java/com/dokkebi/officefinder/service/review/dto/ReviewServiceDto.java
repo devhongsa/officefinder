@@ -52,7 +52,29 @@ public class ReviewServiceDto {
           .officeName(review.getOffice().getName())
           .build();
     }
+  }
 
+  @Getter
+  @NoArgsConstructor
+  public static class UpdateServiceRequest {
+    private String customerEmail;
+    private int rate;
+    private String description;
+
+    @Builder
+    public UpdateServiceRequest(String customerEmail, int rate, String description) {
+      this.customerEmail = customerEmail;
+      this.rate = rate;
+      this.description = description;
+    }
+
+    public UpdateServiceRequest from(SubmitControllerRequest submitControllerRequest, String customerEmail) {
+      return UpdateServiceRequest.builder()
+          .customerEmail(customerEmail)
+          .rate(submitControllerRequest.getRate())
+          .description(submitControllerRequest.getDescription())
+          .build();
+    }
   }
 
 }
