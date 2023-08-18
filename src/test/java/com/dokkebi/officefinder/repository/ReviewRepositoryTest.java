@@ -37,8 +37,6 @@ public class ReviewRepositoryTest {
         LeaseStatus.EXPIRED).build());
 
     Review review = Review.builder()
-        .customer(customer)
-        .office(office)
         .lease(lease)
         .rate(5)
         .description("a").build();
