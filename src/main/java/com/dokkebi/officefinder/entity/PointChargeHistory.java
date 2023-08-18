@@ -39,4 +39,11 @@ public class PointChargeHistory extends BaseEntity {
     this.customer = customer;
     this.chargeAmount = chargeAmount;
   }
+
+  public static PointChargeHistory fromRequest(Customer customer, long chargeAmount){
+    return PointChargeHistory.builder()
+        .customer(customer)
+        .chargeAmount(chargeAmount)
+        .build();
+  }
 }
