@@ -28,14 +28,6 @@ public class Review extends BaseEntity {
   @Column(name = "review_id")
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "customer_id")
-  private Customer customer;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "office_id")
-  private Office office;
-
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "lease_id")
   private Lease lease;
@@ -45,19 +37,11 @@ public class Review extends BaseEntity {
   private String description;
 
   @Builder
-  private Review(Long id, Customer customer, Office office, Lease lease, int rate, String description) {
+  private Review(Long id, Lease lease, int rate, String description) {
     this.id = id;
-    this.customer = customer;
-    this.office = office;
     this.lease = lease;
     this.rate = rate;
     this.description = description;
   }
 
-  /*
-  review 수정 메서드
-   */
-  public void changeReviewData(){
-    return;
-  }
 }

@@ -91,8 +91,6 @@ public class LeaseServiceIntegrationTest {
 
   private void createReview(Customer customer, Office office, Lease lease, int rate, String description) {
     reviewRepository.save(Review.builder()
-        .customer(customer)
-        .office(office)
         .lease(lease)
         .rate(rate)
         .description(description)
@@ -150,4 +148,3 @@ public class LeaseServiceIntegrationTest {
         .build());
   }
 }
-

@@ -107,7 +107,7 @@ public class ReviewServiceTest {
         .leaseId(lease.getId())
         .rate(5)
         .description("테스트").build();
-    reviewRepository.save(Review.builder().customer(lease.getCustomer()).office(lease.getOffice()).lease(lease).build());
+    reviewRepository.save(Review.builder().lease(lease).build());
     //then
     Assertions.assertThatThrownBy(
         () -> reviewService.submit(submitServiceRequest)
@@ -156,8 +156,6 @@ public class ReviewServiceTest {
     //given
     Lease lease = makeLease("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
     Review review = Review.builder()
-        .customer(lease.getCustomer())
-        .office(lease.getOffice())
         .lease(lease)
         .rate(5)
         .description("test").build();
@@ -178,8 +176,6 @@ public class ReviewServiceTest {
   public void ReviewUpdate2() throws Exception {
     Lease lease = makeLease("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
     Review review = Review.builder()
-        .customer(lease.getCustomer())
-        .office(lease.getOffice())
         .lease(lease)
         .rate(5)
         .description("test").build();
@@ -200,8 +196,6 @@ public class ReviewServiceTest {
   public void ReviewUpdate3() throws Exception {
     Lease lease = makeLease("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
     Review review = Review.builder()
-        .customer(lease.getCustomer())
-        .office(lease.getOffice())
         .lease(lease)
         .rate(5)
         .description("test").build();
