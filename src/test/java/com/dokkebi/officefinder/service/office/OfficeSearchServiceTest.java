@@ -24,13 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-public class OfficeQueryServiceTest {
+public class OfficeSearchServiceTest {
 
   @Autowired
   private OfficeService officeService;
 
   @Autowired
-  private OfficeQueryService officeQueryService;
+  private OfficeSearchService officeQueryService;
   @Autowired
   private OfficeOwnerRepository officeOwnerRepository;
   @Autowired
