@@ -26,7 +26,6 @@ public class OfficeService {
   private final OfficeLocationRepository officeLocationRepository;
   private final OfficeConditionRepository officeConditionRepository;
   private final OfficeOwnerRepository ownerRepository;
-  private final OfficeRedisService officeRedisService;
 
   public Long createOfficeInfo(OfficeCreateRequestDto request, String ownerEmail) {
     OfficeOwner officeOwner = ownerRepository.findByEmail(ownerEmail)
@@ -48,8 +47,6 @@ public class OfficeService {
     officeLocationRepository.save(officeLocation);
     officeConditionRepository.save(officeCondition);
 
-    officeRedisService.setRemainRoom(request.getOfficeName(), request.getRemainRoom());
-
     return savedOffice.getId();
   }
 
@@ -64,8 +61,6 @@ public class OfficeService {
     modifyOfficeLocation(office.getOfficeLocation(), OfficeLocationDto.fromRequest(request));
 
     office.modifyFromRequest(request);
-
-    officeRedisService.setRemainRoom(request.getOfficeName(), request.getRemainRoom());
 
     return office.getId();
   }
