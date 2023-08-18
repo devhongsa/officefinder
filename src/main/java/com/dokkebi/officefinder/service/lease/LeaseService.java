@@ -3,16 +3,15 @@ package com.dokkebi.officefinder.service.lease;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
-import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
-import com.dokkebi.officefinder.repository.LeaseRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
+import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
-import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -60,27 +59,10 @@ public class LeaseService {
 
     customer.usePoint(totalPrice);
 
-    Lease lease = saveLeaseInfo(customer, office, totalPrice, leaseOfficeRequestDto);
+    Lease lease = Lease.fromRequest(customer, office, totalPrice, leaseOfficeRequestDto);
+    Lease savedLease = leaseRepository.save(lease);
 
-    return LeaseOfficeServiceResponse.of(lease);
-  }
-
-  private Lease saveLeaseInfo(Customer customer, Office office, long totalPrice,
-      LeaseOfficeRequestDto request) {
-
-    Lease lease = Lease.builder()
-        .customer(customer)
-        .office(office)
-        .price(totalPrice)
-        .leaseStatus(LeaseStatus.AWAIT)
-        .leaseStartDate(request.getStartDate())
-        .leaseEndDate(request.getStartDate().plusMonths(request.getMonths()))
-        .isMonthlyPay(request.isMonthlyPay())
-        .build();
-
-    leaseRepository.save(lease);
-
-    return lease;
+    return LeaseOfficeServiceResponse.of(savedLease);
   }
 
   private void checkOfficeCapacity(Office office, int customerCount) {
