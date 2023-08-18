@@ -217,7 +217,7 @@ class OfficeRepositoryImplTest {
   private void addData() {
     OfficeOwner owner = createOfficeOwner("kim", "test@test.com", "1234", "123-456", 1000);
     Office office = createOffice("office", owner, 5, 500000);
-    Address address = createAddress("경상남도", "김해시", "삼계동", "", "삼계로", "12-34", 50898, "12-3번지");
+    Address address = createAddress("경상남도", "김해시", "삼계동", "", "삼계로",  50898);
     OfficeLocation officeLocation = createOfficeLocation(office, address, 127.123452, 37.475648);
     OfficeCondition officeCondition = createOfficeCondition(office, true, false, true, true, true,
         true,
@@ -226,7 +226,7 @@ class OfficeRepositoryImplTest {
 
     OfficeOwner owner2 = createOfficeOwner("park", "test2@test.com", "1234", "123-457", 1000);
     Office office2 = createOffice("office2", owner2, 5, 500000);
-    Address address2 = createAddress("경상남도", "진영시", "가츠동", "", "가츠로", "12-56", 50878, "12-5번지");
+    Address address2 = createAddress("경상남도", "진영시", "가츠동", "", "가츠로", 50878);
     OfficeLocation officeLocation2 = createOfficeLocation(office2, address2, 127.123452, 37.475648);
     OfficeCondition officeCondition2 = createOfficeCondition(office2, false, false, true, true, true,
         true,
@@ -235,7 +235,7 @@ class OfficeRepositoryImplTest {
 
     OfficeOwner owner3 = createOfficeOwner("lee", "test3@test.com", "1234", "123-497", 1000);
     Office office3 = createOffice("office3", owner3, 5, 500000);
-    Address address3 = createAddress("경상남도", "김해시", "내외동", "", "내외로", "12-57", 50878, "12-9번지");
+    Address address3 = createAddress("경상남도", "김해시", "내외동", "", "내외로", 50878);
     OfficeLocation officeLocation3 = createOfficeLocation(office3, address3, 127.123452, 37.475648);
     OfficeCondition officeCondition3 = createOfficeCondition(office3, true, false, true, true, true,
         true,
@@ -249,16 +249,14 @@ class OfficeRepositoryImplTest {
   }
 
   private Address createAddress(String legion, String city, String town, String village,
-      String street, String buildingNumber, int zipcode, String bungi) {
+      String street,int zipcode) {
     return Address.builder()
         .legion(legion)
         .city(city)
         .village(village)
         .street(street)
         .town(town)
-        .buildingNumber(buildingNumber)
         .zipcode(zipcode)
-        .bungi(bungi)
         .build();
   }
 

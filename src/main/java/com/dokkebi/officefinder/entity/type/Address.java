@@ -16,21 +16,17 @@ public class Address {
   private String city;
   private String town;
   private String village;
-  private String bungi;
   private String street;
-  private String buildingNumber;
   private int zipcode;
 
   @Builder
-  private Address(String legion, String city, String town, String village, String bungi,
-      String street, String buildingNumber, int zipcode) {
+  private Address(String legion, String city, String town, String village,
+      String street, int zipcode) {
     this.legion = legion;
     this.city = city;
     this.town = town;
     this.village = village;
-    this.bungi = bungi;
     this.street = street;
-    this.buildingNumber = buildingNumber;
     this.zipcode = zipcode;
   }
 
@@ -43,9 +39,7 @@ public class Address {
         .city(request.getCity())
         .town(request.getTown())
         .village(request.getVillage())
-        .bungi(request.getBungi())
         .street(request.getStreet())
-        .buildingNumber(request.getBuildingNumber())
         .zipcode(request.getZipcode())
         .build();
   }
