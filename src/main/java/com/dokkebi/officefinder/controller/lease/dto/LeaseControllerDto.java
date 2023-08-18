@@ -1,6 +1,8 @@
 package com.dokkebi.officefinder.controller.lease.dto;
 
-import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseServiceResponse;
+import com.dokkebi.officefinder.entity.type.LeaseStatus;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import java.time.LocalDate;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -48,13 +50,51 @@ public class LeaseControllerDto {
 
     private LocalDate endDate;
 
-    public static LeaseSuccessResponse of(LeaseServiceResponse resp){
+    public static LeaseSuccessResponse of(LeaseOfficeServiceResponse resp){
       return LeaseSuccessResponse.builder()
           .customerEmail(resp.getCustomerEmail())
           .officeName(resp.getOfficeName())
           .price(resp.getPrice())
           .startDate(resp.getStartDate())
           .endDate(resp.getEndDate())
+          .build();
+    }
+  }
+
+  @Getter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  public static class LeaseLookUpResponse{
+    private Long leaseId;
+
+    private String name;
+
+    private String location;
+
+    private LeaseStatus leaseStatus;
+
+    private LocalDate paymentDate;
+
+    private LocalDate startDate;
+
+    private LocalDate endDate;
+
+    private boolean isMonthly;
+
+    private boolean isReviewed;
+
+    public static LeaseLookUpResponse of (LeaseLookUpServiceResponse resp){
+      return LeaseLookUpResponse.builder()
+          .leaseId(resp.getLeaseId())
+          .name(resp.getName())
+          .location(resp.getLocation())
+          .leaseStatus(resp.getLeaseStatus())
+          .paymentDate(resp.getPaymentDate())
+          .startDate(resp.getStartDate())
+          .endDate(resp.getEndDate())
+          .isMonthly(resp.isMonthlyPay())
+          .isReviewed(resp.isReviewed())
           .build();
     }
   }
