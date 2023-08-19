@@ -1,12 +1,9 @@
 package com.dokkebi.officefinder.controller.review;
 
 import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto;
-import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.SubmitControllerResponse;
 import com.dokkebi.officefinder.dto.ResponseDto;
+import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.service.review.ReviewService;
-import com.dokkebi.officefinder.service.review.dto.ReviewServiceDto.UpdateServiceRequest;
-import com.dokkebi.officefinder.service.review.dto.ReviewServiceDto.SubmitServiceRequest;
-import com.dokkebi.officefinder.service.review.dto.ReviewServiceDto.SubmitServiceResponse;
 import java.security.Principal;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,14 +32,9 @@ public class ReviewController {
   public ResponseDto<?> submitReview(@RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitControllerRequest,
       Principal principal, @PathVariable @Valid Long leaseId) {
     String customerEmail = principal.getName();
-    SubmitServiceRequest serviceRequest = new SubmitServiceRequest().from(submitControllerRequest, customerEmail, leaseId);
-    SubmitServiceResponse submitServiceResponse = reviewService.submit(serviceRequest);
+    Review review = reviewService.submit(submitControllerRequest, customerEmail, leaseId);
 
-    SubmitControllerResponse submitControllerResponse = new SubmitControllerResponse().from(submitServiceResponse);
-    log.info("review submit from : " + submitControllerResponse.getCustomerName()
-        + ", to : " + submitControllerResponse.getOfficeName());
-
-    return new ResponseDto<>("success", submitControllerResponse);
+    return new ResponseDto<>("success", review);
   }
 
   @GetMapping("api/customers/reviews")
@@ -51,13 +43,12 @@ public class ReviewController {
   }
 
   @PutMapping("api/customers/reviews/{reviewId}")
-  public ResponseDto<?> fixReview(@RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitRequest,
+  public ResponseDto<?> fixReview(@RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitControllerRequest,
       Principal principal, @PathVariable @Valid Long reviewId) {
     String customerEmail = principal.getName();
-    UpdateServiceRequest updateServiceRequest = new UpdateServiceRequest().from(submitRequest, customerEmail);
-    reviewService.update(updateServiceRequest, reviewId);
+    Review review = reviewService.update(submitControllerRequest, customerEmail, reviewId);
 
-    return new ResponseDto<>("success", "");
+    return new ResponseDto<>("success", review);
   }
 
   @DeleteMapping("api/customers/reviews/{reviewId}")

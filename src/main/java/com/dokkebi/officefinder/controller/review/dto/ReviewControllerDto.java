@@ -1,6 +1,6 @@
 package com.dokkebi.officefinder.controller.review.dto;
 
-import com.dokkebi.officefinder.service.review.dto.ReviewServiceDto.SubmitServiceResponse;
+import com.dokkebi.officefinder.entity.review.Review;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,10 +32,10 @@ public class ReviewControllerDto {
       this.officeName = officeName;
     }
 
-    public SubmitControllerResponse from(SubmitServiceResponse submitServiceResponse) {
+    public SubmitControllerResponse from(Review review) {
       return SubmitControllerResponse.builder()
-          .customerName(submitServiceResponse.getCustomerName())
-          .officeName(submitServiceResponse.getOfficeName())
+          .customerName(review.getLease().getCustomer().getName())
+          .officeName(review.getLease().getOffice().getName())
           .build();
     }
   }
