@@ -1,5 +1,6 @@
 package com.dokkebi.officefinder.service.review;
 
+import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.SubmitControllerRequest;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
@@ -9,9 +10,6 @@ import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
-import com.dokkebi.officefinder.service.review.dto.ReviewServiceDto.SubmitServiceRequest;
-import com.dokkebi.officefinder.service.review.dto.ReviewServiceDto.SubmitServiceResponse;
-import com.dokkebi.officefinder.service.review.dto.ReviewServiceDto.UpdateServiceRequest;
 import java.util.Set;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -69,14 +67,12 @@ public class ReviewServiceTest {
   public void ReviewSubmit1() throws Exception {
     //given
     Lease lease = makeLease("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
-    SubmitServiceRequest submitServiceRequest = SubmitServiceRequest.builder()
-        .customerEmail("test@naver.com")
-        .leaseId(lease.getId() + 1)
+    SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(5)
         .description("테스트").build();
     //then
     Assertions.assertThatThrownBy(
-        () -> reviewService.submit(submitServiceRequest)
+        () -> reviewService.submit(submitControllerRequest, "test@naver.com", lease.getId()+1)
     ).isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -85,31 +81,27 @@ public class ReviewServiceTest {
   public void ReviewSubmit2() throws Exception {
     //given
     Lease lease = makeLease("1", "false@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
-    SubmitServiceRequest submitServiceRequest = SubmitServiceRequest.builder()
-        .customerEmail("test@naver.com")
-        .leaseId(lease.getId())
+    SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(5)
         .description("테스트").build();
     //then
     Assertions.assertThatThrownBy(
-        () -> reviewService.submit(submitServiceRequest)
+        () -> reviewService.submit(submitControllerRequest, "test@naver.com", lease.getId())
     ).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
-  @DisplayName("Submit시 이미 동일한 회원의 오피스에 대한 리뷰가 존재하는 경우 exception return")
+  @DisplayName("Submit시 이미 동일한 임대에 대한 리뷰가 존재하는 경우 exception return")
   public void ReviewSubmit3() throws Exception {
     //given
     Lease lease = makeLease("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
-    SubmitServiceRequest submitServiceRequest = SubmitServiceRequest.builder()
-        .customerEmail("test@naver.com")
-        .leaseId(lease.getId())
+    SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(5)
         .description("테스트").build();
     reviewRepository.save(Review.builder().lease(lease).build());
     //then
     Assertions.assertThatThrownBy(
-        () -> reviewService.submit(submitServiceRequest)
+        () -> reviewService.submit(submitControllerRequest, "test@naver.com", lease.getId())
     ).isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -118,15 +110,12 @@ public class ReviewServiceTest {
   public void ReviewSubmit4() throws Exception {
     //given
     Lease lease = makeLease("1", "test@naver.com", "1", "customer", 0, LeaseStatus.AWAIT);
-
-    SubmitServiceRequest submitServiceRequest = SubmitServiceRequest.builder()
-        .customerEmail("test@naver.com")
-        .leaseId(lease.getId())
+    SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(5)
         .description("테스트").build();
     //then
     Assertions.assertThatThrownBy(
-        () -> reviewService.submit(submitServiceRequest)
+        () -> reviewService.submit(submitControllerRequest, "test@naver.com", lease.getId())
     ).isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -135,18 +124,14 @@ public class ReviewServiceTest {
   public void ReviewSubmit5() throws Exception {
     //given
     Lease lease = makeLease("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
-
-    SubmitServiceRequest submitServiceRequest5 = SubmitServiceRequest.builder()
-        .customerEmail("test@naver.com")
-        .leaseId(lease.getId())
+    SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(5)
         .description("테스트").build();
+    //when
+    Review review = reviewService.submit(submitControllerRequest, "test@naver.com", lease.getId());
     //then
-    SubmitServiceResponse submitServiceResponse = reviewService.submit(submitServiceRequest5);
-    Assertions.assertThat(submitServiceResponse.getCustomerName())
-        .isEqualTo(lease.getCustomer().getName());
-    Assertions.assertThat(submitServiceResponse.getOfficeName())
-        .isEqualTo(lease.getOffice().getName());
+    Assertions.assertThat(review.getLease().getId())
+        .isEqualTo(lease.getId());
   }
 
   @Test
@@ -160,13 +145,13 @@ public class ReviewServiceTest {
         .description("test").build();
     Review savedReview = reviewRepository.save(review);
 
-    UpdateServiceRequest updateServiceRequest = UpdateServiceRequest.builder()
-        .customerEmail("test@naver.com")
+    SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(5)
-        .description("수정 후").build();
+        .description("테스트").build();
 
     //then
-    Assertions.assertThatThrownBy(() -> reviewService.update(updateServiceRequest, savedReview.getId() + 1))
+    Assertions.assertThatThrownBy(() -> reviewService.update(submitControllerRequest,
+            "test@naver.com", savedReview.getId() + 1))
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -180,13 +165,13 @@ public class ReviewServiceTest {
         .description("test").build();
     Review savedReview = reviewRepository.save(review);
 
-    UpdateServiceRequest updateServiceRequest = UpdateServiceRequest.builder()
-        .customerEmail("false@naver.com")
+    SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(5)
-        .description("수정 후").build();
+        .description("테스트").build();
 
     //then
-    Assertions.assertThatThrownBy(() -> reviewService.update(updateServiceRequest, savedReview.getId()))
+    Assertions.assertThatThrownBy(() -> reviewService.update(submitControllerRequest,
+            "false@naver.com", savedReview.getId() + 1))
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -200,17 +185,15 @@ public class ReviewServiceTest {
         .description("test").build();
     Review savedReview = reviewRepository.save(review);
 
-    UpdateServiceRequest updateServiceRequest = UpdateServiceRequest.builder()
-        .customerEmail("test@naver.com")
+    SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(1)
         .description("수정 후").build();
     //when
-    reviewService.update(updateServiceRequest, savedReview.getId());
-    Review changedReview = reviewRepository.findById(savedReview.getId())
-        .orElseThrow(()->new NullPointerException("존재하지 않는 리뷰입니다."));
+    Review updatedReview = reviewService.update(submitControllerRequest,
+        "test@naver.com", savedReview.getId());
     //then
-    Assertions.assertThat(changedReview.getRate()).isEqualTo(1);
-    Assertions.assertThat(changedReview.getDescription()).isEqualTo("수정 후");
+    Assertions.assertThat(updatedReview.getRate()).isEqualTo(1);
+    Assertions.assertThat(updatedReview.getDescription()).isEqualTo("수정 후");
   }
 
 }
