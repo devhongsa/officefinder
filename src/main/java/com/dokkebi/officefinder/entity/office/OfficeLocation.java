@@ -34,20 +34,14 @@ public class OfficeLocation extends BaseEntity {
   @Embedded
   private Address address;
 
-  private double latitude;
-  private double longitude;
-
   @Builder
-  private OfficeLocation(Long id, Office office, Address address, double latitude,
-      double longitude) {
+  private OfficeLocation(Long id, Office office, Address address) {
     this.id = id;
 
     this.office = office;
     office.setOfficeLocation(this);
 
     this.address = address;
-    this.latitude = latitude;
-    this.longitude = longitude;
   }
 
   /*
@@ -58,15 +52,11 @@ public class OfficeLocation extends BaseEntity {
 
     return OfficeLocation.builder()
         .office(office)
-        .latitude(request.getLatitude())
-        .longitude(request.getLongitude())
         .address(address)
         .build();
   }
 
   public void modifyFromRequest(OfficeLocationDto request) {
     this.address = Address.fromRequestDto(request);
-    this.latitude = request.getLatitude();
-    this.longitude = request.getLongitude();
   }
 }

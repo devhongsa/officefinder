@@ -67,6 +67,7 @@ public class Office extends BaseEntity {
         .maxCapacity(request.getMaxCapacity())
         .leaseFee(request.getLeaseFee())
         .remainRoom(request.getRemainRoom())
+        .officeAddress(request.getAddress().getStreet())
         .build();
   }
 
