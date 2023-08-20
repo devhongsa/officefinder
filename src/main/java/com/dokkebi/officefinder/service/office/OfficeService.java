@@ -12,7 +12,6 @@ import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepos
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
 import com.dokkebi.officefinder.service.office.dto.OfficeConditionDto;
 import com.dokkebi.officefinder.service.office.dto.OfficeLocationDto;
-import com.dokkebi.officefinder.utils.AddressConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +25,6 @@ public class OfficeService {
   private final OfficeLocationRepository officeLocationRepository;
   private final OfficeConditionRepository officeConditionRepository;
   private final OfficeOwnerRepository ownerRepository;
-  private final OfficeRedisService officeRedisService;
 
   public Long createOfficeInfo(OfficeCreateRequestDto request, String ownerEmail) {
     OfficeOwner officeOwner = ownerRepository.findByEmail(ownerEmail)
@@ -42,13 +40,9 @@ public class OfficeService {
         office, OfficeLocationDto.fromRequest(request)
     );
 
-    office.setOfficeAddress(AddressConverter.getAddress(officeLocation));
-
     Office savedOffice = officeRepository.save(office);
     officeLocationRepository.save(officeLocation);
     officeConditionRepository.save(officeCondition);
-
-    officeRedisService.setRemainRoom(request.getOfficeName(), request.getRemainRoom());
 
     return savedOffice.getId();
   }
@@ -64,8 +58,6 @@ public class OfficeService {
     modifyOfficeLocation(office.getOfficeLocation(), OfficeLocationDto.fromRequest(request));
 
     office.modifyFromRequest(request);
-
-    officeRedisService.setRemainRoom(request.getOfficeName(), request.getRemainRoom());
 
     return office.getId();
   }

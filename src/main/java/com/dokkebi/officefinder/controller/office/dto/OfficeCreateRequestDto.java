@@ -16,61 +16,15 @@ import lombok.Setter;
 public class OfficeCreateRequestDto {
 
   @NotEmpty
-  String officeName;
+  private String officeName;
   @NotNull
-  Integer maxCapacity;
+  private Integer maxCapacity;
   @NotNull
-  Long leaseFee;
+  private Long leaseFee;
   @NotNull
-  Integer remainRoom;
+  private Integer remainRoom;
 
   // address
-  @NotEmpty
-  String legion;
-  @NotEmpty
-  String city;
-  @NotEmpty
-  String town;
-  @NotNull
-  String village;
-  @NotEmpty
-  String street;
-  @NotNull
-  Integer zipcode;
-  @NotNull
-  Double latitude;
-  @NotNull
-  Double longitude;
-
-  // option
-  @NotNull
-  Boolean haveAirCondition;
-  @NotNull
-  Boolean haveCafe;
-  @NotNull
-  Boolean havePrinter;
-  @NotNull
-  Boolean packageSendServiceAvailable;
-  @NotNull
-  Boolean haveDoorLock;
-  @NotNull
-  Boolean faxServiceAvailable;
-  @NotNull
-  Boolean havePublicKitchen;
-  @NotNull
-  Boolean havePublicLounge;
-  @NotNull
-  Boolean havePrivateLocker;
-  @NotNull
-  Boolean haveTvProjector;
-  @NotNull
-  Boolean haveWhiteBoard;
-  @NotNull
-  Boolean haveWifi;
-  @NotNull
-  Boolean haveShowerBooth;
-  @NotNull
-  Boolean haveStorage;
-  @NotNull
-  Boolean haveHeater;
+  private OfficeAddress address;
+  private OfficeOption officeOption;
 }

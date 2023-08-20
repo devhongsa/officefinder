@@ -3,8 +3,10 @@ package com.dokkebi.officefinder.service.office;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.dokkebi.officefinder.controller.office.dto.OfficeAddress;
 import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeModifyRequestDto;
+import com.dokkebi.officefinder.controller.office.dto.OfficeOption;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficeCondition;
@@ -58,9 +60,9 @@ class OfficeServiceTest {
 
     OfficeCreateRequestDto request = new OfficeCreateRequestDto();
     setOfficeInfo(request, "office1", 5, 500000, 5);
-    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
-    setOfficeCondition(request, false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true);
+    request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
+    request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
+        true, true, true, true, true, true, true, true, true));
 
     // when
     Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
@@ -75,19 +77,15 @@ class OfficeServiceTest {
     assertThat(result)
         .extracting("name", "maxCapacity", "leaseFee", "officeAddress")
         .contains(
-            "office1", 5, 500000L, "경상남도 김해시 삼계동 삼계로"
+            "office1", 5, 500000L, "경상남도 김해시 삼계동 삼계로 223"
         );
 
     assertThat(resultOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "street", "zipcode")
+        .extracting("legion", "city", "town", "village", "zipcode")
         .contains(
-            "경상남도", "김해시", "삼계동", "", "삼계로", 12345
+            "경상남도", "김해시", "삼계동", "", 12345
         );
-
-    assertThat(resultOfficeLocation)
-        .extracting("latitude", "longitude")
-        .contains(127.1315, 37.4562);
 
     assertThat(resultOfficeCondition)
         .extracting("airCondition", "heaterCondition", "cafe", "printer", "packageSendService",
@@ -111,18 +109,18 @@ class OfficeServiceTest {
     // set office create request dto
     OfficeCreateRequestDto request = new OfficeCreateRequestDto();
     setOfficeInfo(request, "office1", 5, 500000, 5);
-    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
-    setOfficeCondition(request, false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true);
+    request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
+    request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
+        true, true, true, true, true, true, true, true, true));
 
     Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
 
     // set office modify request dto
     OfficeModifyRequestDto modifyRequest = new OfficeModifyRequestDto();
     setOfficeInfo(modifyRequest, "office1", 5, 1000000, 5);
-    setOfficeLocation(modifyRequest, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
-    setOfficeCondition(modifyRequest, true, true, true, true, true, true,
-        true, true, true, true, true, true, true, true, true);
+    modifyRequest.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
+    modifyRequest.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
+        true, true, true, true, true, true, true, true, true));
 
     // when
     Long modifiedOfficeId = officeService.modifyOfficeInfo(modifyRequest,
@@ -138,19 +136,15 @@ class OfficeServiceTest {
     assertThat(result)
         .extracting("name", "maxCapacity", "leaseFee", "officeAddress")
         .contains(
-            "office1", 5, 1000000L, "경상남도 김해시 삼계동 삼계로"
+            "office1", 5, 1000000L, "경상남도 김해시 삼계동 삼계로 223"
         );
 
     assertThat(resultOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "street", "zipcode")
+        .extracting("legion", "city", "town", "village", "zipcode")
         .contains(
-            "경상남도", "김해시", "삼계동", "", "삼계로", 12345
+            "경상남도", "김해시", "삼계동", "", 12345
         );
-
-    assertThat(resultOfficeLocation)
-        .extracting("latitude", "longitude")
-        .contains(127.1315, 37.4562);
 
     assertThat(resultOfficeCondition)
         .extracting("airCondition", "heaterCondition", "cafe", "printer", "packageSendService",
@@ -179,18 +173,18 @@ class OfficeServiceTest {
     // set office create request dto
     OfficeCreateRequestDto request = new OfficeCreateRequestDto();
     setOfficeInfo(request, "office1", 5, 500000, 5);
-    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
-    setOfficeCondition(request, false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true);
+    request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
+    request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
+        true, true, true, true, true, true, true, true, true));
 
     Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
 
     // set office modify request dto
     OfficeModifyRequestDto modifyRequest = new OfficeModifyRequestDto();
     setOfficeInfo(modifyRequest, "office1", 5, 1000000, 5);
-    setOfficeLocation(modifyRequest, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
-    setOfficeCondition(modifyRequest, true, true, true, true, true, true,
-        true, true, true, true, true, true, true, true, true);
+    modifyRequest.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
+    modifyRequest.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
+        true, true, true, true, true, true, true, true, true));
 
     // when
     // then
@@ -211,9 +205,9 @@ class OfficeServiceTest {
 
     OfficeCreateRequestDto request = new OfficeCreateRequestDto();
     setOfficeInfo(request, "office1", 5, 500000, 5);
-    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
-    setOfficeCondition(request, false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true);
+    request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
+    request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
+        true, true, true, true, true, true, true, true, true));
 
     Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
 
@@ -251,42 +245,6 @@ class OfficeServiceTest {
     request.setRemainRoom(remainRoom);
   }
 
-  private void setOfficeLocation(OfficeCreateRequestDto request, String legion, String city,
-      String town, String village, String street, int zipcode, double latitude, double longitude) {
-
-    request.setLegion(legion);
-    request.setCity(city);
-    request.setTown(town);
-    request.setVillage(village);
-    request.setStreet(street);
-    request.setZipcode(zipcode);
-    request.setLatitude(latitude);
-    request.setLongitude(longitude);
-  }
-
-  private void setOfficeCondition(OfficeCreateRequestDto request, boolean airCondition,
-      boolean heaterCondition, boolean cafe,
-      boolean printer, boolean packageSendService, boolean doorLock, boolean fax,
-      boolean publicKitchen, boolean publicLounge, boolean privateLocker, boolean tvProjector,
-      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage) {
-
-    request.setHaveAirCondition(airCondition);
-    request.setHaveHeater(heaterCondition);
-    request.setHaveCafe(cafe);
-    request.setHavePrinter(printer);
-    request.setPackageSendServiceAvailable(packageSendService);
-    request.setHaveDoorLock(doorLock);
-    request.setFaxServiceAvailable(fax);
-    request.setHavePublicKitchen(publicKitchen);
-    request.setHavePublicLounge(publicLounge);
-    request.setHavePrivateLocker(privateLocker);
-    request.setHaveTvProjector(tvProjector);
-    request.setHaveWhiteBoard(whiteboard);
-    request.setHaveWifi(wifi);
-    request.setHaveShowerBooth(showerBooth);
-    request.setHaveStorage(storage);
-  }
-
   private void setOfficeInfo(OfficeModifyRequestDto request, String officeName, int maxCapacity,
       long leaseFee, int remainRoom) {
     request.setOfficeName(officeName);
@@ -295,40 +253,41 @@ class OfficeServiceTest {
     request.setRemainRoom(remainRoom);
   }
 
-  private void setOfficeLocation(OfficeModifyRequestDto request, String legion, String city,
-      String town, String village, String street, int zipcode, double latitude, double longitude) {
+  private OfficeAddress setOfficeLocation(String legion, String city, String town, String village,
+      String street, int zipcode) {
 
-    request.setLegion(legion);
-    request.setCity(city);
-    request.setTown(town);
-    request.setVillage(village);
-    request.setStreet(street);
-    request.setZipcode(zipcode);
-    request.setLatitude(latitude);
-    request.setLongitude(longitude);
+    return OfficeAddress.builder()
+        .legion(legion)
+        .city(city)
+        .town(town)
+        .village(village)
+        .street(street)
+        .zipcode(String.valueOf(zipcode))
+        .build();
   }
 
-  private void setOfficeCondition(OfficeModifyRequestDto request, boolean airCondition,
-      boolean heaterCondition, boolean cafe,
+  private OfficeOption setOfficeCondition(boolean airCondition, boolean heaterCondition,
+      boolean cafe,
       boolean printer, boolean packageSendService, boolean doorLock, boolean fax,
       boolean publicKitchen, boolean publicLounge, boolean privateLocker, boolean tvProjector,
       boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage) {
 
-    request.setHaveAirCondition(airCondition);
-    request.setHaveHeater(heaterCondition);
-    request.setHaveCafe(cafe);
-    request.setHavePrinter(printer);
-    request.setPackageSendServiceAvailable(packageSendService);
-    request.setHaveDoorLock(doorLock);
-    request.setFaxServiceAvailable(fax);
-    request.setHavePublicKitchen(publicKitchen);
-    request.setHavePublicLounge(publicLounge);
-    request.setHavePrivateLocker(privateLocker);
-    request.setHaveTvProjector(tvProjector);
-    request.setHaveWhiteBoard(whiteboard);
-    request.setHaveWifi(wifi);
-    request.setHaveShowerBooth(showerBooth);
-    request.setHaveStorage(storage);
+    return OfficeOption.builder()
+        .haveAirCondition(airCondition)
+        .haveHeater(heaterCondition)
+        .haveCafe(cafe)
+        .havePrinter(printer)
+        .packageSendServiceAvailable(packageSendService)
+        .haveDoorLock(doorLock)
+        .faxServiceAvailable(fax)
+        .havePublicKitchen(publicKitchen)
+        .havePublicLounge(publicLounge)
+        .havePrivateLocker(privateLocker)
+        .haveTvProjector(tvProjector)
+        .haveWhiteBoard(whiteboard)
+        .haveWifi(wifi)
+        .haveShowerBooth(showerBooth)
+        .haveStorage(storage)
+        .build();
   }
-
 }
