@@ -62,6 +62,13 @@ public class OfficeService {
     return office.getId();
   }
 
+  public void deleteOfficeInfo(Long officeId) {
+    Office office = officeRepository.findByOfficeId(officeId)
+        .orElseThrow(() -> new IllegalArgumentException("해당 오피스는 존재하지 않습니다."));
+
+    officeRepository.delete(office);
+  }
+
   private void validateCorrectOwner(String ownerEmail, Office office) {
     if (!office.getOwner().getEmail().equals(ownerEmail)) {
       throw new IllegalArgumentException("잘못된 접근입니다.");
@@ -74,12 +81,5 @@ public class OfficeService {
 
   private void modifyOfficeLocation(OfficeLocation location, OfficeLocationDto request) {
     location.modifyFromRequest(request);
-  }
-
-  public void deleteOfficeInfo(Long officeId) {
-    Office office = officeRepository.findByOfficeId(officeId)
-        .orElseThrow(() -> new IllegalArgumentException("해당 오피스는 존재하지 않습니다."));
-
-    officeRepository.delete(office);
   }
 }
