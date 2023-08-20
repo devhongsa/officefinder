@@ -1,7 +1,6 @@
 package com.dokkebi.officefinder.controller.office.dto;
 
 import com.dokkebi.officefinder.entity.office.Office;
-import com.dokkebi.officefinder.utils.AddressConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,20 +16,18 @@ public class OfficeDetailResponseDto {
 
   private String officeName;
   private String address;
-  private String remainOffices;
+  private int remainOffices;
   private long leaseFee;
   private int maxCapacity;
   private OfficeOptionDto officeOptionDto;
 
-  public static OfficeDetailResponseDto fromEntity(Office office, String remainOffices) {
-    String address = AddressConverter.getAddress(office.getOfficeLocation());
-
+  public static OfficeDetailResponseDto fromEntity(Office office) {
     return OfficeDetailResponseDto.builder()
         .officeName(office.getName())
-        .remainOffices(remainOffices)
         .leaseFee(office.getLeaseFee())
         .maxCapacity(office.getMaxCapacity())
-        .address(address)
+        .address(office.getOfficeAddress())
+        .remainOffices(office.getRemainRoom())
         .officeOptionDto(OfficeOptionDto.fromEntity(office.getOfficeCondition()))
         .build();
   }

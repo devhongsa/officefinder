@@ -7,8 +7,7 @@ import com.dokkebi.officefinder.controller.officeowner.dto.OwnerOfficeOverViewDt
 import com.dokkebi.officefinder.dto.PageInfo;
 import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.entity.office.Office;
-import com.dokkebi.officefinder.service.office.OfficeQueryService;
-import com.dokkebi.officefinder.service.office.OfficeRedisService;
+import com.dokkebi.officefinder.service.office.OfficeSearchService;
 import com.dokkebi.officefinder.service.office.OfficeService;
 import java.security.Principal;
 import java.util.List;
@@ -30,8 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OfficeOwnerController {
 
   private final OfficeService officeService;
-  private final OfficeQueryService officeQueryService;
-  private final OfficeRedisService officeRedisService;
+  private final OfficeSearchService officeQueryService;
 
   @GetMapping("/offices")
   public PageResponseDto<?> showOfficeList(Principal principal, Pageable pageable) {
@@ -56,8 +54,7 @@ public class OfficeOwnerController {
   public OfficeDetailResponseDto showOfficeDetail(@PathVariable("officeId") Long officeId) {
     Office office = officeQueryService.getOfficeInfo(officeId);
 
-    return OfficeDetailResponseDto.fromEntity(office,
-        officeRedisService.getRemainRoom(office.getName()));
+    return OfficeDetailResponseDto.fromEntity(office);
   }
 
   @PutMapping("/offices/{officeId}")

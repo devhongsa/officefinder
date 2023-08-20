@@ -3,9 +3,11 @@ package com.dokkebi.officefinder.service.office;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import com.dokkebi.officefinder.controller.office.dto.OfficeAddress;
 import com.dokkebi.officefinder.controller.office.dto.OfficeBasicSearchCond;
 import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeDetailSearchCond;
+import com.dokkebi.officefinder.controller.office.dto.OfficeOption;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficeLocation;
@@ -24,13 +26,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-public class OfficeQueryServiceTest {
+public class OfficeSearchServiceTest {
 
   @Autowired
   private OfficeService officeService;
 
   @Autowired
-  private OfficeQueryService officeQueryService;
+  private OfficeSearchService officeQueryService;
   @Autowired
   private OfficeOwnerRepository officeOwnerRepository;
   @Autowired
@@ -66,31 +68,21 @@ public class OfficeQueryServiceTest {
     assertThat(content).hasSize(4)
         .extracting("name", "leaseFee", "maxCapacity", "officeAddress")
         .containsExactlyInAnyOrder(
-            tuple("office1", 500000L, 5, "경상남도 김해시 삼계동 삼계로"),
-            tuple("office2", 1000000L, 10, "경상남도 김해시 삼계동 삼계로"),
-            tuple("office4", 1500000L, 10, "경상남도 진영시 가츠동 가츠로"),
-            tuple("office5", 2000000L, 15, "경상남도 김해시 내외동 내외로")
+            tuple("office1", 500000L, 5, "경상남도 김해시 삼계동 삼계로 223"),
+            tuple("office2", 1000000L, 10, "경상남도 김해시 삼계동 삼계로 224"),
+            tuple("office4", 1500000L, 10, "경상남도 진영시 가츠동 가츠로 4"),
+            tuple("office5", 2000000L, 15, "경상남도 김해시 내외동 내외로 12")
         );
 
     assertThat(content)
         .extracting(Office::getOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "street", "zipcode")
+        .extracting("legion", "city", "town", "village", "zipcode")
         .containsExactlyInAnyOrder(
-            tuple("경상남도", "김해시", "삼계동", "", "삼계로", 12345),
-            tuple("경상남도", "김해시", "삼계동", "", "삼계로", 12348),
-            tuple("경상남도", "진영시", "가츠동", "", "가츠로", 12598),
-            tuple("경상남도", "김해시", "내외동", "", "내외로", 12508)
-        );
-
-    assertThat(content)
-        .extracting(Office::getOfficeLocation)
-        .extracting("latitude", "longitude")
-        .containsExactlyInAnyOrder(
-            tuple(127.1315, 37.4562),
-            tuple(127.1324, 37.4500),
-            tuple(127.1284, 37.4420),
-            tuple(127.1286, 37.4490)
+            tuple("경상남도", "김해시", "삼계동", "", 12345),
+            tuple("경상남도", "김해시", "삼계동", "", 12348),
+            tuple("경상남도", "진영시", "가츠동", "", 12598),
+            tuple("경상남도", "김해시", "내외동", "", 12508)
         );
 
     assertThat(content)
@@ -135,28 +127,19 @@ public class OfficeQueryServiceTest {
     assertThat(content).hasSize(3)
         .extracting("name", "leaseFee", "maxCapacity", "officeAddress")
         .containsExactlyInAnyOrder(
-            tuple("office1", 500000L, 5, "경상남도 김해시 삼계동 삼계로"),
-            tuple("office2", 1000000L, 10, "경상남도 김해시 삼계동 삼계로"),
-            tuple("office5", 2000000L, 15, "경상남도 김해시 내외동 내외로")
+            tuple("office1", 500000L, 5, "경상남도 김해시 삼계동 삼계로 223"),
+            tuple("office2", 1000000L, 10, "경상남도 김해시 삼계동 삼계로 224"),
+            tuple("office5", 2000000L, 15, "경상남도 김해시 내외동 내외로 12")
         );
 
     assertThat(content)
         .extracting(Office::getOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "street", "zipcode")
+        .extracting("legion", "city", "town", "village", "zipcode")
         .containsExactlyInAnyOrder(
-            tuple("경상남도", "김해시", "삼계동", "", "삼계로", 12345),
-            tuple("경상남도", "김해시", "삼계동", "", "삼계로", 12348),
-            tuple("경상남도", "김해시", "내외동", "", "내외로", 12508)
-        );
-
-    assertThat(content)
-        .extracting(Office::getOfficeLocation)
-        .extracting("latitude", "longitude")
-        .containsExactlyInAnyOrder(
-            tuple(127.1315, 37.4562),
-            tuple(127.1324, 37.4500),
-            tuple(127.1286, 37.4490)
+            tuple("경상남도", "김해시", "삼계동", "", 12345),
+            tuple("경상남도", "김해시", "삼계동", "", 12348),
+            tuple("경상남도", "김해시", "내외동", "", 12508)
         );
 
     assertThat(content)
@@ -200,22 +183,15 @@ public class OfficeQueryServiceTest {
     assertThat(content).hasSize(1)
         .extracting("name", "leaseFee", "maxCapacity", "officeAddress")
         .containsExactlyInAnyOrder(
-            tuple("office1", 500000L, 5, "경상남도 김해시 삼계동 삼계로")
+            tuple("office1", 500000L, 5, "경상남도 김해시 삼계동 삼계로 223")
         );
 
     assertThat(content)
         .extracting(Office::getOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "street", "zipcode")
+        .extracting("legion", "city", "town", "village", "zipcode")
         .containsExactlyInAnyOrder(
-            tuple("경상남도", "김해시", "삼계동", "", "삼계로", 12345)
-        );
-
-    assertThat(content)
-        .extracting(Office::getOfficeLocation)
-        .extracting("latitude", "longitude")
-        .containsExactlyInAnyOrder(
-            tuple(127.1315, 37.4562)
+            tuple("경상남도", "김해시", "삼계동", "", 12345)
         );
 
     assertThat(content)
@@ -255,28 +231,19 @@ public class OfficeQueryServiceTest {
     assertThat(content).hasSize(3)
         .extracting("name", "leaseFee", "maxCapacity", "officeAddress")
         .containsExactlyInAnyOrder(
-            tuple("office1", 500000L, 5, "경상남도 김해시 삼계동 삼계로"),
-            tuple("office3", 1500000L, 10, "부산광역시 동구 좌천동 좌천로"),
-            tuple("office4", 1500000L, 10, "경상남도 진영시 가츠동 가츠로")
+            tuple("office1", 500000L, 5, "경상남도 김해시 삼계동 삼계로 223"),
+            tuple("office3", 1500000L, 10, "부산광역시 동구 좌천동 좌천로 123"),
+            tuple("office4", 1500000L, 10, "경상남도 진영시 가츠동 가츠로 4")
         );
 
     assertThat(content)
         .extracting(Office::getOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "street", "zipcode")
+        .extracting("legion", "city", "town", "village", "zipcode")
         .containsExactlyInAnyOrder(
-            tuple("경상남도", "김해시", "삼계동", "", "삼계로", 12345),
-            tuple("부산광역시", "동구", "좌천동", "", "좌천로", 12398),
-            tuple("경상남도", "진영시", "가츠동", "", "가츠로", 12598)
-        );
-
-    assertThat(content)
-        .extracting(Office::getOfficeLocation)
-        .extracting("latitude", "longitude")
-        .containsExactlyInAnyOrder(
-            tuple(127.1315, 37.4562),
-            tuple(127.1524, 37.4320),
-            tuple(127.1284, 37.4420)
+            tuple("경상남도", "김해시", "삼계동", "", 12345),
+            tuple("부산광역시", "동구", "좌천동", "", 12398),
+            tuple("경상남도", "진영시", "가츠동", "", 12598)
         );
 
     assertThat(content)
@@ -320,25 +287,17 @@ public class OfficeQueryServiceTest {
     assertThat(content).hasSize(2)
         .extracting("name", "leaseFee", "maxCapacity", "officeAddress")
         .containsExactlyInAnyOrder(
-            tuple("office1", 500000L, 5, "경상남도 김해시 삼계동 삼계로"),
-            tuple("office4", 1500000L, 10, "경상남도 진영시 가츠동 가츠로")
+            tuple("office1", 500000L, 5, "경상남도 김해시 삼계동 삼계로 223"),
+            tuple("office4", 1500000L, 10, "경상남도 진영시 가츠동 가츠로 4")
         );
 
     assertThat(content)
         .extracting(Office::getOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "street", "zipcode")
+        .extracting("legion", "city", "town", "village", "zipcode")
         .containsExactlyInAnyOrder(
-            tuple("경상남도", "김해시", "삼계동", "", "삼계로", 12345),
-            tuple("경상남도", "진영시", "가츠동", "", "가츠로", 12598)
-        );
-
-    assertThat(content)
-        .extracting(Office::getOfficeLocation)
-        .extracting("latitude", "longitude")
-        .containsExactlyInAnyOrder(
-            tuple(127.1315, 37.4562),
-            tuple(127.1284, 37.4420)
+            tuple("경상남도", "김해시", "삼계동", "", 12345),
+            tuple("경상남도", "진영시", "가츠동", "", 12598)
         );
 
     assertThat(content)
@@ -356,42 +315,43 @@ public class OfficeQueryServiceTest {
 
   private void addOfficeData(OfficeOwner savedOfficeOwner) {
     OfficeCreateRequestDto request = new OfficeCreateRequestDto();
+
     setOfficeInfo(request, "office1", 5, 500000, 5);
-    setOfficeLocation(request, "경상남도", "김해시", "삼계동", "", "삼계로", 12345, 127.1315, 37.4562);
-    setOfficeCondition(request, false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true);
+    request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
+    request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
+        true, true, true, true, true, true, true, true, true));
 
     officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
 
     OfficeCreateRequestDto request2 = new OfficeCreateRequestDto();
     setOfficeInfo(request2, "office2", 10, 1000000, 10);
-    setOfficeLocation(request2, "경상남도", "김해시", "삼계동", "", "삼계로", 12348, 127.1324, 37.4500);
-    setOfficeCondition(request2, true, true, false, true, true, true,
-        true, false, false, true, true, true, true, true, true);
+    request2.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 224", 12348));
+    request2.setOfficeOption(setOfficeCondition(true, true, false, true, true, true,
+        true, false, false, true, true, true, true, true, true));
 
     officeService.createOfficeInfo(request2, savedOfficeOwner.getEmail());
 
     OfficeCreateRequestDto request3 = new OfficeCreateRequestDto();
     setOfficeInfo(request3, "office3", 10, 1500000, 10);
-    setOfficeLocation(request3, "부산광역시", "동구", "좌천동", "", "좌천로", 12398, 127.1524, 37.4320);
-    setOfficeCondition(request3, true, true, true, true, true, true,
-        true, true, true, true, true, true, true, true, true);
+    request3.setAddress(setOfficeLocation("부산광역시", "동구", "좌천동", "", "부산광역시 동구 좌천동 좌천로 123", 12398));
+    request3.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
+        true, true, true, true, true, true, true, true, true));
 
     officeService.createOfficeInfo(request3, savedOfficeOwner.getEmail());
 
     OfficeCreateRequestDto request4 = new OfficeCreateRequestDto();
     setOfficeInfo(request4, "office4", 10, 1500000, 10);
-    setOfficeLocation(request4, "경상남도", "진영시", "가츠동", "", "가츠로", 12598, 127.1284, 37.4420);
-    setOfficeCondition(request4, true, true, true, true, true, true,
-        true, true, true, true, true, true, true, true, true);
+    request4.setAddress(setOfficeLocation("경상남도", "진영시", "가츠동", "", "경상남도 진영시 가츠동 가츠로 4", 12598));
+    request4.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
+        true, true, true, true, true, true, true, true, true));
 
     officeService.createOfficeInfo(request4, savedOfficeOwner.getEmail());
 
     OfficeCreateRequestDto request5 = new OfficeCreateRequestDto();
     setOfficeInfo(request5, "office5", 15, 2000000, 10);
-    setOfficeLocation(request5, "경상남도", "김해시", "내외동", "", "내외로",  12508, 127.1286, 37.4490);
-    setOfficeCondition(request5, true, true, true, true, true, true,
-        true, false, false, true, true, true, true, false, true);
+    request5.setAddress(setOfficeLocation("경상남도", "김해시", "내외동", "", "경상남도 김해시 내외동 내외로 12", 12508));
+    request5.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
+        true, false, false, true, true, true, true, false, true));
 
     officeService.createOfficeInfo(request5, savedOfficeOwner.getEmail());
   }
@@ -417,39 +377,41 @@ public class OfficeQueryServiceTest {
     request.setRemainRoom(remainRoom);
   }
 
-  private void setOfficeLocation(OfficeCreateRequestDto request, String legion, String city,
-      String town, String village, String street, int zipcode, double latitude, double longitude) {
+  private OfficeAddress setOfficeLocation(String legion, String city, String town, String village,
+      String street, int zipcode) {
 
-    request.setLegion(legion);
-    request.setCity(city);
-    request.setTown(town);
-    request.setVillage(village);
-    request.setStreet(street);
-    request.setZipcode(zipcode);
-    request.setLatitude(latitude);
-    request.setLongitude(longitude);
+    return OfficeAddress.builder()
+        .legion(legion)
+        .city(city)
+        .town(town)
+        .village(village)
+        .street(street)
+        .zipcode(String.valueOf(zipcode))
+        .build();
   }
 
-  private void setOfficeCondition(OfficeCreateRequestDto request, boolean airCondition,
-      boolean heaterCondition, boolean cafe,
+  private OfficeOption setOfficeCondition(boolean airCondition, boolean heaterCondition,
+      boolean cafe,
       boolean printer, boolean packageSendService, boolean doorLock, boolean fax,
       boolean publicKitchen, boolean publicLounge, boolean privateLocker, boolean tvProjector,
       boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage) {
 
-    request.setHaveAirCondition(airCondition);
-    request.setHaveHeater(heaterCondition);
-    request.setHaveCafe(cafe);
-    request.setHavePrinter(printer);
-    request.setPackageSendServiceAvailable(packageSendService);
-    request.setHaveDoorLock(doorLock);
-    request.setFaxServiceAvailable(fax);
-    request.setHavePublicKitchen(publicKitchen);
-    request.setHavePublicLounge(publicLounge);
-    request.setHavePrivateLocker(privateLocker);
-    request.setHaveTvProjector(tvProjector);
-    request.setHaveWhiteBoard(whiteboard);
-    request.setHaveWifi(wifi);
-    request.setHaveShowerBooth(showerBooth);
-    request.setHaveStorage(storage);
+    return OfficeOption.builder()
+        .haveAirCondition(airCondition)
+        .haveHeater(heaterCondition)
+        .haveCafe(cafe)
+        .havePrinter(printer)
+        .packageSendServiceAvailable(packageSendService)
+        .haveDoorLock(doorLock)
+        .faxServiceAvailable(fax)
+        .havePublicKitchen(publicKitchen)
+        .havePublicLounge(publicLounge)
+        .havePrivateLocker(privateLocker)
+        .haveTvProjector(tvProjector)
+        .haveWhiteBoard(whiteboard)
+        .haveWifi(wifi)
+        .haveShowerBooth(showerBooth)
+        .haveStorage(storage)
+        .build();
   }
 }

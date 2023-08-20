@@ -6,8 +6,7 @@ import com.dokkebi.officefinder.controller.office.dto.OfficeOverViewDto;
 import com.dokkebi.officefinder.dto.PageInfo;
 import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.entity.office.Office;
-import com.dokkebi.officefinder.service.office.OfficeQueryService;
-import com.dokkebi.officefinder.service.office.OfficeRedisService;
+import com.dokkebi.officefinder.service.office.OfficeSearchService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/offices")
 public class OfficeController {
 
-  private final OfficeQueryService officeQueryService;
-  private final OfficeRedisService officeRedisService;
+  private final OfficeSearchService officeQueryService;
 
   @GetMapping
   public PageResponseDto<?> showOfficeList(OfficeDetailSearchCond cond, Pageable pageable) {
@@ -44,7 +42,6 @@ public class OfficeController {
   public OfficeDetailResponseDto showOfficeDetail(@PathVariable("officeId") Long officeId) {
     Office officeInfo = officeQueryService.getOfficeInfo(officeId);
 
-    return OfficeDetailResponseDto.fromEntity(officeInfo,
-        officeRedisService.getRemainRoom(officeInfo.getName()));
+    return OfficeDetailResponseDto.fromEntity(officeInfo);
   }
 }

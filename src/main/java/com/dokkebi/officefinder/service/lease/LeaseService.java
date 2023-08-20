@@ -12,8 +12,11 @@ import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,13 +25,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class LeaseService {
 
   private final LeaseRepository leaseRepository;
   private final CustomerRepository customerRepository;
   private final OfficeRepository officeRepository;
-
   private final ReviewRepository reviewRepository;
+  private final RedissonClient redissonClient;
 
   /**
    * 오피스 임대 서비스를 처리하는 메서드입니다.
@@ -53,6 +57,7 @@ public class LeaseService {
         .orElseThrow(() -> new CustomException(CustomErrorCode.INVALID_OFFICE_ID));
 
     checkOfficeCapacity(office, leaseOfficeRequestDto.getCustomerCount());
+    decreaseRemainOffice(office);
 
     long totalPrice = leaseOfficeRequestDto.getMonths() * office.getLeaseFee();
     checkCustomerPoints(customer, totalPrice);
@@ -63,6 +68,16 @@ public class LeaseService {
     Lease savedLease = leaseRepository.save(lease);
 
     return LeaseOfficeServiceResponse.of(savedLease);
+  }
+
+  public Page<LeaseLookUpServiceResponse> getLeaseList(String email, Pageable pageable) {
+    Customer customer = customerRepository.findByEmail(email)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.EMAIL_NOT_REGISTERED));
+
+    Page<Lease> leases = leaseRepository.findByCustomerId(customer.getId(), pageable);
+
+    return leases.map(lease -> LeaseLookUpServiceResponse.of(lease,
+        reviewRepository.existsByLeaseId(lease.getId())));
   }
 
   private void checkOfficeCapacity(Office office, int customerCount) {
@@ -77,14 +92,21 @@ public class LeaseService {
     }
   }
 
-  @Transactional(readOnly = true)
-  public Page<LeaseLookUpServiceResponse> lookupLease(String email, Pageable pageable) {
-    Customer customer = customerRepository.findByEmail(email)
-        .orElseThrow(() -> new CustomException(CustomErrorCode.EMAIL_NOT_REGISTERED));
+  private void decreaseRemainOffice(Office office) {
+    final String lockName = "remainRoom:lock";
+    final RLock lock = redissonClient.getLock(lockName);
 
-    Page<Lease> leases = leaseRepository.findByCustomerId(customer.getId(), pageable);
-
-    return leases.map(lease -> LeaseLookUpServiceResponse.of(lease,
-        reviewRepository.existsByLeaseId(lease.getId())));
+    try{
+      if (!lock.tryLock(1, 3, TimeUnit.SECONDS)) {
+        throw new IllegalArgumentException("lock exception");
+      }
+      office.decreaseRemainRoom();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } finally {
+      if (lock != null && lock.isLocked()){
+        lock.unlock();
+      }
+    }
   }
 }
