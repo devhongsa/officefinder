@@ -9,6 +9,8 @@ import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.service.office.OfficeSearchService;
 import com.dokkebi.officefinder.service.office.OfficeService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "임대주 api")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/agents")
@@ -31,6 +34,7 @@ public class OfficeOwnerController {
   private final OfficeService officeService;
   private final OfficeSearchService officeQueryService;
 
+  @ApiOperation(value = "오피스 리스트 조회", notes = "자신이 등록한 오피스 리스트를 조회할 수 있다.")
   @GetMapping("/offices")
   public PageResponseDto<?> showOfficeList(Principal principal, Pageable pageable) {
     Page<Office> result = officeQueryService.getAllOffices(principal.getName(), pageable);
@@ -45,6 +49,7 @@ public class OfficeOwnerController {
     return new PageResponseDto<>(overViewData, pageInfo);
   }
 
+  @ApiOperation(value = "오피스 등록", notes = "자신이 가진 오피스를 서비스에 등록할 수 있다.")
   @PostMapping("/offices")
   public void addOffice(@RequestBody OfficeCreateRequestDto request, Principal principal) {
     officeService.createOfficeInfo(request, principal.getName());
