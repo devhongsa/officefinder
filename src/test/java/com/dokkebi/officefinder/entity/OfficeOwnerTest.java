@@ -1,8 +1,7 @@
 package com.dokkebi.officefinder.entity;
 
-import static org.junit.jupiter.api.Assertions.*;
 
-import com.dokkebi.officefinder.entity.type.UserRole;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +20,7 @@ class OfficeOwnerTest {
   public void addPointTest() {
     // given
     OfficeOwner owner = createOwner("owner1", "owner1@test.com", "1234", "1234-5678", 0,
-        UserRole.OFFICE_OWNER);
+        Set.of("ROLE_OFFICE_OWNER"));
 
     entityManager.persist(owner);
     entityManager.flush();
@@ -44,7 +43,7 @@ class OfficeOwnerTest {
   public void changePasswordTest() {
     // given
     OfficeOwner owner = createOwner("owner1", "owner1@test.com", "1234", "1234-5678", 0,
-        UserRole.OFFICE_OWNER);
+        Set.of("ROLE_OFFICE_OWNER"));
 
     entityManager.persist(owner);
     entityManager.flush();
@@ -63,14 +62,14 @@ class OfficeOwnerTest {
   }
 
   private static OfficeOwner createOwner(String name, String email, String password,
-      String businessNumber, long point, UserRole role) {
+      String businessNumber, long point, Set<String> roles) {
     return OfficeOwner.builder()
         .name(name)
         .email(email)
         .password(password)
         .businessNumber(businessNumber)
         .point(point)
-        .role(role)
+        .roles(roles)
         .build();
   }
 

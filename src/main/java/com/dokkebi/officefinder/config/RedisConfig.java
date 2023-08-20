@@ -1,12 +1,14 @@
 package com.dokkebi.officefinder.config;
 
 import java.util.Arrays;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
@@ -20,7 +22,6 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-@Profile("!test")
 @Configuration
 @EnableRedisRepositories
 public class RedisConfig {
@@ -34,6 +35,7 @@ public class RedisConfig {
 
   @Autowired
   private Environment environment;
+  private static final String REDISSON_HOST_PREFIX = "redis://";
 
   @Bean
   public RedisConnectionFactory redisConnectionFactory() {
@@ -78,5 +80,21 @@ public class RedisConfig {
     redisTemplate.setHashValueSerializer(new StringRedisSerializer());
 
     return redisTemplate;
+  }
+
+  @Bean
+  public RedissonClient redissonClient(){
+    RedissonClient redisson = null;
+    Config config = new Config();
+    config.useSingleServer()
+        .setAddress(REDISSON_HOST_PREFIX + host + ":" + port);
+
+    Arrays.stream(environment.getActiveProfiles()).forEach(profile -> {
+      if (profile.equals("release") || profile.equals("local")){
+        config.useSingleServer().setPassword(password);
+      }
+    });
+
+    return Redisson.create(config);
   }
 }
