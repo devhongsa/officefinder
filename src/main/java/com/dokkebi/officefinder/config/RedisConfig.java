@@ -89,6 +89,12 @@ public class RedisConfig {
     config.useSingleServer()
         .setAddress(REDISSON_HOST_PREFIX + host + ":" + port);
 
+    Arrays.stream(environment.getActiveProfiles()).forEach(profile -> {
+      if (profile.equals("release") || profile.equals("local")){
+        config.useSingleServer().setPassword(password);
+      }
+    });
+
     return Redisson.create(config);
   }
 }
