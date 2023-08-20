@@ -15,40 +15,29 @@ import lombok.Setter;
 @Builder
 public class OfficeLocationDto {
 
-  String legion;
-  String city;
-  String town;
-  String village;
-  String bungi;
-  String street;
-  String buildingNumber;
-  int zipcode;
-  double latitude;
-  double longitude;
+  private String legion;
+  private String city;
+  private String town;
+  private String village;
+  private int zipcode;
 
   public static OfficeLocationDto fromRequest(OfficeCreateRequestDto request) {
     return OfficeLocationDto.builder()
-        .legion(request.getLegion())
-        .city(request.getCity())
-        .town(request.getTown())
-        .village(request.getVillage())
-        .street(request.getStreet())
-        .zipcode(request.getZipcode())
-        .latitude(request.getLatitude())
-        .longitude(request.getLongitude())
+        .legion(request.getAddress().getLegion())
+        .city(request.getAddress().getCity())
+        .town(request.getAddress().getTown())
+        .village(request.getAddress().getVillage())
+        .zipcode(Integer.parseInt(request.getAddress().getZipcode()))
         .build();
   }
 
   public static OfficeLocationDto fromRequest(OfficeModifyRequestDto request) {
     return OfficeLocationDto.builder()
-        .legion(request.getLegion())
-        .city(request.getCity())
-        .town(request.getTown())
-        .village(request.getVillage())
-        .street(request.getStreet())
-        .zipcode(request.getZipcode())
-        .latitude(request.getLatitude())
-        .longitude(request.getLongitude())
+        .legion(request.getAddress().getLegion())
+        .city(request.getAddress().getCity())
+        .town(request.getAddress().getTown())
+        .village(request.getAddress().getVillage())
+        .zipcode(Integer.parseInt(request.getAddress().getZipcode()))
         .build();
   }
 }
