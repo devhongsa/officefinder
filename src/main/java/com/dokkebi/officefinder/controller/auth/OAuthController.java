@@ -3,9 +3,9 @@ package com.dokkebi.officefinder.controller.auth;
 import com.dokkebi.officefinder.controller.auth.dto.Auth.LoginResponseCustomer;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.service.auth.OAuthService;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,6 +35,7 @@ public class OAuthController {
     return redirectView;
   }
 
+  @ApiOperation(value="Hidden API",hidden = true)
   @GetMapping("/login/oauth2/code/google")
   public ResponseDto<?> googleLogin(@RequestParam String code) {
     LoginResponseCustomer customer = oAuthService.socialLogin(code);
