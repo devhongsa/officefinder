@@ -35,6 +35,7 @@ public class SecurityConfig {
         .and()
         .authorizeHttpRequests((authz) -> authz
             .antMatchers("/api/**").permitAll() // 개발환경에서만 우선 설정
+            .antMatchers("/swagger*/**","/v2/api-docs").permitAll()
             .antMatchers("/**/signup", "/**/login/**").permitAll()
             .anyRequest().authenticated()
         )
