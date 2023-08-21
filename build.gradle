@@ -46,8 +46,6 @@ dependencies {
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 	// https://mvnrepository.com/artifact/org.redisson/redisson
 	implementation 'org.redisson:redisson:3.17.7'
-	// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-aws
-	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
 
 	compileOnly 'org.projectlombok:lombok'
@@ -69,6 +67,16 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+processResources.dependsOn('copyPrivate')
+
+task copyPrivate(type: Copy){
+	copy{
+		from './officefinder-submodule'
+		include "application*.yml"
+		into 'src/main/resources'
+	}
 }
 
 def querydslDir = "$buildDir/generated/querydsl"
