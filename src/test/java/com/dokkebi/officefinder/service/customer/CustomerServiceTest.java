@@ -2,6 +2,7 @@ package com.dokkebi.officefinder.service.customer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.dokkebi.officefinder.controller.customer.dto.CustomerControllerDto.CustomerInfo;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.PointChargeHistory;
 import com.dokkebi.officefinder.repository.CustomerRepository;
@@ -46,6 +47,19 @@ class CustomerServiceTest {
         );
 
   }
+
+  @DisplayName("회원정보를 가져온다.")
+  @Test
+  public void getCustomerInfoTest() {
+    //given
+    Customer customer = createCustomer("test", "test@test.com", "12345", 0L);
+    Customer savedCustomer = customerRepository.save(customer);
+    //when
+    CustomerInfo customerInfo = customerService.getCustomerInfo(savedCustomer.getId());
+    //then
+    assertThat(customerInfo.getName()).isEqualTo("test");
+  }
+
 
   private Customer createCustomer(String name, String email, String password, long point) {
     return Customer.builder()
