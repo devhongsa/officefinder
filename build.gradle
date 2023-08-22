@@ -47,6 +47,7 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.redisson/redisson
 	implementation 'org.redisson:redisson:3.17.7'
 
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 
@@ -58,6 +59,10 @@ dependencies {
 	// https://mvnrepository.com/artifact/it.ozimov/embedded-redis
 	testImplementation('it.ozimov:embedded-redis:0.7.3'){ exclude group: "org.slf4j", module: "slf4j-simple" }
 
+	// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-aws
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
@@ -66,6 +71,22 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+processResources.dependsOn('copyPrivate')
+
+task copyPrivate(type: Copy){
+	copy{
+		from './officefinder-submodule'
+		include "application-release.yml"
+		into 'src/main/resources'
+	}
+
+	copy{
+		from './officefinder-submodule'
+		include "application.yml"
+		into 'src/test/resources'
+	}
 }
 
 def querydslDir = "$buildDir/generated/querydsl"

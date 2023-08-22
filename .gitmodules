@@ -1,0 +1,3 @@
+[submodule "officefinder-submodule"]
+	path = officefinder-submodule
+	url = https://github.com/zerobase-office-finder/officefinder-submodule.git
