@@ -19,6 +19,7 @@ import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeReq
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import com.dokkebi.officefinder.service.office.OfficeService;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +66,8 @@ public class LeaseServiceIntegrationTest {
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
-    Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
+        savedOfficeOwner.getEmail());
 
     // set lease data
     LocalDate leaseDate = LocalDate.now();
@@ -108,7 +110,8 @@ public class LeaseServiceIntegrationTest {
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
-    Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
+        savedOfficeOwner.getEmail());
 
     LocalDate leaseDate = LocalDate.now();
     LeaseOfficeRequestDto leaseRequest = createLeaseRequest(customer.getEmail(), savedId, leaseDate,
@@ -146,7 +149,8 @@ public class LeaseServiceIntegrationTest {
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
-    Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
+        savedOfficeOwner.getEmail());
 
     // set lease data
     LocalDate leaseDate = LocalDate.now().minusDays(30);
