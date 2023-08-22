@@ -15,6 +15,7 @@ import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import java.util.ArrayList;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
@@ -65,7 +66,7 @@ class OfficeServiceTest {
         true, true, true, true, true, true, true, true, true));
 
     // when
-    Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(), savedOfficeOwner.getEmail());
 
     // then
     Office result = officeRepository.findByOfficeId(savedId)
@@ -113,7 +114,7 @@ class OfficeServiceTest {
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
-    Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(), savedOfficeOwner.getEmail());
 
     // set office modify request dto
     OfficeModifyRequestDto modifyRequest = new OfficeModifyRequestDto();
@@ -177,7 +178,7 @@ class OfficeServiceTest {
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
-    Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(), savedOfficeOwner.getEmail());
 
     // set office modify request dto
     OfficeModifyRequestDto modifyRequest = new OfficeModifyRequestDto();
@@ -209,7 +210,7 @@ class OfficeServiceTest {
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
-    Long savedId = officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(), savedOfficeOwner.getEmail());
 
     // when
     officeService.deleteOfficeInfo(savedId);

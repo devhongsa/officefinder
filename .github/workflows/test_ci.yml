@@ -8,7 +8,7 @@
 name: Java CI with Gradle
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - dev
       - feature/**

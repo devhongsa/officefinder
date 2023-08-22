@@ -6,12 +6,15 @@ import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficeCondition;
 import com.dokkebi.officefinder.entity.office.OfficeLocation;
+import com.dokkebi.officefinder.entity.office.OfficePicture;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.office.dto.OfficeConditionDto;
 import com.dokkebi.officefinder.service.office.dto.OfficeLocationDto;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +27,11 @@ public class OfficeService {
   private final OfficeRepository officeRepository;
   private final OfficeLocationRepository officeLocationRepository;
   private final OfficeConditionRepository officeConditionRepository;
+  private final OfficePictureRepository officePictureRepository;
   private final OfficeOwnerRepository ownerRepository;
 
-  public Long createOfficeInfo(OfficeCreateRequestDto request, String ownerEmail) {
+  public Long createOfficeInfo(OfficeCreateRequestDto request, List<String> imageList,
+      String ownerEmail) {
     OfficeOwner officeOwner = ownerRepository.findByEmail(ownerEmail)
         .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
 
@@ -43,6 +48,10 @@ public class OfficeService {
     Office savedOffice = officeRepository.save(office);
     officeLocationRepository.save(officeLocation);
     officeConditionRepository.save(officeCondition);
+
+    for (String imageUrl : imageList) {
+      officePictureRepository.save(OfficePicture.createFromPath(imageUrl, savedOffice));
+    }
 
     return savedOffice.getId();
   }
