@@ -4,7 +4,7 @@ import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.service.review.ReviewService;
-import java.security.Principal;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +35,8 @@ public class ReviewController {
   @PostMapping("api/customers/info/leases/{leaseId}/reviews")
   @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseDto<?> submitReview(@RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitControllerRequest,
-      Principal principal, @PathVariable @Valid Long leaseId) {
-    String customerEmail = principal.getName();
+      HttpServletRequest request, @PathVariable @Valid Long leaseId) {
+    String customerEmail = request.getUserPrincipal().getName();
     Review review = reviewService.submit(submitControllerRequest, customerEmail, leaseId);
 
     return new ResponseDto<>("success", review);
@@ -44,9 +44,9 @@ public class ReviewController {
 
   @GetMapping("api/customers/reviews")
   @PreAuthorize("hasRole('CUSTOMER')")
-  public ResponseDto<?> getReviews(Principal principal, @RequestParam(defaultValue = "0") Integer page,
+  public ResponseDto<?> getReviews(HttpServletRequest request, @RequestParam(defaultValue = "0") Integer page,
   @RequestParam(defaultValue = "20") Integer size) {
-    String customerEmail = principal.getName();
+    String customerEmail = request.getUserPrincipal().getName();
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<Review> reviews = reviewService.getReviewsByCustomerEmail(customerEmail, pageable);
 
@@ -56,8 +56,8 @@ public class ReviewController {
   @PutMapping("api/customers/reviews/{reviewId}")
   @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseDto<?> updateReview(@RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitControllerRequest,
-      Principal principal, @PathVariable @Valid Long reviewId) {
-    String customerEmail = principal.getName();
+      HttpServletRequest request, @PathVariable @Valid Long reviewId) {
+    String customerEmail = request.getUserPrincipal().getName();
     Review review = reviewService.update(submitControllerRequest, customerEmail, reviewId);
 
     return new ResponseDto<>("success", review);
@@ -65,8 +65,8 @@ public class ReviewController {
 
   @DeleteMapping("api/customers/reviews/{reviewId}")
   @PreAuthorize("hasRole('CUSTOMER')")
-  public ResponseDto<?> deleteReview(Principal principal, @PathVariable @Valid Long reviewId) {
-    String customerEmail = principal.getName();
+  public ResponseDto<?> deleteReview(HttpServletRequest request, @PathVariable @Valid Long reviewId) {
+    String customerEmail = request.getUserPrincipal().getName();
     reviewService.delete(customerEmail, reviewId);
 
     return new ResponseDto<>("success", "");
