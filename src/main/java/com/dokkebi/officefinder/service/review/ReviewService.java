@@ -1,14 +1,21 @@
 package com.dokkebi.officefinder.service.review;
 
 import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.SubmitControllerRequest;
+import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
+import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +27,7 @@ public class ReviewService {
 
   private final ReviewRepository reviewRepository;
   private final LeaseRepository leaseRepository;
+  private final CustomerRepository customerRepository;
 
   public Review submit(SubmitControllerRequest controllerRequest,
       String customerEmail, Long leaseId) {
@@ -61,4 +69,32 @@ public class ReviewService {
     return reviewRepository.save(fixedReview);
   }
 
+  public Page<Review> getReviewsByCustomerEmail(String customerEmail, Pageable pageable) {
+    Customer customer = customerRepository.findByEmail(customerEmail)
+        .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+    Page<Lease> leases = leaseRepository.findByCustomerId(customer.getId(), pageable);
+    if (leases.isEmpty()) {
+      throw new IllegalArgumentException("임대계약이 존재하지 않습니다.");
+    }
+
+    return leases.map(lease -> reviewRepository.findByLeaseId(lease.getId())
+        .orElseThrow(() -> new IllegalArgumentException("리뷰가 존재하지 않습니다.")));
+  }
+
+  @Cacheable(value = "Review", cacheManager = "redisCacheManager")
+  public List<Review> getAllReviews() {
+    return reviewRepository.findAll();
+  }
+
+  @CacheEvict(value = "Review", key = "#reviewId", cacheManager = "redisCacheManager")
+  public void delete(String customerEmail, Long reviewId) {
+    Customer customer = customerRepository.findByEmail(customerEmail)
+        .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+    Review review = reviewRepository.findById(reviewId)
+        .orElseThrow(() -> new IllegalArgumentException("리뷰가 존재하지 않습니다."));
+    if (!customer.getEmail().equals(review.getLease().getCustomer().getEmail())) {
+      throw new IllegalArgumentException("리뷰 작성자 본인이 아닙니다.");
+    }
+    reviewRepository.delete(review);
+  }
 }
