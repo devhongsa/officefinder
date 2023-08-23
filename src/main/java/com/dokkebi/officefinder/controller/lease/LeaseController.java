@@ -1,14 +1,16 @@
 package com.dokkebi.officefinder.controller.lease;
 
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.AgentLeaseLookUpResponse;
-import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.LeaseLookUpResponse;
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.LeaseSuccessResponse;
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.LeaseOfficeRequest;
+import com.dokkebi.officefinder.dto.PageInfo;
+import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.service.lease.LeaseService;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
 import java.security.Principal;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -42,26 +44,37 @@ public class LeaseController {
   }
 
   @GetMapping("/customers/info/leases")
-  public Page<LeaseLookUpResponse> getLeaseInfo(Principal principal,
-      @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(defaultValue = "20") Integer size) {
+  public PageResponseDto<?> getLeaseInfo(Principal principal, Pageable pageableReceived) {
 
-    // 기본적으로 임대 정보가 생성 되었던 시간에 따라 내림차순으로 정렬
-    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    Pageable pageable = createPageable(pageableReceived, Sort.by(Sort.Direction.DESC, "createdAt"));
 
     Page<LeaseLookUpServiceResponse> serviceResponses = leaseService.getLeaseList(
         principal.getName(), pageable);
 
-    return serviceResponses.map(LeaseLookUpResponse::of);
+    return createPageResponseDto(serviceResponses);
   }
 
   @GetMapping("/agents/offices/{officeId}/lease-requests")
-  public Page<AgentLeaseLookUpResponse> getLeaseRequest(Principal principal,
-      @PathVariable Long officeId, @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(defaultValue = "5") Integer size) {
+  public PageResponseDto<?> getLeaseRequest(Principal principal,
+      @PathVariable Long officeId, Pageable pageableReceived) {
 
-    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt"));
+    Pageable pageable = createPageable(pageableReceived, Sort.by("createdAt"));
 
-    return leaseService.getLeaseRequestList(principal.getName(), officeId, pageable);
+    Page<AgentLeaseLookUpResponse> leaseRequestList = leaseService.getLeaseRequestList(
+        principal.getName(), officeId, pageable);
+
+    return createPageResponseDto(leaseRequestList);
+  }
+
+  private Pageable createPageable(Pageable pageableReceived, Sort sort) {
+    return PageRequest.of(pageableReceived.getPageNumber(), pageableReceived.getPageSize(), sort);
+  }
+
+  private <T> PageResponseDto<List<T>> createPageResponseDto(Page<T> pageData) {
+
+    PageInfo pageInfo = new PageInfo(pageData.getNumber(), pageData.getSize(),
+        (int) pageData.getTotalElements(), pageData.getTotalPages());
+
+    return new PageResponseDto<>(pageData.getContent(), pageInfo);
   }
 }
