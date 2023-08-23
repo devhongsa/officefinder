@@ -14,7 +14,9 @@ import com.dokkebi.officefinder.repository.office.location.OfficeLocationReposit
 import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.office.dto.OfficeConditionDto;
 import com.dokkebi.officefinder.service.office.dto.OfficeLocationDto;
+import com.dokkebi.officefinder.service.s3.S3Service;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ public class OfficeService {
   private final OfficeLocationRepository officeLocationRepository;
   private final OfficeConditionRepository officeConditionRepository;
   private final OfficePictureRepository officePictureRepository;
+  private final S3Service s3Service;
   private final OfficeOwnerRepository ownerRepository;
 
   public Long createOfficeInfo(OfficeCreateRequestDto request, List<String> imageList,
@@ -56,7 +59,9 @@ public class OfficeService {
     return savedOffice.getId();
   }
 
-  public Long modifyOfficeInfo(OfficeModifyRequestDto request, String ownerEmail, Long officeId) {
+  public Long modifyOfficeInfo(OfficeModifyRequestDto request, List<String> imageList,
+      String ownerEmail, Long officeId) {
+
     Office office = officeRepository.findByOfficeId(officeId)
         .orElseThrow(() -> new IllegalArgumentException("해당 오피스는 존재하지 않습니다."));
 
@@ -65,8 +70,14 @@ public class OfficeService {
 
     modifyOfficeCondition(office.getOfficeCondition(), OfficeConditionDto.fromRequest(request));
     modifyOfficeLocation(office.getOfficeLocation(), OfficeLocationDto.fromRequest(request));
-
     office.modifyFromRequest(request);
+
+    List<OfficePicture> oldOfficePicture = officePictureRepository.findByOfficeId(officeId);
+    officePictureRepository.deleteAll(oldOfficePicture);
+
+    for (String image : imageList) {
+      officePictureRepository.save(OfficePicture.createFromPath(image, office));
+    }
 
     return office.getId();
   }
