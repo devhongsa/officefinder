@@ -5,6 +5,7 @@ import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -120,6 +121,8 @@ public class LeaseControllerDto {
 
     private Long price;
 
+    private LocalDateTime requestDateTime;
+
     public static AgentLeaseLookUpResponse of(Lease lease, String officeName){
       return AgentLeaseLookUpResponse.builder()
           .leaseId(lease.getId())
@@ -129,6 +132,7 @@ public class LeaseControllerDto {
           .startDate(lease.getLeaseStartDate())
           .endDate(lease.getLeaseEndDate())
           .price(lease.getPrice())
+          .requestDateTime(lease.getCreatedAt())
           .build();
     }
   }
