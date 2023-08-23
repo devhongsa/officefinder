@@ -12,6 +12,7 @@ import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
+import com.dokkebi.officefinder.service.notification.NotificationService;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,8 @@ public class LeaseService {
   private final OfficeRepository officeRepository;
   private final ReviewRepository reviewRepository;
   private final RedissonClient redissonClient;
+
+  private final NotificationService notificationService;
 
   /**
    * 오피스 임대 서비스를 처리하는 메서드입니다.
@@ -66,6 +69,8 @@ public class LeaseService {
 
     Lease lease = Lease.fromRequest(customer, office, totalPrice, leaseOfficeRequestDto);
     Lease savedLease = leaseRepository.save(lease);
+
+    notificationService.sendLeaseNotification(office);
 
     return LeaseOfficeServiceResponse.of(savedLease);
   }
