@@ -3,7 +3,9 @@ package com.dokkebi.officefinder.service.lease;
 import static com.dokkebi.officefinder.entity.type.LeaseStatus.AWAIT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
+import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.AgentLeaseLookUpResponse;
 import com.dokkebi.officefinder.controller.office.dto.OfficeAddress;
 import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeOption;
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -174,6 +177,58 @@ public class LeaseServiceIntegrationTest {
         .extracting("customerEmail", "officeName", "price", "leaseStatus", "startDate", "endDate")
         .contains(
             "test@test.com", "office1", 500000L, AWAIT, leaseDate, leaseDate.plusMonths(1)
+        );
+  }
+
+  @DisplayName("임대 업자는 AWIAT 상태의 임대 요청들을 조회할 수 있다.")
+  @Test
+  public void getLeaseRequests(){
+    // Given
+    Customer customer = createCustomer("customer1", "test@test.com", "1234",
+        Set.of("ROLE_CUSTOMER"), 1000000);
+
+    Customer customer2 = createCustomer("customer2", "test2@test.com", "1234",
+        Set.of("ROLE_CUSTOMER"), 1000000);
+
+    customerRepository.save(customer);
+    customerRepository.save(customer2);
+
+    OfficeOwner officeOwner = createOfficeOwner("kim", "owner@test.com", "12345", "123-45", 1000L,
+        Set.of("ROLE_OFFICE_OWNER"));
+    OfficeOwner savedOfficeOwner = officeOwnerRepository.save(officeOwner);
+
+    OfficeCreateRequestDto request = new OfficeCreateRequestDto();
+    setOfficeInfo(request, "office1", 5, 500000, 5);
+    request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
+    request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
+        true, true, true, true, true, true, true, true, true));
+
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
+        savedOfficeOwner.getEmail());
+
+    LocalDate leaseDate = LocalDate.now().minusDays(30);
+    LocalDate leaseDate2 = LocalDate.now();
+
+    LeaseOfficeRequestDto leaseRequest = createLeaseRequest("test@test.com", savedId, leaseDate, 1,
+        4, false);
+    LeaseOfficeRequestDto leaseRequest2 = createLeaseRequest("test2@test.com", savedId, leaseDate2,
+        1, 4, false);
+
+    leaseService.leaseOffice(leaseRequest);
+    leaseService.leaseOffice(leaseRequest2);
+
+    PageRequest pageRequest = PageRequest.of(0, 5);
+
+    // When
+    Page<AgentLeaseLookUpResponse> res = leaseService.getLeaseRequestList(
+        "owner@test.com", savedId, pageRequest);
+
+    // Then
+    assertThat(res).hasSize(2)
+        .extracting("customerName", "customerEmail", "officeName", "price")
+        .containsExactlyInAnyOrder(
+            tuple("customer1", "test@test.com", "office1", 500000L),
+            tuple("customer2", "test2@test.com", "office1", 500000L)
         );
   }
 
