@@ -1,5 +1,6 @@
 package com.dokkebi.officefinder.controller.lease.dto;
 
+import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
@@ -95,6 +96,39 @@ public class LeaseControllerDto {
           .endDate(resp.getEndDate())
           .isMonthly(resp.isMonthlyPay())
           .isReviewed(resp.isReviewed())
+          .build();
+    }
+  }
+
+  @Getter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  public static class AgentLeaseLookUpResponse{
+
+    private Long leaseId;
+
+    private String customerName;
+
+    private String customerEmail;
+
+    private String officeName;
+
+    private LocalDate startDate;
+
+    private LocalDate endDate;
+
+    private Long price;
+
+    public static AgentLeaseLookUpResponse of(Lease lease, String officeName){
+      return AgentLeaseLookUpResponse.builder()
+          .leaseId(lease.getId())
+          .customerName(lease.getCustomer().getName())
+          .customerEmail(lease.getCustomer().getEmail())
+          .officeName(officeName)
+          .startDate(lease.getLeaseStartDate())
+          .endDate(lease.getLeaseEndDate())
+          .price(lease.getPrice())
           .build();
     }
   }
