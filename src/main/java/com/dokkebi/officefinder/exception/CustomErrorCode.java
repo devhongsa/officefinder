@@ -19,7 +19,10 @@ public enum CustomErrorCode {
   OFFICE_OVER_CAPACITY(HttpStatus.BAD_REQUEST, "예약하려는 인원 수가 오피스의 최대 인원 수를 능가합니다."),
   INSUFFICIENT_POINTS(HttpStatus.BAD_REQUEST, "오피스 임대를 위한 포인트가 부족합니다."),
   INVALID_OFFICE_ID(HttpStatus.BAD_REQUEST, "아이디에 해당하는 오피스가 존재하지 않습니다."),
-  FAIL_LOGIN(HttpStatus.UNAUTHORIZED,"로그인에 실패하였습니다. 다시 시도해 주십시오.");
+  FAIL_LOGIN(HttpStatus.UNAUTHORIZED,"로그인에 실패하였습니다. 다시 시도해 주십시오."),
+  SSE_SEND_DUMMY_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "더미 데이터 전송에 실패하였습니다."),
+  SSE_SEND_MISSED_EVENTS_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "이전 이벤트 전송에 실패하였습니다."),
+  SSE_SEND_LEASE_NOTIFICATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "임대 알림 전송에 실패하였습니다.");
 
   private final HttpStatus httpStatus;
   private final String errorMessage;

@@ -10,6 +10,7 @@ import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
+import java.util.List;
 import java.util.Set;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +18,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -40,26 +45,6 @@ public class ReviewServiceTest {
     leaseRepository.deleteAllInBatch();
     customerRepository.deleteAllInBatch();
     officeRepository.deleteAllInBatch();
-  }
-
-  private Lease makeLease(String name, String email, String password, String roles, int point, LeaseStatus status) {
-    Customer customer = customerRepository.save(
-        Customer.builder()
-            .name(name)
-            .email(email)
-            .password(password)
-            .roles(Set.of(roles))
-            .point(point).build()
-    );
-    Office office = officeRepository.save(
-        Office.builder().name(name).build()
-    );
-    return leaseRepository.save(
-        Lease.builder()
-            .customer(customer)
-            .office(office)
-            .leaseStatus(status).build()
-    );
   }
 
   @Test
@@ -194,6 +179,228 @@ public class ReviewServiceTest {
     //then
     Assertions.assertThat(updatedReview.getRate()).isEqualTo(1);
     Assertions.assertThat(updatedReview.getDescription()).isEqualTo("수정 후");
+  }
+
+  @Test
+  @DisplayName("read할때 Principal에서 가져온 Email이 잘못된 경우")
+  public void getReviews1() {
+
+    //given
+    Customer customer = customerRepository.save(
+        Customer.builder()
+            .name("1")
+            .email("test@naver.com")
+            .password("1")
+            .roles(Set.of("customer"))
+            .point(0).build()
+    );
+    Office office = officeRepository.save(
+        Office.builder().name("1").build()
+    );
+    Lease lease1 = leaseRepository.save(
+        Lease.builder()
+            .customer(customer)
+            .office(office)
+            .leaseStatus(LeaseStatus.EXPIRED).build()
+    );
+
+    Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
+    Review review1 = Review.builder()
+        .lease(lease1)
+        .rate(5)
+        .description("test").build();
+
+    reviewRepository.save(review1);
+
+    //then
+    Assertions.assertThatThrownBy(() -> reviewService.getReviewsByCustomerEmail("false@naver.com", pageable))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  @DisplayName("read할때 회원이메일로 계약된 임대가 없을 경우")
+  public void getReviews2() {
+
+    //given
+    Customer customer = customerRepository.save(
+        Customer.builder()
+            .name("1")
+            .email("test@naver.com")
+            .password("1")
+            .roles(Set.of("customer"))
+            .point(0).build()
+    );
+    Office office = officeRepository.save(
+        Office.builder().name("1").build()
+    );
+
+    Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+    //then
+    Assertions.assertThatThrownBy(() -> reviewService.getReviewsByCustomerEmail("test@naver.com", pageable))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  @DisplayName("read할때 임대계약은 있지만 리뷰는 없는 경우")
+  public void getReviews3() {
+
+    //given
+    Customer customer = customerRepository.save(
+        Customer.builder()
+            .name("1")
+            .email("test@naver.com")
+            .password("1")
+            .roles(Set.of("customer"))
+            .point(0).build()
+    );
+    Office office = officeRepository.save(
+        Office.builder().name("1").build()
+    );
+    Lease lease1 = leaseRepository.save(
+        Lease.builder()
+            .customer(customer)
+            .office(office)
+            .leaseStatus(LeaseStatus.EXPIRED).build()
+    );
+
+    Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+    //then
+    Assertions.assertThatThrownBy(() -> reviewService.getReviewsByCustomerEmail("false@naver.com", pageable))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  @DisplayName("리뷰 CustomerEmail로 가져오기 정상 작동")
+  public void getReviews4() {
+
+    //given
+    Customer customer = customerRepository.save(
+        Customer.builder()
+            .name("1")
+            .email("test@naver.com")
+            .password("1")
+            .roles(Set.of("customer"))
+            .point(0).build()
+    );
+    Office office = officeRepository.save(
+        Office.builder().name("1").build()
+    );
+    Lease lease1 = leaseRepository.save(
+        Lease.builder()
+            .customer(customer)
+            .office(office)
+            .leaseStatus(LeaseStatus.EXPIRED).build()
+    );
+    Lease lease2 = leaseRepository.save(
+        Lease.builder()
+            .customer(customer)
+            .office(office)
+            .leaseStatus(LeaseStatus.EXPIRED).build()
+    );
+
+    Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
+    Review review1 = Review.builder()
+        .lease(lease1)
+        .rate(5)
+        .description("test").build();
+    Review review2 = Review.builder()
+        .lease(lease2)
+        .rate(5)
+        .description("test").build();
+    reviewRepository.save(review1);
+    reviewRepository.save(review2);
+    //when
+    Page<Review> reviews = reviewService.getReviewsByCustomerEmail("test@naver.com", pageable);
+    //then
+    List<Review> reviewList = reviews.getContent();
+    Assertions.assertThat(reviewList.get(0).getLease().getCustomer().getName()).isEqualTo("1");
+    Assertions.assertThat(reviewList.get(1).getLease().getCustomer().getName()).isEqualTo("1");
+  }
+
+  @Test
+  @DisplayName("delete할때 Principal의 회원 이메일이 잘못된 경우")
+  public void delete1() {
+    //given
+    Lease lease = makeLease("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
+    Review review = Review.builder()
+        .lease(lease)
+        .rate(5)
+        .description("test").build();
+    Review savedReview = reviewRepository.save(review);
+
+    //then
+    Assertions.assertThatThrownBy(() -> reviewService.delete("false@naver.com", savedReview.getId())).message()
+        .isEqualTo("회원이 존재하지 않습니다.");
+  }
+
+  @Test
+  @DisplayName("delete할때 review가 존재하지 않는 경우")
+  public void delete2() {
+    //given
+    Lease lease = makeLease("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
+
+    //then
+    Assertions.assertThatThrownBy(() -> reviewService.delete("test@naver.com", 1L))
+        .message().isEqualTo("리뷰가 존재하지 않습니다.");
+  }
+
+  @Test
+  @DisplayName("delete할때 리뷰 작성자와 현재 회원이 다른 경우")
+  public void delete3() {
+    //given
+    Lease lease1 = makeLease("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
+    Lease lease2 = makeLease("2", "test2@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
+    Review review1 = Review.builder()
+        .lease(lease1)
+        .rate(5)
+        .description("test").build();
+    Review review2 = Review.builder()
+        .lease(lease2)
+        .rate(5)
+        .description("test").build();
+    Review savedReview1 = reviewRepository.save(review1);
+    Review savedReview2 = reviewRepository.save(review2);
+    //when
+    Assertions.assertThatThrownBy(() -> reviewService.delete("test2@naver.com", review1.getId()))
+        .message().isEqualTo("리뷰 작성자 본인이 아닙니다.");
+  }
+
+  @Test
+  @DisplayName("delete 정상 작동")
+  public void delete4() {
+    //given
+    Lease lease = makeLease("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
+    Review review = Review.builder()
+        .lease(lease)
+        .rate(5)
+        .description("test").build();
+    Review savedReview = reviewRepository.save(review);
+    //when
+    reviewService.delete("test@naver.com", savedReview.getId());
+    //then
+    Assertions.assertThat(reviewRepository.findById(savedReview.getId())).isEmpty();
+  }
+
+  private Lease makeLease(String name, String email, String password, String roles, int point, LeaseStatus status) {
+    Customer customer = customerRepository.save(
+        Customer.builder()
+            .name(name)
+            .email(email)
+            .password(password)
+            .roles(Set.of(roles))
+            .point(point).build()
+    );
+    Office office = officeRepository.save(
+        Office.builder().name(name).build()
+    );
+    return leaseRepository.save(
+        Lease.builder()
+            .customer(customer)
+            .office(office)
+            .leaseStatus(status).build()
+    );
   }
 
 }
