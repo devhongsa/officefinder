@@ -1,11 +1,15 @@
 package com.dokkebi.officefinder.service.lease;
 
+import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.AgentLeaseLookUpResponse;
 import com.dokkebi.officefinder.entity.Customer;
+import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
+import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
@@ -28,6 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class LeaseService {
+
+  private final OfficeOwnerRepository officeOwnerRepository;
 
   private final LeaseRepository leaseRepository;
   private final CustomerRepository customerRepository;
@@ -83,6 +89,22 @@ public class LeaseService {
 
     return leases.map(lease -> LeaseLookUpServiceResponse.of(lease,
         reviewRepository.existsByLeaseId(lease.getId())));
+  }
+
+  // 특정 오피스에 들어온 임대 요청 정보 확인(AWAIT 상태의 임대 정보만)
+  public Page<AgentLeaseLookUpResponse> getLeaseRequestList(String email, Long officeId,
+      Pageable pageable){
+    OfficeOwner officeOwner = officeOwnerRepository.findByEmail(email)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.OWNER_NOT_FOUND));
+
+    Office office = officeRepository.findByOwnerAndId(officeOwner, officeId)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.OFFICE_NOT_OWNED_BY_OWNER));
+
+    // 수략 대기 상태에 있는 Lease 정보들을 가져옴
+    Page<Lease> awaitList = leaseRepository.findByOfficeIdAndLeaseStatus(office.getId(),
+        LeaseStatus.AWAIT, pageable);
+
+    return awaitList.map(l -> AgentLeaseLookUpResponse.of(l, office.getName()));
   }
 
   private void checkOfficeCapacity(Office office, int customerCount) {

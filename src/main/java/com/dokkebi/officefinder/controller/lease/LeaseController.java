@@ -1,5 +1,6 @@
 package com.dokkebi.officefinder.controller.lease;
 
+import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.AgentLeaseLookUpResponse;
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.LeaseLookUpResponse;
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.LeaseSuccessResponse;
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.LeaseOfficeRequest;
@@ -41,7 +42,8 @@ public class LeaseController {
   }
 
   @GetMapping("/customers/info/leases")
-  public Page<LeaseLookUpResponse> getLeaseInfo(Principal principal, @RequestParam(defaultValue = "0") Integer page,
+  public Page<LeaseLookUpResponse> getLeaseInfo(Principal principal,
+      @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "20") Integer size) {
 
     // 기본적으로 임대 정보가 생성 되었던 시간에 따라 내림차순으로 정렬
@@ -51,5 +53,15 @@ public class LeaseController {
         principal.getName(), pageable);
 
     return serviceResponses.map(LeaseLookUpResponse::of);
+  }
+
+  @GetMapping("/agents/offices/{officeId}/lease-requests")
+  public Page<AgentLeaseLookUpResponse> getLeaseRequest(Principal principal,
+      @PathVariable Long officeId, @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(defaultValue = "5") Integer size) {
+
+    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt"));
+
+    return leaseService.getLeaseRequestList(principal.getName(), officeId, pageable);
   }
 }
