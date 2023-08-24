@@ -268,11 +268,54 @@ public class LeaseServiceIntegrationTest {
 
     Lease savedLease = leaseRepository.findById(response.getLeaseId()).get();
 
+    // When
     leaseService.acceptLeaseRequest(savedLease.getId());
 
     Lease updatedLease = leaseRepository.findById(savedLease.getId()).get();
 
+    // Then
     assertEquals(LeaseStatus.ACCEPTED, updatedLease.getLeaseStatus());
+  }
+
+  @DisplayName("임대 요청 거절 테스트")
+  @Test
+  public void RejectLeaseRequest(){
+    // Given
+    Customer customer = createCustomer("customer1", "test@test.com", "1234",
+        Set.of("ROLE_CUSTOMER"), 1000000);
+
+    Customer savedCustomer = customerRepository.save(customer);
+
+    OfficeOwner officeOwner = createOfficeOwner("kim", "owner@test.com", "12345", "123-45", 1000L,
+        Set.of("ROLE_OFFICE_OWNER"));
+    OfficeOwner savedOfficeOwner = officeOwnerRepository.save(officeOwner);
+
+    OfficeCreateRequestDto request = new OfficeCreateRequestDto();
+    setOfficeInfo(request, "office1", 5, 500000, 5);
+    request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
+    request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
+        true, true, true, true, true, true, true, true, true));
+
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
+        savedOfficeOwner.getEmail());
+
+    LocalDate leaseDate = LocalDate.now();
+
+    LeaseOfficeRequestDto leaseRequest = createLeaseRequest("test@test.com", savedId, leaseDate, 1,
+        4, false);
+
+    LeaseOfficeServiceResponse response = leaseService.leaseOffice(leaseRequest);
+
+    Lease savedLease = leaseRepository.findById(response.getLeaseId()).get();
+
+    // When
+    leaseService.rejectLeaseRequest(savedLease.getId());
+
+    Lease updatedLease = leaseRepository.findById(savedLease.getId()).get();
+
+    // Then
+    assertEquals(LeaseStatus.DENIED, updatedLease.getLeaseStatus());
+    assertEquals(customer.getPoint(), 1000000);
   }
 
   private LeaseOfficeRequestDto createLeaseRequest(String email, Long officeId, LocalDate startDate,
