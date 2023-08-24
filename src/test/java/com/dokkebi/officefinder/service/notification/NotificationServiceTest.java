@@ -9,7 +9,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.dokkebi.officefinder.dto.Event;
+import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.OfficeOwner;
+import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.repository.notification.EmitterRepository;
 import com.dokkebi.officefinder.repository.notification.EventRepository;
@@ -17,6 +19,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -87,6 +90,34 @@ class NotificationServiceTest {
 
     // When
     notificationService.sendLeaseNotification(mockOffice);
+
+    // Then
+    verify(emitterRepository).get(email);
+    verify(mockEmitter).send(any(SseEmitter.SseEventBuilder.class));
+  }
+
+  @Test
+  @DisplayName("임대 수락 알림을 보내는 경우")
+  public void testSendAcceptNotification() throws Exception{
+    // Given
+    Lease mockLease = mock(Lease.class);
+    Office mockOffice = mock(Office.class);
+    Customer mockCustomer = mock(Customer.class);
+
+    String email = "test@example.com";
+    String officeName = "testOffice";
+    String expectedMessage = officeName + "에 대한 임대 요청이 수락되었습니다 :)";
+
+    when(mockLease.getOffice()).thenReturn(mockOffice);
+    when(mockLease.getCustomer()).thenReturn(mockCustomer);
+    when(mockOffice.getName()).thenReturn(officeName);
+    when(mockCustomer.getEmail()).thenReturn(email);
+
+    SseEmitter mockEmitter = mock(SseEmitter.class);
+    when(emitterRepository.get(email)).thenReturn(mockEmitter);
+
+    // When
+    notificationService.sendAcceptNotification(mockLease);
 
     // Then
     verify(emitterRepository).get(email);
