@@ -75,6 +75,14 @@ public class LeaseController {
     return ResponseEntity.ok().build();
   }
 
+  @PutMapping("/agents/offices/lease-requests/{leaseId}/reject")
+  public ResponseEntity rejectRequest(Principal principal, @PathVariable Long leaseId){
+
+    leaseService.rejectLeaseRequest(leaseId);
+
+    return ResponseEntity.ok().build();
+  }
+
   private Pageable createPageable(Pageable pageableReceived, Sort sort) {
     return PageRequest.of(pageableReceived.getPageNumber(), pageableReceived.getPageSize(), sort);
   }

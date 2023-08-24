@@ -117,6 +117,24 @@ public class LeaseService {
     notificationService.sendAcceptNotification(lease);
   }
 
+  @Transactional
+  public void rejectLeaseRequest(Long leaseId){
+    Lease lease = leaseRepository.findById(leaseId)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.LEASE_NOT_FOUND));
+
+    // 임대 거절시 포인트를 다시 환급
+    refundPayment(lease.getCustomer(), lease.getPrice());
+
+    // 거절 상태로 바꿈
+    lease.changeLeaseStatus(LeaseStatus.DENIED);
+
+    notificationService.sendRejectNotification(lease);
+  }
+
+  private void refundPayment(Customer customer, long price) {
+    customer.chargePoint(price);
+  }
+
   private void checkOfficeCapacity(Office office, int customerCount) {
     if (office.getMaxCapacity() < customerCount) {
       throw new CustomException(CustomErrorCode.OFFICE_OVER_CAPACITY);

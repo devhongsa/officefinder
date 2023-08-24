@@ -58,6 +58,15 @@ public class NotificationService {
         CustomErrorCode.SSE_SEND_ACCEPT_NOTIFICATION_FAIL);
   }
 
+  public void sendRejectNotification(Lease lease){
+    String officeName = lease.getOffice().getName();
+    String email = lease.getCustomer().getEmail();
+    String message = officeName + "에 대한 임대 요청이 거절되었습니다 :(";
+
+    sendNotification(email, "rejectNotification", message,
+        CustomErrorCode.SSE_SEND_REJECT_NOTIFICATION_FAIL);
+  }
+
   private void sendNotification(String email, String eventType, String message,
       CustomErrorCode errorCode) {
     Event event = new Event();
