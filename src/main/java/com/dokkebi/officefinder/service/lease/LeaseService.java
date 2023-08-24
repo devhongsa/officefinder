@@ -93,7 +93,7 @@ public class LeaseService {
 
   // 특정 오피스에 들어온 임대 요청 정보 확인(AWAIT 상태의 임대 정보만)
   public Page<AgentLeaseLookUpResponse> getLeaseRequestList(String email, Long officeId,
-      Pageable pageable){
+      Pageable pageable) {
     OfficeOwner officeOwner = officeOwnerRepository.findByEmail(email)
         .orElseThrow(() -> new CustomException(CustomErrorCode.OWNER_NOT_FOUND));
 
@@ -105,6 +105,16 @@ public class LeaseService {
         LeaseStatus.AWAIT, pageable);
 
     return awaitList.map(l -> AgentLeaseLookUpResponse.of(l, office.getName()));
+  }
+
+  public void acceptLeaseRequest(Long leaseId) {
+    Lease lease = leaseRepository.findById(leaseId)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.LEASE_NOT_FOUND));
+
+    // 변경 후 저장안해도 더티 체킹으로 인해 반영됨
+    lease.changeLeaseStatus(LeaseStatus.ACCEPTED);
+
+    notificationService.sendAcceptNotification(lease);
   }
 
   private void checkOfficeCapacity(Office office, int customerCount) {
@@ -123,7 +133,7 @@ public class LeaseService {
     final String lockName = "remainRoom:lock";
     final RLock lock = redissonClient.getLock(lockName);
 
-    try{
+    try {
       if (!lock.tryLock(1, 3, TimeUnit.SECONDS)) {
         throw new IllegalArgumentException("lock exception");
       }
@@ -131,7 +141,7 @@ public class LeaseService {
     } catch (InterruptedException e) {
       e.printStackTrace();
     } finally {
-      if (lock != null && lock.isLocked()){
+      if (lock != null && lock.isLocked()) {
         lock.unlock();
       }
     }
