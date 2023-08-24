@@ -123,4 +123,32 @@ class NotificationServiceTest {
     verify(emitterRepository).get(email);
     verify(mockEmitter).send(any(SseEmitter.SseEventBuilder.class));
   }
+
+  @Test
+  @DisplayName("임대 거절 알림을 보내는 경우")
+  public void testSendRejectNotification() throws Exception{
+    // Given
+    Lease mockLease = mock(Lease.class);
+    Office mockOffice = mock(Office.class);
+    Customer mockCustomer = mock(Customer.class);
+
+    String email = "test@example.com";
+    String officeName = "testOffice";
+    String expectedMessage = officeName + "에 대한 임대 요청이 거절되었습니다 :(";
+
+    when(mockLease.getOffice()).thenReturn(mockOffice);
+    when(mockLease.getCustomer()).thenReturn(mockCustomer);
+    when(mockOffice.getName()).thenReturn(officeName);
+    when(mockCustomer.getEmail()).thenReturn(email);
+
+    SseEmitter mockEmitter = mock(SseEmitter.class);
+    when(emitterRepository.get(email)).thenReturn(mockEmitter);
+
+    // When
+    notificationService.sendRejectNotification(mockLease);
+
+    // Then
+    verify(emitterRepository).get(email);
+    verify(mockEmitter).send(any(SseEmitter.SseEventBuilder.class));
+  }
 }
