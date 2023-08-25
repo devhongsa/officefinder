@@ -14,11 +14,15 @@ import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
+import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
+import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.office.OfficeService;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.BatchStatus;
@@ -29,6 +33,7 @@ import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Import(BatchTestConfig.class)
@@ -45,6 +50,12 @@ class BatchJobConfigTest {
 
   @Autowired
   private OfficeRepository officeRepository;
+  @Autowired
+  private OfficeLocationRepository officeLocationRepository;
+  @Autowired
+  private OfficeConditionRepository officeConditionRepository;
+  @Autowired
+  private OfficePictureRepository officePictureRepository;
 
   @Autowired
   private OfficeService officeService;
@@ -52,9 +63,20 @@ class BatchJobConfigTest {
   @Autowired
   private OfficeOwnerRepository officeOwnerRepository;
 
+  @AfterEach
+  void tearDown() {
+    leaseRepository.deleteAllInBatch();
+    officeLocationRepository.deleteAllInBatch();
+    officeConditionRepository.deleteAllInBatch();
+    officePictureRepository.deleteAllInBatch();
+    officeRepository.deleteAllInBatch();
+    officeOwnerRepository.deleteAllInBatch();
+    customerRepository.deleteAllInBatch();
+  }
+
   @Test
   @DisplayName("이용 기간이 만료된 임대의 상태를 Expired 상태로 바꾸는 배치 기능 테스트")
-  public void testUpdateExpiredLeaseJob() throws Exception{
+  public void testUpdateExpiredLeaseJob() throws Exception {
 
     Customer customer = createCustomer("customer1", "test@test.com", "1234",
         Set.of("ROLE_CUSTOMER"), 1000000);
@@ -80,8 +102,10 @@ class BatchJobConfigTest {
 
     Office office = officeRepository.findById(savedId).get();
 
-    Lease lease = createLease(savedCustomer, office, 100000L, LeaseStatus.PROCEEDING, LocalDate.now().minusMonths(2), LocalDate.now().minusDays(1));
-    Lease lease2 = createLease(savedCustomer2, office, 100000L, LeaseStatus.PROCEEDING, LocalDate.now().minusMonths(2), LocalDate.now().minusDays(1));
+    Lease lease = createLease(savedCustomer, office, 100000L, LeaseStatus.PROCEEDING,
+        LocalDate.now().minusMonths(2), LocalDate.now().minusDays(1));
+    Lease lease2 = createLease(savedCustomer2, office, 100000L, LeaseStatus.PROCEEDING,
+        LocalDate.now().minusMonths(2), LocalDate.now().minusDays(1));
 
     leaseRepository.save(lease);
     leaseRepository.save(lease2);
@@ -97,7 +121,7 @@ class BatchJobConfigTest {
     // Lease 객체들의 상태 확인
     List<Lease> updatedLeases = leaseRepository.findAll();
 
-    for(Lease l : updatedLeases){
+    for (Lease l : updatedLeases) {
       assertEquals(LeaseStatus.EXPIRED, l.getLeaseStatus());
     }
   }
@@ -172,7 +196,8 @@ class BatchJobConfigTest {
         .build();
   }
 
-  private Lease createLease(Customer customer, Office office, long price, LeaseStatus leaseStatus, LocalDate startDate, LocalDate endDate) {
+  private Lease createLease(Customer customer, Office office, long price, LeaseStatus leaseStatus,
+      LocalDate startDate, LocalDate endDate) {
     return Lease.builder()
         .customer(customer)
         .office(office)

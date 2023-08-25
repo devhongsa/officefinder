@@ -11,10 +11,12 @@ import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficeCondition;
 import com.dokkebi.officefinder.entity.office.OfficeLocation;
+import com.dokkebi.officefinder.entity.office.OfficePicture;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import java.util.ArrayList;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +44,18 @@ class OfficeServiceTest {
   @Autowired
   private OfficeLocationRepository officeLocationRepository;
   @Autowired
+  private OfficePictureRepository officePictureRepository;
+  @Autowired
   private RedisTemplate<String, String> redisTemplate;
   private static final String REMAIN_ROOM_KEY = "remain-room";
 
   @AfterEach
   void tearDown() {
+    officeConditionRepository.deleteAllInBatch();
+    officeLocationRepository.deleteAllInBatch();
+    officePictureRepository.deleteAllInBatch();
+    officeRepository.deleteAllInBatch();
+    officeOwnerRepository.deleteAllInBatch();
     redisTemplate.delete(REMAIN_ROOM_KEY);
   }
 
@@ -66,7 +75,8 @@ class OfficeServiceTest {
         true, true, true, true, true, true, true, true, true));
 
     // when
-    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(), savedOfficeOwner.getEmail());
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
+        savedOfficeOwner.getEmail());
 
     // then
     Office result = officeRepository.findByOfficeId(savedId)
@@ -114,17 +124,19 @@ class OfficeServiceTest {
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
-    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(), savedOfficeOwner.getEmail());
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
+        savedOfficeOwner.getEmail());
 
     // set office modify request dto
     OfficeModifyRequestDto modifyRequest = new OfficeModifyRequestDto();
     setOfficeInfo(modifyRequest, "office1", 5, 1000000, 5);
-    modifyRequest.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
+    modifyRequest.setAddress(
+        setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     modifyRequest.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
     // when
-    Long modifiedOfficeId = officeService.modifyOfficeInfo(modifyRequest,
+    Long modifiedOfficeId = officeService.modifyOfficeInfo(modifyRequest, new ArrayList<>(),
         savedOfficeOwner.getEmail(), savedId);
 
     // then
@@ -178,19 +190,22 @@ class OfficeServiceTest {
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
-    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(), savedOfficeOwner.getEmail());
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
+        savedOfficeOwner.getEmail());
 
     // set office modify request dto
     OfficeModifyRequestDto modifyRequest = new OfficeModifyRequestDto();
     setOfficeInfo(modifyRequest, "office1", 5, 1000000, 5);
-    modifyRequest.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
+    modifyRequest.setAddress(
+        setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     modifyRequest.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
     // when
     // then
     assertThatThrownBy(
-        () -> officeService.modifyOfficeInfo(modifyRequest, savedOfficeOwner2.getEmail(), savedId))
+        () -> officeService.modifyOfficeInfo(modifyRequest, new ArrayList<>(),
+            savedOfficeOwner2.getEmail(), savedId))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("잘못된 접근입니다.");
   }
@@ -210,7 +225,8 @@ class OfficeServiceTest {
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
-    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(), savedOfficeOwner.getEmail());
+    Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
+        savedOfficeOwner.getEmail());
 
     // when
     officeService.deleteOfficeInfo(savedId);

@@ -1,12 +1,10 @@
 package com.dokkebi.officefinder.repository.office.picture;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.dokkebi.officefinder.entity.office.Office;
-import com.dokkebi.officefinder.entity.office.Office.OfficeBuilder;
 import com.dokkebi.officefinder.entity.office.OfficePicture;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import java.util.List;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,5 +52,10 @@ class OfficePictureRepositoryTest {
     List<OfficePicture> result = officePictureRepository.findByOfficeId(savedOffice.getId());
 
     // then
+    Assertions.assertThat(result).hasSize(3)
+        .extracting("fileName")
+        .containsExactlyInAnyOrder(
+            "abcd.png", "abce.png", "abcf.png"
+        );
   }
 }
