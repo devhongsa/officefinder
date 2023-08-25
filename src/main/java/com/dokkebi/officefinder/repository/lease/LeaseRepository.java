@@ -20,6 +20,6 @@ public interface LeaseRepository extends JpaRepository<Lease, Long>, LeaseReposi
 
   List<Lease> findByOfficeIdAndLeaseStartDateBetweenAndLeaseStatusInOrderByLeaseStartDate(Long officeId, LocalDate startDate, LocalDate endDate, List<LeaseStatus> leaseStatus);
 
-  Long countByOfficeIdAndLeaseStatusInAndLeaseStartDateGreaterThanEqualAndLeaseEndDateLessThanEqualOrderByLeaseStartDate(
+  Long countByOfficeIdAndLeaseStatusInAndLeaseEndDateGreaterThanEqualAndLeaseStartDateLessThanEqualOrderByLeaseStartDate(
       Long officeId, List<LeaseStatus> leaseStatus, LocalDate startDate, LocalDate endDate);
 }

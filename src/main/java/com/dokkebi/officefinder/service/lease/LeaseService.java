@@ -147,7 +147,7 @@ public class LeaseService {
   private void checkAvailableRooms(LeaseOfficeRequestDto office, int maxRoomCount) {
     LocalDate endDate = office.getStartDate().plusMonths(office.getMonths());
     List<LeaseStatus> leaseStatus = Arrays.asList(LeaseStatus.AWAIT, LeaseStatus.ACCEPTED);
-    Long CurrentRoomUsed = leaseRepository.countByOfficeIdAndLeaseStatusInAndLeaseStartDateGreaterThanEqualAndLeaseEndDateLessThanEqualOrderByLeaseStartDate(
+    Long CurrentRoomUsed = leaseRepository.countByOfficeIdAndLeaseStatusInAndLeaseEndDateGreaterThanEqualAndLeaseStartDateLessThanEqualOrderByLeaseStartDate(
         office.getOfficeId(), leaseStatus, office.getStartDate(), endDate);
 
     if (CurrentRoomUsed >= maxRoomCount) {
