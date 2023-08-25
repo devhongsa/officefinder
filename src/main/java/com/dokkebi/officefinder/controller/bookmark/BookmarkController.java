@@ -1,11 +1,9 @@
 package com.dokkebi.officefinder.controller.bookmark;
 
 import com.dokkebi.officefinder.controller.bookmark.dto.BookmarkDto;
-import com.dokkebi.officefinder.controller.customer.dto.PointChargeHistoryDto;
 import com.dokkebi.officefinder.dto.PageInfo;
 import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
-import com.dokkebi.officefinder.entity.PointChargeHistory;
 import com.dokkebi.officefinder.entity.bookmark.Bookmark;
 import com.dokkebi.officefinder.security.TokenProvider;
 import com.dokkebi.officefinder.service.bookmark.BookmarkService;
