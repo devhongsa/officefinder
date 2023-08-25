@@ -40,7 +40,10 @@ public class Bookmark {
   }
 
   public static BookmarkDto toDto(Bookmark bookmark) {
-    return BookmarkDto.builder().build();
-
+    Office office = bookmark.getOffice();
+    return BookmarkDto.builder()
+        .name(office.getName())
+        .officeAddress(office.getOfficeAddress())
+        .build();
   }
 }

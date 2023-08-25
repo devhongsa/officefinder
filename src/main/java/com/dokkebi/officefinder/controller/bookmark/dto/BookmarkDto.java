@@ -6,7 +6,6 @@ import lombok.Getter;
 @Getter
 @Builder
 public class BookmarkDto {
-
-
-
+  String name;
+  String officeAddress;
 }
