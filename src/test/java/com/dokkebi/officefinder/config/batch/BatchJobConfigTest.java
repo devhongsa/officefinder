@@ -14,11 +14,15 @@ import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
+import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
+import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.office.OfficeService;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.BatchStatus;
@@ -51,6 +55,29 @@ class BatchJobConfigTest {
 
   @Autowired
   private OfficeOwnerRepository officeOwnerRepository;
+  @Autowired
+  private OfficePictureRepository officePictureRepository;
+  @Autowired
+  private OfficeConditionRepository officeConditionRepository;
+  @Autowired
+  private OfficeLocationRepository officeLocationRepository;
+
+  @AfterEach
+  public void tearDown(){
+    // Lease가 Customer와 Office를 참조하고 있으므로 Lease를 먼저 삭제
+    leaseRepository.deleteAllInBatch();
+
+    // OfficePicture, OfficeCondition, OfficeLocation은 모두 Office를 참조하고 있으므로, 이들을 먼저 삭제
+    officePictureRepository.deleteAllInBatch();
+    officeConditionRepository.deleteAllInBatch();
+    officeLocationRepository.deleteAllInBatch();
+
+    // OfficeOwner 참고 하므로 먼저 삭제
+    officeRepository.deleteAllInBatch();
+
+    customerRepository.deleteAllInBatch();
+    officeOwnerRepository.deleteAllInBatch();
+  }
 
   @Test
   @DisplayName("이용 기간이 만료된 임대의 상태를 Expired 상태로 바꾸는 배치 기능 테스트")
