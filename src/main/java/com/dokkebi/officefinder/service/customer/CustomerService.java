@@ -38,7 +38,6 @@ public class CustomerService {
     customer.chargePoint(amount);
   }
 
-  @Transactional
   public CustomerInfo getCustomerInfo(Long id) {
     Customer customer = customerRepository.findById(id)
         .orElseThrow(() -> new CustomException(USER_NOT_FOUND, USER_NOT_FOUND.getErrorMessage(),
@@ -56,7 +55,6 @@ public class CustomerService {
         .build();
   }
 
-  @Transactional
   public Page<PointChargeHistory> getAllHistories(Long id, Pageable pageable) {
     Customer customer = customerRepository.findById(id)
         .orElseThrow(() -> new CustomException(USER_NOT_FOUND, USER_NOT_FOUND.getErrorMessage(),
