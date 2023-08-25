@@ -390,11 +390,11 @@ public class OfficeSearchServiceTest {
   }
 
   private void setOfficeInfo(OfficeCreateRequestDto request, String officeName, int maxCapacity,
-      long leaseFee, int remainRoom) {
+      long leaseFee, int maxRoomCount) {
     request.setOfficeName(officeName);
     request.setMaxCapacity(maxCapacity);
     request.setLeaseFee(leaseFee);
-    request.setRemainRoom(remainRoom);
+    request.setMaxRoomCount(maxRoomCount);
   }
 
   private OfficeAddress setOfficeLocation(String legion, String city, String town, String village,

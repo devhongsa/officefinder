@@ -27,7 +27,7 @@ class OfficePictureRepositoryTest {
         .name("office1")
         .leaseFee(10000L)
         .maxCapacity(10)
-        .remainRoom(10)
+        .maxRoomCount(10)
         .build();
 
     Office savedOffice = officeRepository.save(office);

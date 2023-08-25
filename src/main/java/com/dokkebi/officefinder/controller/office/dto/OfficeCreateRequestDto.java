@@ -22,7 +22,7 @@ public class OfficeCreateRequestDto {
   @NotNull
   private Long leaseFee;
   @NotNull
-  private Integer remainRoom;
+  private Integer maxRoomCount;
 
   // address
   private OfficeAddress address;

@@ -27,7 +27,8 @@ public enum CustomErrorCode {
   OWNER_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 이메일을 가진 임대업자를 찾을 수 없습니다."),
   LEASE_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 임대 정보가 조회되지 않습니다."),
   SSE_SEND_ACCEPT_NOTIFICATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "임대 수락 알림 전송에 실패하였습니다."),
-  SSE_SEND_REJECT_NOTIFICATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "임대 거절 알림 전송에 실패하였습니다.");
+  SSE_SEND_REJECT_NOTIFICATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "임대 거절 알림 전송에 실패하였습니다."),
+  NO_ROOMS_AVAILABLE_FOR_LEASE(HttpStatus.BAD_REQUEST, "현재 임대예약이 가능한 방이 없습니다.");
 
   private final HttpStatus httpStatus;
   private final String errorMessage;

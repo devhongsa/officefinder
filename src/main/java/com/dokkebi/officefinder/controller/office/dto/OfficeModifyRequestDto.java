@@ -22,7 +22,7 @@ public class OfficeModifyRequestDto {
   @NotNull
   private Long leaseFee;
   @NotNull
-  private Integer remainRoom;
+  private Integer maxRoomCount;
 
   private OfficeAddress address;
   private OfficeOption officeOption;
