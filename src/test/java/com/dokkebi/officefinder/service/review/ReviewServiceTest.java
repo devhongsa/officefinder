@@ -4,12 +4,16 @@ import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.Submit
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.entity.office.OfficeCondition;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
+import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
+import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import java.util.List;
 import java.util.Set;
 import org.assertj.core.api.Assertions;
@@ -39,11 +43,21 @@ public class ReviewServiceTest {
   @Autowired
   private OfficeRepository officeRepository;
 
+  @Autowired
+  private OfficeLocationRepository officeLocationRepository;
+  @Autowired
+  private OfficeConditionRepository officeConditionRepository;
+  @Autowired
+  private OfficePictureRepository officePictureRepository;
+
   @AfterEach
   void tearDown() {
     reviewRepository.deleteAllInBatch();
     leaseRepository.deleteAllInBatch();
     customerRepository.deleteAllInBatch();
+    officeConditionRepository.deleteAllInBatch();
+    officeLocationRepository.deleteAllInBatch();
+    officePictureRepository.deleteAllInBatch();
     officeRepository.deleteAllInBatch();
   }
 

@@ -7,6 +7,8 @@ import com.dokkebi.officefinder.controller.officeowner.dto.OwnerOfficeOverViewDt
 import com.dokkebi.officefinder.dto.PageInfo;
 import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.entity.office.OfficePicture;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.office.OfficeSearchService;
 import com.dokkebi.officefinder.service.office.OfficeService;
 import com.dokkebi.officefinder.service.s3.S3Service;
@@ -15,6 +17,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,10 +33,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/agents")
+@Slf4j
 public class OfficeOwnerController {
 
   private final OfficeService officeService;
   private final OfficeSearchService officeQueryService;
+  private final OfficePictureRepository officePictureRepository;
   private final S3Service s3Service;
 
   @ApiOperation(value = "오피스 리스트 조회", notes = "자신이 등록한 오피스 리스트를 조회할 수 있다.")
@@ -69,6 +74,14 @@ public class OfficeOwnerController {
     return OfficeDetailResponseDto.fromEntity(office);
   }
 
+  /**
+   * 기존 오피스 사진으로 등록된 것들을 모두 삭제 -> S3 상에서 삭제 + 리포지토리에서도 삭제
+   * 이후 입력으로 받은 오피스 사진들을 다시 등록 -> S3 상에서 등록 + 리포지토리에도 등록
+   * @param officeId
+   * @param request
+   * @param multipartFileList
+   * @param principal
+   */
   @PutMapping("/offices/{officeId}")
   public void modifyOffice(
       @PathVariable("officeId") Long officeId,
@@ -76,6 +89,19 @@ public class OfficeOwnerController {
       @RequestPart(value = "multipartFileList") List<MultipartFile> multipartFileList,
       Principal principal
   ) {
-    officeService.modifyOfficeInfo(request, principal.getName(), officeId);
+
+    // 기존 이미지 삭제
+    List<OfficePicture> officePicture = officePictureRepository.findByOfficeId(officeId);
+    if (officePicture != null && !officePicture.isEmpty()){
+      List<String> fileList = officePicture.stream()
+          .map(OfficePicture::getFileName)
+          .collect(Collectors.toList());
+
+      s3Service.deleteImages(fileList);
+    }
+
+    // 들어온 이미지 등록
+    List<String> imagePaths = s3Service.uploadOfficeImages(multipartFileList);
+    officeService.modifyOfficeInfo(request, imagePaths, principal.getName(), officeId);
   }
 }
