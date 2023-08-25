@@ -11,10 +11,12 @@ import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficeCondition;
 import com.dokkebi.officefinder.entity.office.OfficeLocation;
+import com.dokkebi.officefinder.entity.office.OfficePicture;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import java.util.ArrayList;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +44,18 @@ class OfficeServiceTest {
   @Autowired
   private OfficeLocationRepository officeLocationRepository;
   @Autowired
+  private OfficePictureRepository officePictureRepository;
+  @Autowired
   private RedisTemplate<String, String> redisTemplate;
   private static final String REMAIN_ROOM_KEY = "remain-room";
 
   @AfterEach
   void tearDown() {
+    officeConditionRepository.deleteAllInBatch();
+    officeLocationRepository.deleteAllInBatch();
+    officePictureRepository.deleteAllInBatch();
+    officeRepository.deleteAllInBatch();
+    officeOwnerRepository.deleteAllInBatch();
     redisTemplate.delete(REMAIN_ROOM_KEY);
   }
 

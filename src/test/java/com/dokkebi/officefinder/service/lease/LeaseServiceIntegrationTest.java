@@ -14,12 +14,17 @@ import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.entity.office.OfficeLocation;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
+import com.dokkebi.officefinder.repository.office.OfficeRepository;
+import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
+import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import com.dokkebi.officefinder.service.office.OfficeService;
@@ -28,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +59,26 @@ public class LeaseServiceIntegrationTest {
   private ReviewRepository reviewRepository;
   @Autowired
   private LeaseRepository leaseRepository;
+  @Autowired
+  private OfficeRepository officeRepository;
+  @Autowired
+  private OfficeLocationRepository officeLocationRepository;
+  @Autowired
+  private OfficeConditionRepository officeConditionRepository;
+  @Autowired
+  private OfficePictureRepository officePictureRepository;
+
+  @AfterEach
+  void tearDown(){
+    reviewRepository.deleteAllInBatch();
+    leaseRepository.deleteAllInBatch();
+    customerRepository.deleteAllInBatch();
+    officePictureRepository.deleteAllInBatch();
+    officeConditionRepository.deleteAllInBatch();
+    officeLocationRepository.deleteAllInBatch();
+    officeRepository.deleteAllInBatch();
+    officeOwnerRepository.deleteAllInBatch();
+  }
 
   @DisplayName("임대 계약을 수행한다. 결재 시 가격만큼 회원의 포인트가 감소한다.")
   @Test

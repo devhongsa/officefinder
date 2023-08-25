@@ -56,6 +56,11 @@ public class OfficeSearchServiceTest {
 
   @AfterEach
   void tearDown() {
+    officePictureRepository.deleteAllInBatch();
+    officeConditionRepository.deleteAllInBatch();
+    officeLocationRepository.deleteAllInBatch();
+    officeRepository.deleteAllInBatch();
+    officeOwnerRepository.deleteAllInBatch();
     redisTemplate.delete(REMAIN_ROOM_KEY);
   }
 

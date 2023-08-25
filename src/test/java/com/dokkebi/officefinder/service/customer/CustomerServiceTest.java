@@ -9,6 +9,7 @@ import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.history.ChargeHistoryRepository;
 import java.util.List;
 import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,12 @@ class CustomerServiceTest {
   private CustomerRepository customerRepository;
   @Autowired
   private ChargeHistoryRepository chargeHistoryRepository;
+
+  @AfterEach
+  void tearDown() {
+    chargeHistoryRepository.deleteAllInBatch();
+    customerRepository.deleteAllInBatch();
+  }
 
   @DisplayName("회원의 포인트를 충전한다. 충전한 기록은 DB에 저장되고 충전한 량 만큼 회원의 보유 포인트가 증가한다.")
   @Test
