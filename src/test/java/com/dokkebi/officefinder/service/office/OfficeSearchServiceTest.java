@@ -12,10 +12,15 @@ import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficeLocation;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
+import com.dokkebi.officefinder.repository.office.OfficeRepository;
+import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
+import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +36,15 @@ public class OfficeSearchServiceTest {
 
   @Autowired
   private OfficeService officeService;
+
+  @Autowired
+  private OfficeRepository officeRepository;
+  @Autowired
+  private OfficeLocationRepository officeLocationRepository;
+  @Autowired
+  private OfficeConditionRepository officeConditionRepository;
+  @Autowired
+  private OfficePictureRepository officePictureRepository;
 
   @Autowired
   private OfficeSearchService officeQueryService;
