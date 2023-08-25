@@ -3,6 +3,7 @@ package com.dokkebi.officefinder.repository;
 import static com.dokkebi.officefinder.entity.type.LeaseStatus.ACCEPTED;
 import static com.dokkebi.officefinder.entity.type.LeaseStatus.AWAIT;
 import static com.dokkebi.officefinder.entity.type.LeaseStatus.EXPIRED;
+import static com.dokkebi.officefinder.entity.type.LeaseStatus.PROCEEDING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
@@ -15,6 +16,7 @@ import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,6 +116,59 @@ public class LeaseRepositoryTest {
             "office1",
             "office1",
             "office1"
+        );
+  }
+
+  @Test
+  @DisplayName("오피스 id와 LeaseStatus를 바탕으로 임대 요청을 페이징으로 조회할 수 있다.")
+  void paging_leaseRequest(){
+    // Given
+    Customer customer = createCustomer("customer", "test@test.com", "1234", 1000);
+    Customer customer2 = createCustomer("customer2", "test2@test.com", "1234", 1000);
+    customerRepository.saveAll(List.of(customer, customer2));
+
+    Office office = createOffice("office1");
+    Office savedOffice = officeRepository.save(office);
+
+    LocalDate startDate = LocalDate.now().minusDays(20);
+    LocalDate endDate = startDate.plusDays(20);
+
+    LocalDate startDate2 = LocalDate.now().minusDays(10);
+    LocalDate endDate2 = startDate2.plusDays(20);
+
+    LocalDate startDate3 = LocalDate.now();
+    LocalDate endDate3 = startDate3.plusDays(20);
+
+    Lease lease = createLease(customer, savedOffice, 10000L, AWAIT, startDate,
+        endDate, false);
+    Lease lease2 = createLease(customer, savedOffice, 20000L, AWAIT, startDate2,
+        endDate2, false);
+    Lease lease3 = createLease(customer, savedOffice, 30000L, ACCEPTED, startDate3,
+        endDate3, false);
+    Lease lease4 = createLease(customer2, savedOffice, 40000L, PROCEEDING, startDate3,
+        endDate3, false);
+
+    leaseRepository.saveAll(List.of(lease, lease2, lease3, lease4));
+
+    PageRequest pageRequest = PageRequest.of(0, 5);
+
+    // When
+    Page<Lease> result = leaseRepository.findByOfficeIdAndLeaseStatus(savedOffice.getId(), AWAIT, pageRequest);
+    List<Lease> content = result.getContent();
+
+    // Then
+    assertThat(content).hasSize(2)
+        .extracting("leaseStatus", "leaseStartDate", "leaseEndDate", "isMonthlyPay")
+        .containsExactlyInAnyOrder(
+            tuple(AWAIT, startDate, endDate, false),
+            tuple(AWAIT, startDate2, endDate2, false)
+        );
+
+    assertThat(content)
+        .extracting(Lease::getOffice)
+        .extracting(Office::getName)
+        .containsExactlyInAnyOrder(
+            "office1", "office1"
         );
   }
 

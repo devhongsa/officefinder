@@ -10,4 +10,8 @@ public interface LeaseRepository extends JpaRepository<Lease, Long>, LeaseReposi
 
   @Query("select l from Lease l join fetch l.customer join fetch l.office where l.id = :leaseId")
   Optional<Lease> findById(@Param("leaseId") Long leaseId);
+
+//  @Query("select l from Lease l join fetch l.customer where l.office = :office "
+//      + "and l.leaseStatus = :leaseStatus")
+//  Page<Lease> findByOfficeAndLeaseStatus(Office office, LeaseStatus leaseStatus, Pageable pageable);
 }

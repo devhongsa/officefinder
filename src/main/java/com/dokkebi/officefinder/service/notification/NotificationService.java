@@ -1,6 +1,7 @@
 package com.dokkebi.officefinder.service.notification;
 
 import com.dokkebi.officefinder.dto.Event;
+import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
@@ -26,12 +27,12 @@ public class NotificationService {
 
   // 회원의 email을 바탕으로 SSE 연결을 설정
   // LastEvenId가 포함된 경우, 연결이 끊긴 이후의 Event들을 전송
-  public SseEmitter subscribe(String email, String lastEventId){
+  public SseEmitter subscribe(String email, String lastEventId) {
     SseEmitter emitter = createEmitter(email);
 
-    if(!lastEventId.isEmpty()){
+    if (!lastEventId.isEmpty()) {
       sendAfterEvents(emitter, email, lastEventId);
-    }else{
+    } else {
       sendDummyData(emitter);
     }
 
@@ -39,24 +40,48 @@ public class NotificationService {
   }
 
   // 임대 알림을 전송하는 메서드
-  public void sendLeaseNotification(Office office){
+  public void sendLeaseNotification(Office office) {
     String email = office.getOwner().getEmail();
     String officeName = office.getName();
     String message = officeName + " 임대 요청이 들어왔습니다.";
 
+    sendNotification(email, "leaseNotification", message,
+        CustomErrorCode.SSE_SEND_LEASE_NOTIFICATION_FAIL);
+  }
+
+  public void sendAcceptNotification(Lease lease) {
+    String officeName = lease.getOffice().getName();
+    String email = lease.getCustomer().getEmail();
+    String message = officeName + "에 대한 임대 요청이 수락되었습니다 :)";
+
+    sendNotification(email, "acceptNotification", message,
+        CustomErrorCode.SSE_SEND_ACCEPT_NOTIFICATION_FAIL);
+  }
+
+  public void sendRejectNotification(Lease lease){
+    String officeName = lease.getOffice().getName();
+    String email = lease.getCustomer().getEmail();
+    String message = officeName + "에 대한 임대 요청이 거절되었습니다 :(";
+
+    sendNotification(email, "rejectNotification", message,
+        CustomErrorCode.SSE_SEND_REJECT_NOTIFICATION_FAIL);
+  }
+
+  private void sendNotification(String email, String eventType, String message,
+      CustomErrorCode errorCode) {
     Event event = new Event();
-    event.setEventType("leaseNotification");
+    event.setEventType(eventType);
     event.setEventData(message);
 
     eventRepository.addEvent(email, event);
 
     SseEmitter sseEmitter = emitterRepository.get(email);
 
-    if(sseEmitter != null){
-      try{
+    if (sseEmitter != null) {
+      try {
         sseEmitter.send(SseEmitter.event().name(event.getEventType()).data(event.getEventData()));
-      }catch(IOException e){
-        throw new CustomException(CustomErrorCode.SSE_SEND_LEASE_NOTIFICATION_FAIL);
+      } catch (IOException e) {
+        throw new CustomException(errorCode);
       }
     }
   }
@@ -64,9 +89,9 @@ public class NotificationService {
   // 첫 연결 시 더미 데이터를 전송하는 메서드
   // 이벤트가 전송되지 않으면 연결 요청에 오류가 발생하거나 재연결 요청이 발생할 수 있기 때문
   private void sendDummyData(SseEmitter emitter) {
-    try{
+    try {
       emitter.send(SseEmitter.event().name("connect"));
-    }catch(IOException e){
+    } catch (IOException e) {
       throw new CustomException(CustomErrorCode.SSE_SEND_DUMMY_FAIL);
     }
   }
@@ -76,10 +101,10 @@ public class NotificationService {
     int eventId = Integer.parseInt(lastEventId);
     List<Event> missedEvents = eventRepository.getMissedEvents(email, eventId);
 
-    for(Event event : missedEvents){
-      try{
+    for (Event event : missedEvents) {
+      try {
         emitter.send(SseEmitter.event().name(event.getEventType()).data(event.getEventData()));
-      }catch(IOException e){
+      } catch (IOException e) {
         throw new CustomException(CustomErrorCode.SSE_SEND_MISSED_EVENTS_FAIL);
       }
     }

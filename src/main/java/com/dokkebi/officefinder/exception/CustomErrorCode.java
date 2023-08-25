@@ -22,7 +22,12 @@ public enum CustomErrorCode {
   FAIL_LOGIN(HttpStatus.UNAUTHORIZED,"로그인에 실패하였습니다. 다시 시도해 주십시오."),
   SSE_SEND_DUMMY_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "더미 데이터 전송에 실패하였습니다."),
   SSE_SEND_MISSED_EVENTS_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "이전 이벤트 전송에 실패하였습니다."),
-  SSE_SEND_LEASE_NOTIFICATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "임대 알림 전송에 실패하였습니다.");
+  SSE_SEND_LEASE_NOTIFICATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "임대 알림 전송에 실패하였습니다."),
+  OFFICE_NOT_OWNED_BY_OWNER(HttpStatus.NOT_FOUND, "해당 사용자가 소유하고 있는 오피스가 아닙니다."),
+  OWNER_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 이메일을 가진 임대업자를 찾을 수 없습니다."),
+  LEASE_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 임대 정보가 조회되지 않습니다."),
+  SSE_SEND_ACCEPT_NOTIFICATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "임대 수락 알림 전송에 실패하였습니다."),
+  SSE_SEND_REJECT_NOTIFICATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "임대 거절 알림 전송에 실패하였습니다.");
 
   private final HttpStatus httpStatus;
   private final String errorMessage;
