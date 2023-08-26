@@ -27,7 +27,7 @@ public class OfficeDetailResponseDto {
         .leaseFee(office.getLeaseFee())
         .maxCapacity(office.getMaxCapacity())
         .address(office.getOfficeAddress())
-        .remainOffices(office.getRemainRoom())
+        .remainOffices(office.getMaxRoomCount())
         .officeOptionDto(OfficeOptionDto.fromEntity(office.getOfficeCondition()))
         .build();
   }
