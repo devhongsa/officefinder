@@ -32,6 +32,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.springframework.boot:spring-boot-starter-batch'
 
 	// querydsl implementation
 	implementation 'com.querydsl:querydsl-jpa:5.0.0'
@@ -55,6 +56,7 @@ dependencies {
 	annotationProcessor 'com.querydsl:querydsl-apt:5.0.0'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.batch:spring-batch-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	// https://mvnrepository.com/artifact/it.ozimov/embedded-redis
 	testImplementation('it.ozimov:embedded-redis:0.7.3'){ exclude group: "org.slf4j", module: "slf4j-simple" }

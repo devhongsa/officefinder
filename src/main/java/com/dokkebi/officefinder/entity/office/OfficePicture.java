@@ -31,6 +31,12 @@ public class OfficePicture extends BaseEntity {
   @JoinColumn(name = "office_id")
   private Office office;
 
-  private String fileId;
   private String fileName;
+
+  public static OfficePicture createFromPath(String imagePath, Office office){
+    return OfficePicture.builder()
+        .fileName(imagePath)
+        .office(office)
+        .build();
+  }
 }

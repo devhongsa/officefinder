@@ -54,8 +54,8 @@ public class Office extends BaseEntity {
   @Column(name = "office_address")
   private String officeAddress;
 
-  @Column(name = "office_remain_room")
-  private int remainRoom;
+  @Column(name = "office_maximum_room_count")
+  private int maxRoomCount;
 
   /*
   엔티티 생성 메서드
@@ -66,7 +66,7 @@ public class Office extends BaseEntity {
         .owner(officeOwner)
         .maxCapacity(request.getMaxCapacity())
         .leaseFee(request.getLeaseFee())
-        .remainRoom(request.getRemainRoom())
+        .maxRoomCount(request.getMaxRoomCount())
         .officeAddress(request.getAddress().getStreet())
         .build();
   }
@@ -79,7 +79,7 @@ public class Office extends BaseEntity {
     this.name = request.getOfficeName();
     this.leaseFee = request.getLeaseFee();
     this.maxCapacity = request.getMaxCapacity();
-    this.remainRoom = request.getRemainRoom();
+    this.maxRoomCount = request.getMaxRoomCount();
   }
 
   public void setOfficeCondition(OfficeCondition officeCondition) {
@@ -92,13 +92,5 @@ public class Office extends BaseEntity {
 
   public void setOfficeAddress(String address){
     this.officeAddress = address;
-  }
-
-  public void decreaseRemainRoom() {
-    if (this.remainRoom <= 0){
-      throw new IllegalArgumentException("room is full");
-    }
-
-    this.remainRoom--;
   }
 }

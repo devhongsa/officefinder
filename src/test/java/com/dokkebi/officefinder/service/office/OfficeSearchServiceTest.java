@@ -12,9 +12,15 @@ import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficeLocation;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
+import com.dokkebi.officefinder.repository.office.OfficeRepository;
+import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
+import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +38,15 @@ public class OfficeSearchServiceTest {
   private OfficeService officeService;
 
   @Autowired
+  private OfficeRepository officeRepository;
+  @Autowired
+  private OfficeLocationRepository officeLocationRepository;
+  @Autowired
+  private OfficeConditionRepository officeConditionRepository;
+  @Autowired
+  private OfficePictureRepository officePictureRepository;
+
+  @Autowired
   private OfficeSearchService officeQueryService;
   @Autowired
   private OfficeOwnerRepository officeOwnerRepository;
@@ -41,6 +56,11 @@ public class OfficeSearchServiceTest {
 
   @AfterEach
   void tearDown() {
+    officePictureRepository.deleteAllInBatch();
+    officeConditionRepository.deleteAllInBatch();
+    officeLocationRepository.deleteAllInBatch();
+    officeRepository.deleteAllInBatch();
+    officeOwnerRepository.deleteAllInBatch();
     redisTemplate.delete(REMAIN_ROOM_KEY);
   }
 
@@ -321,7 +341,7 @@ public class OfficeSearchServiceTest {
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
-    officeService.createOfficeInfo(request, savedOfficeOwner.getEmail());
+    officeService.createOfficeInfo(request, new ArrayList<>(), savedOfficeOwner.getEmail());
 
     OfficeCreateRequestDto request2 = new OfficeCreateRequestDto();
     setOfficeInfo(request2, "office2", 10, 1000000, 10);
@@ -329,7 +349,7 @@ public class OfficeSearchServiceTest {
     request2.setOfficeOption(setOfficeCondition(true, true, false, true, true, true,
         true, false, false, true, true, true, true, true, true));
 
-    officeService.createOfficeInfo(request2, savedOfficeOwner.getEmail());
+    officeService.createOfficeInfo(request2, new ArrayList<>(), savedOfficeOwner.getEmail());
 
     OfficeCreateRequestDto request3 = new OfficeCreateRequestDto();
     setOfficeInfo(request3, "office3", 10, 1500000, 10);
@@ -337,7 +357,7 @@ public class OfficeSearchServiceTest {
     request3.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
-    officeService.createOfficeInfo(request3, savedOfficeOwner.getEmail());
+    officeService.createOfficeInfo(request3, new ArrayList<>(), savedOfficeOwner.getEmail());
 
     OfficeCreateRequestDto request4 = new OfficeCreateRequestDto();
     setOfficeInfo(request4, "office4", 10, 1500000, 10);
@@ -345,7 +365,7 @@ public class OfficeSearchServiceTest {
     request4.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
         true, true, true, true, true, true, true, true, true));
 
-    officeService.createOfficeInfo(request4, savedOfficeOwner.getEmail());
+    officeService.createOfficeInfo(request4, new ArrayList<>(), savedOfficeOwner.getEmail());
 
     OfficeCreateRequestDto request5 = new OfficeCreateRequestDto();
     setOfficeInfo(request5, "office5", 15, 2000000, 10);
@@ -353,7 +373,7 @@ public class OfficeSearchServiceTest {
     request5.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
         true, false, false, true, true, true, true, false, true));
 
-    officeService.createOfficeInfo(request5, savedOfficeOwner.getEmail());
+    officeService.createOfficeInfo(request5, new ArrayList<>(), savedOfficeOwner.getEmail());
   }
 
   private OfficeOwner createOfficeOwner(String name, String email, String password,
@@ -370,11 +390,11 @@ public class OfficeSearchServiceTest {
   }
 
   private void setOfficeInfo(OfficeCreateRequestDto request, String officeName, int maxCapacity,
-      long leaseFee, int remainRoom) {
+      long leaseFee, int maxRoomCount) {
     request.setOfficeName(officeName);
     request.setMaxCapacity(maxCapacity);
     request.setLeaseFee(leaseFee);
-    request.setRemainRoom(remainRoom);
+    request.setMaxRoomCount(maxRoomCount);
   }
 
   private OfficeAddress setOfficeLocation(String legion, String city, String town, String village,
