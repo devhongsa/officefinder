@@ -31,6 +31,7 @@ public class S3Service {
     List<String> imageUrlList = new ArrayList<>();
 
     for (var image : multipartFileList) {
+      if (image.getOriginalFilename().equals("")) continue;
       String fileName = createUniqueFileName(image.getOriginalFilename());
 
       ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -54,6 +55,15 @@ public class S3Service {
     return imageUrlList;
   }
 
+  public void deleteImages(List<String> fileUrlList) {
+    String separator = ".com/";
+
+    for (String fileUrl : fileUrlList) {
+      String fileName = fileUrl.substring(fileUrl.lastIndexOf(separator) + separator.length());
+      amazonS3Client.deleteObject(bucket, fileName);
+    }
+  }
+
   private String createUniqueFileName(String fileName) {
     return UUID.randomUUID().toString().concat(getFileExtension(fileName));
   }
@@ -62,7 +72,6 @@ public class S3Service {
     Set<String> fileExtensionSet = new HashSet<>(
         List.of(".jpg", ".jpeg", ".png", ".JPG", ".JPEG", ".PNG")
     );
-
     String idxFileName = fileName.substring(fileName.lastIndexOf("."));
 
     if (!fileExtensionSet.contains(idxFileName)) {
