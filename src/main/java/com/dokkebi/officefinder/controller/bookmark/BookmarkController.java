@@ -12,12 +12,16 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -33,31 +37,36 @@ public class BookmarkController {
     Long customerId = tokenProvider.getUserIdFromHeader(jwtHeader);
     bookmarkService.submitBookmark(customerId, officeId);
 
-    return new ResponseDto<>("success", customerId);
+    return new ResponseDto<>("success", officeId);
   }
 
   @GetMapping
   public PageResponseDto<?> getBookmarks(@RequestHeader("Authorization") String jwtHeader,
-      Pageable pageable) {
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(defaultValue = "20") Integer size) {
     Long customerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<Bookmark> bookmarks = bookmarkService.getBookmarks(customerId, pageable);
 
     PageInfo pageInfo = new PageInfo(pageable.getPageNumber(), pageable.getPageSize(),
         (int) bookmarks.getTotalElements(), bookmarks.getTotalPages());
 
-    List<BookmarkDto> list = bookmarks.stream().map(Bookmark::toDto)
+    List<BookmarkDto> list = bookmarks.stream().map(BookmarkDto::from)
         .collect(Collectors.toList());
+    if (list.isEmpty()) {
+      throw new IllegalArgumentException("등록된 북마크가 없습니다.");
+    }
 
     return new PageResponseDto<>(list, pageInfo);
   }
 
-  @PostMapping("/delete")
+  @DeleteMapping("/delete")
   public ResponseDto<?> deleteBookmark(@RequestHeader("Authorization") String jwtHeader,
       @RequestBody @Valid Long officeId) {
     Long customerId = tokenProvider.getUserIdFromHeader(jwtHeader);
     bookmarkService.deleteBookmark(customerId, officeId);
 
-    return new ResponseDto<>("success", customerId);
+    return new ResponseDto<>("success", officeId);
   }
 
 }

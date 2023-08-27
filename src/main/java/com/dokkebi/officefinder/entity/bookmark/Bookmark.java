@@ -1,6 +1,5 @@
 package com.dokkebi.officefinder.entity.bookmark;
 
-import com.dokkebi.officefinder.controller.bookmark.dto.BookmarkDto;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.office.Office;
 import javax.persistence.Column;
@@ -37,13 +36,5 @@ public class Bookmark {
     this.id = id;
     this.customer = customer;
     this.office = office;
-  }
-
-  public static BookmarkDto toDto(Bookmark bookmark) {
-    Office office = bookmark.getOffice();
-    return BookmarkDto.builder()
-        .name(office.getName())
-        .officeAddress(office.getOfficeAddress())
-        .build();
   }
 }

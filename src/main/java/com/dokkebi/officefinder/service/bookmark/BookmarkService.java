@@ -26,7 +26,7 @@ public class BookmarkService {
   private final OfficeRepository officeRepository;
 
 
-  public void submitBookmark(Long customerId, Long officeId) {
+  public Bookmark submitBookmark(Long customerId, Long officeId) {
     Customer customer = customerRepository.findById(customerId)
         .orElseThrow(() -> new CustomException(USER_NOT_FOUND, USER_NOT_FOUND.getErrorMessage(),
             BAD_REQUEST));
@@ -36,7 +36,7 @@ public class BookmarkService {
         .customer(customer)
         .office(office)
         .build();
-    bookmarkRepository.save(bookmark);
+    return bookmarkRepository.save(bookmark);
   }
 
   public Page<Bookmark> getBookmarks(Long customerId, Pageable pageable) {
