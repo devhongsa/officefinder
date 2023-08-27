@@ -17,10 +17,11 @@ import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpSer
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import com.dokkebi.officefinder.service.notification.NotificationService;
-import java.util.concurrent.TimeUnit;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,18 +45,14 @@ public class LeaseService {
   private final NotificationService notificationService;
 
   /**
-   * 오피스 임대 서비스를 처리하는 메서드입니다.
-   * 고객의 이메일을 통해 고객의 정보를 조회하고, 고객이 임대를 요청한 오피스 정보를 조회합니다.
-   * 오피스의 이용 개월 수와 임대료를 통해 전체 가격을 계산하고, 고객의 포인트를 조회한 후 임대가 가능한지 확인합니다.
-   * 모든 조건이 충족되면 임대 정보를 저장하고 반환합니다.
+   * 오피스 임대 서비스를 처리하는 메서드입니다. 고객의 이메일을 통해 고객의 정보를 조회하고, 고객이 임대를 요청한 오피스 정보를 조회합니다. 오피스의 이용 개월 수와
+   * 임대료를 통해 전체 가격을 계산하고, 고객의 포인트를 조회한 후 임대가 가능한지 확인합니다. 모든 조건이 충족되면 임대 정보를 저장하고 반환합니다.
    *
    * @param leaseOfficeRequestDto
    * @return LeaseServiceResponse
-   * @Throws CustomException 발생
-   *             - EMAIL_NOT_REGISTERED : 등록되지 않은 이메일로 요청한 경우
-   *             - INVALID_OFFICE_ID : 유효하지 않은 오피스 ID로 요청한 경우
-   *             - OFFICE_OVER_CAPACITY : 요청 인원이 오피스의 수용인원을 초과하는 경우
-   *             - INSUFFICIENT_POINTS : 고객의 포인트가 부족한경우
+   * @Throws CustomException 발생 - EMAIL_NOT_REGISTERED : 등록되지 않은 이메일로 요청한 경우 - INVALID_OFFICE_ID :
+   * 유효하지 않은 오피스 ID로 요청한 경우 - OFFICE_OVER_CAPACITY : 요청 인원이 오피스의 수용인원을 초과하는 경우 - INSUFFICIENT_POINTS
+   * : 고객의 포인트가 부족한경우
    */
   @Transactional
   public LeaseOfficeServiceResponse leaseOffice(LeaseOfficeRequestDto leaseOfficeRequestDto) {
@@ -65,8 +62,8 @@ public class LeaseService {
     Office office = officeRepository.findById(leaseOfficeRequestDto.getOfficeId())
         .orElseThrow(() -> new CustomException(CustomErrorCode.INVALID_OFFICE_ID));
 
+    checkAvailableRooms(leaseOfficeRequestDto, office.getMaxRoomCount());
     checkOfficeCapacity(office, leaseOfficeRequestDto.getCustomerCount());
-    decreaseRemainOffice(office);
 
     long totalPrice = leaseOfficeRequestDto.getMonths() * office.getLeaseFee();
     checkCustomerPoints(customer, totalPrice);
@@ -118,7 +115,7 @@ public class LeaseService {
   }
 
   @Transactional
-  public void rejectLeaseRequest(Long leaseId){
+  public void rejectLeaseRequest(Long leaseId) {
     Lease lease = leaseRepository.findById(leaseId)
         .orElseThrow(() -> new CustomException(CustomErrorCode.LEASE_NOT_FOUND));
 
@@ -147,21 +144,14 @@ public class LeaseService {
     }
   }
 
-  private void decreaseRemainOffice(Office office) {
-    final String lockName = "remainRoom:lock";
-    final RLock lock = redissonClient.getLock(lockName);
+  private void checkAvailableRooms(LeaseOfficeRequestDto office, int maxRoomCount) {
+    LocalDate endDate = office.getStartDate().plusMonths(office.getMonths());
+    List<LeaseStatus> leaseStatus = Arrays.asList(LeaseStatus.AWAIT, LeaseStatus.ACCEPTED);
+    Long CurrentRoomUsed = leaseRepository.countByOfficeIdAndLeaseStatusInAndLeaseEndDateGreaterThanEqualAndLeaseStartDateLessThanEqualOrderByLeaseStartDate(
+        office.getOfficeId(), leaseStatus, office.getStartDate(), endDate);
 
-    try {
-      if (!lock.tryLock(1, 3, TimeUnit.SECONDS)) {
-        throw new IllegalArgumentException("lock exception");
-      }
-      office.decreaseRemainRoom();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    } finally {
-      if (lock != null && lock.isLocked()) {
-        lock.unlock();
-      }
+    if (CurrentRoomUsed >= maxRoomCount) {
+      throw new CustomException(CustomErrorCode.NO_ROOMS_AVAILABLE_FOR_LEASE);
     }
   }
 }
