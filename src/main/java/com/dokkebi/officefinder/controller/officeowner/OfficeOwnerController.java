@@ -70,7 +70,7 @@ public class OfficeOwnerController {
       @RequestPart(value = "multipartFileList") List<MultipartFile> multipartFileList,
       Principal principal
   ) {
-    List<String> imagePaths = s3Service.uploadOfficeImages(multipartFileList);
+    List<String> imagePaths = s3Service.uploadImages(multipartFileList);
     officeService.createOfficeInfo(request, imagePaths, principal.getName());
   }
 
@@ -109,7 +109,7 @@ public class OfficeOwnerController {
     }
 
     // 들어온 이미지 등록
-    List<String> imagePaths = s3Service.uploadOfficeImages(multipartFileList);
+    List<String> imagePaths = s3Service.uploadImages(multipartFileList);
     officeService.modifyOfficeInfo(request, imagePaths, principal.getName(), officeId);
   }
 
