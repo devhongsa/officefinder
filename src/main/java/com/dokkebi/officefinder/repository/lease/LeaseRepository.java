@@ -1,6 +1,7 @@
 package com.dokkebi.officefinder.repository.lease;
 
 import com.dokkebi.officefinder.entity.lease.Lease;
+import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import java.time.LocalDate;
 import java.util.List;
@@ -20,6 +21,13 @@ public interface LeaseRepository extends JpaRepository<Lease, Long>, LeaseReposi
 
   List<Lease> findByOfficeIdAndLeaseStartDateBetweenAndLeaseStatusInOrderByLeaseStartDate(Long officeId, LocalDate startDate, LocalDate endDate, List<LeaseStatus> leaseStatus);
 
-  Long countByOfficeIdAndLeaseStatusInAndLeaseEndDateGreaterThanEqualAndLeaseStartDateLessThanEqualOrderByLeaseStartDate(
+  List<Lease> findByOfficeInAndLeaseStartDateBetweenAndLeaseStatusInOrderByLeaseStartDate(List<Office> offices, LocalDate startDate, LocalDate endDate, List<LeaseStatus> leaseStatus);
+
+  int countByOfficeIdAndLeaseStatusInAndLeaseEndDateGreaterThanEqualAndLeaseStartDateLessThanEqualOrderByLeaseStartDate(
       Long officeId, List<LeaseStatus> leaseStatus, LocalDate startDate, LocalDate endDate);
+
+  int countByOfficeIdAndLeaseStatus(Long officeId, LeaseStatus leaseStatus);
+
+  int countByOfficeInAndLeaseStatus(List<Office> offices,
+      LeaseStatus leaseStatus);
 }

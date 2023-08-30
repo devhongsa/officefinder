@@ -6,6 +6,7 @@ import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
+import com.dokkebi.officefinder.entity.type.NotificationType;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
@@ -73,7 +74,9 @@ public class LeaseService {
     Lease lease = Lease.fromRequest(customer, office, totalPrice, leaseOfficeRequestDto);
     Lease savedLease = leaseRepository.save(lease);
 
-    notificationService.sendLeaseNotification(office);
+    notificationService.sendToOwner(office.getOwner().getEmail(),
+        NotificationType.LEASE_REQUEST_ARRIVED,
+        "임대 요청", office.getName() + "에 임대 요청이 들어왔습니다");
 
     return LeaseOfficeServiceResponse.of(savedLease);
   }
@@ -111,7 +114,9 @@ public class LeaseService {
     // 변경 후 저장안해도 더티 체킹으로 인해 반영됨
     lease.changeLeaseStatus(LeaseStatus.ACCEPTED);
 
-    notificationService.sendAcceptNotification(lease);
+    notificationService.sendToCustomer(lease.getCustomer(), NotificationType.LEASE_ACCEPTED,
+        "임대 요청 수락",
+        lease.getOffice().getName() + "에 대한 임대 요청이 수락되었습니다.");
   }
 
   @Transactional
@@ -125,7 +130,9 @@ public class LeaseService {
     // 거절 상태로 바꿈
     lease.changeLeaseStatus(LeaseStatus.DENIED);
 
-    notificationService.sendRejectNotification(lease);
+    notificationService.sendToCustomer(lease.getCustomer(), NotificationType.LEASE_DENIED,
+        "임대 요청 거절",
+        lease.getOffice().getName() + "에 대한 임대 요청이 거절되었습니다.");
   }
 
   private void refundPayment(Customer customer, long price) {
@@ -147,7 +154,7 @@ public class LeaseService {
   private void checkAvailableRooms(LeaseOfficeRequestDto office, int maxRoomCount) {
     LocalDate endDate = office.getStartDate().plusMonths(office.getMonths());
     List<LeaseStatus> leaseStatus = Arrays.asList(LeaseStatus.AWAIT, LeaseStatus.ACCEPTED);
-    Long CurrentRoomUsed = leaseRepository.countByOfficeIdAndLeaseStatusInAndLeaseEndDateGreaterThanEqualAndLeaseStartDateLessThanEqualOrderByLeaseStartDate(
+    int CurrentRoomUsed = leaseRepository.countByOfficeIdAndLeaseStatusInAndLeaseEndDateGreaterThanEqualAndLeaseStartDateLessThanEqualOrderByLeaseStartDate(
         office.getOfficeId(), leaseStatus, office.getStartDate(), endDate);
 
     if (CurrentRoomUsed >= maxRoomCount) {

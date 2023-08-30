@@ -40,4 +40,21 @@ public class ReviewControllerDto {
     }
   }
 
+  @Getter
+  @Builder
+  public static class ReviewDto {
+
+
+    String description;
+    int rate;
+
+    public static ReviewDto from(Review review) {
+      return ReviewDto.builder()
+          .description(review.getDescription())
+          .rate(review.getRate())
+          .build();
+    }
+  }
+
+
 }
