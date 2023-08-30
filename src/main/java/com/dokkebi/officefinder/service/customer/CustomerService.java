@@ -27,7 +27,7 @@ public class CustomerService {
   private final ChargeHistoryRepository chargeHistoryRepository;
 
   @Transactional
-  public void chargeCustomerPoint(long amount, String customerEmail){
+  public void chargeCustomerPoint(long amount, String customerEmail) {
     Customer customer = customerRepository.findByEmail(customerEmail)
         .orElseThrow(() -> new CustomException(USER_NOT_FOUND, USER_NOT_FOUND.getErrorMessage(),
             BAD_REQUEST));
@@ -43,7 +43,8 @@ public class CustomerService {
     Customer customer = customerRepository.findById(id)
         .orElseThrow(() -> new CustomException(USER_NOT_FOUND, USER_NOT_FOUND.getErrorMessage(),
             BAD_REQUEST));
-    Set<PointChargeHistory> histories = chargeHistoryRepository.findTop10ByCustomerIdOrderByCreatedAtDesc(id);
+    Set<PointChargeHistory> histories = chargeHistoryRepository.findTop10ByCustomerIdOrderByCreatedAtDesc(
+        id);
     Set<PointChargeHistoryDto> historyDtoSet = toDtoSet(histories);
 
     return CustomerInfo.builder()
@@ -64,6 +65,14 @@ public class CustomerService {
     return chargeHistoryRepository.findByCustomerIdOrderByCreatedAtDesc(id, pageable);
   }
 
+  @Transactional
+  public void changeCustomerProfileImage(String imagePath, String userEmail) {
+    Customer customer = customerRepository.findByEmail(userEmail)
+        .orElseThrow(() -> new CustomException(USER_NOT_FOUND, USER_NOT_FOUND.getErrorMessage(),
+            BAD_REQUEST));
+
+    customer.changeProfileImage(imagePath);
+  }
 
   private Set<PointChargeHistoryDto> toDtoSet(Set<PointChargeHistory> histories) {
 
