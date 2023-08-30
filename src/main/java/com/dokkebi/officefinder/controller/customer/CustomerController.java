@@ -14,12 +14,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -36,6 +40,7 @@ public class CustomerController {
   }
 
   @GetMapping("/info")
+  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
   public ResponseDto<?> getCustomerInfo(@RequestHeader("Authorization") String jwtHeader) {
     Long id = tokenProvider.getUserIdFromHeader(jwtHeader);
     CustomerInfo customerInfo = customerService.getCustomerInfo(id);
@@ -43,11 +48,15 @@ public class CustomerController {
     return new ResponseDto<>("success", customerInfo);
   }
 
-  @GetMapping("/info/chargehistory")
+  @GetMapping("/info/chargehistories")
+  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
   public PageResponseDto<?> getChargeHistoryDetails(
       @RequestHeader("Authorization") String jwtHeader,
-      Pageable pageable) {
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(defaultValue = "20") Integer size) {
     Long id = tokenProvider.getUserIdFromHeader(jwtHeader);
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
     Page<PointChargeHistory> histories = customerService.getAllHistories(id, pageable);
 
     PageInfo pageInfo = new PageInfo(pageable.getPageNumber(), pageable.getPageSize(),
