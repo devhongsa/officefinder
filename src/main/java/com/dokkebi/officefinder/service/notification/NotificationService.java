@@ -1,14 +1,18 @@
 package com.dokkebi.officefinder.service.notification;
 
-import com.dokkebi.officefinder.dto.Event;
-import com.dokkebi.officefinder.entity.lease.Lease;
-import com.dokkebi.officefinder.entity.office.Office;
+import static com.dokkebi.officefinder.entity.notification.Notification.createNotification;
+import static com.dokkebi.officefinder.service.notification.dto.NotificationResponseDto.makeNotificationResponseDto;
+
+import com.dokkebi.officefinder.entity.Customer;
+import com.dokkebi.officefinder.entity.notification.Notification;
+import com.dokkebi.officefinder.entity.type.NotificationType;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.notification.EmitterRepository;
-import com.dokkebi.officefinder.repository.notification.EventRepository;
+import com.dokkebi.officefinder.repository.notification.NotificationRepository;
+import com.dokkebi.officefinder.service.notification.dto.NotificationResponseDto;
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,100 +27,60 @@ public class NotificationService {
 
   private final EmitterRepository emitterRepository;
 
-  private final EventRepository eventRepository;
+  private final NotificationRepository notificationRepository;
 
   // 회원의 email을 바탕으로 SSE 연결을 설정
   // LastEvenId가 포함된 경우, 연결이 끊긴 이후의 Event들을 전송
   public SseEmitter subscribe(String email, String lastEventId) {
-    SseEmitter emitter = createEmitter(email);
+    String emitterId = email + "_" + System.currentTimeMillis();
+    SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
 
+    emitter.onCompletion(() -> emitterRepository.deleteById(emitterId));
+    emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
+
+    // 더미 데이터 전송
+    sendToClient(emitter, emitterId, "연결이 성공하였습니다. [email :" + email + "]");
+
+    // 연결이 끊긴 사이에 전송된 알림들 전송
     if (!lastEventId.isEmpty()) {
-      sendAfterEvents(emitter, email, lastEventId);
-    } else {
-      sendDummyData(emitter);
+      Map<String, Object> events = emitterRepository.findAllEventCacheStartsWithEmail(email);
+      events.entrySet().stream()
+          .filter(e -> lastEventId.compareTo(e.getKey()) < 0)
+          .forEach(e -> sendToClient(emitter, e.getKey(), e.getValue()));
     }
 
     return emitter;
   }
 
-  // 임대 알림을 전송하는 메서드
-  public void sendLeaseNotification(Office office) {
-    String email = office.getOwner().getEmail();
-    String officeName = office.getName();
-    String message = officeName + " 임대 요청이 들어왔습니다.";
-
-    sendNotification(email, "leaseNotification", message,
-        CustomErrorCode.SSE_SEND_LEASE_NOTIFICATION_FAIL);
+  public void sendToCustomer(Customer customer, NotificationType notificationType, String title,
+      String content) {
+    Notification notification = notificationRepository.save(
+        createNotification(customer, notificationType, title, content));
+    sendNotificationToEmail(customer.getEmail(), notification);
   }
 
-  public void sendAcceptNotification(Lease lease) {
-    String officeName = lease.getOffice().getName();
-    String email = lease.getCustomer().getEmail();
-    String message = officeName + "에 대한 임대 요청이 수락되었습니다 :)";
-
-    sendNotification(email, "acceptNotification", message,
-        CustomErrorCode.SSE_SEND_ACCEPT_NOTIFICATION_FAIL);
+  public void sendToOwner(String email, NotificationType type, String title, String content) {
+    NotificationResponseDto dto = makeNotificationResponseDto(title, content);
+    sendNotificationToEmail(email, dto);
   }
 
-  public void sendRejectNotification(Lease lease){
-    String officeName = lease.getOffice().getName();
-    String email = lease.getCustomer().getEmail();
-    String message = officeName + "에 대한 임대 요청이 거절되었습니다 :(";
+  private void sendNotificationToEmail(String email, Object notificationData) {
+    Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartsWithEmail(email);
 
-    sendNotification(email, "rejectNotification", message,
-        CustomErrorCode.SSE_SEND_REJECT_NOTIFICATION_FAIL);
+    sseEmitters.forEach((key, emitter) -> {
+      emitterRepository.saveEventCache(key, notificationData);
+      sendToClient(emitter, key, notificationData);
+    });
   }
 
-  private void sendNotification(String email, String eventType, String message,
-      CustomErrorCode errorCode) {
-    Event event = new Event();
-    event.setEventType(eventType);
-    event.setEventData(message);
-
-    eventRepository.addEvent(email, event);
-
-    SseEmitter sseEmitter = emitterRepository.get(email);
-
-    if (sseEmitter != null) {
-      try {
-        sseEmitter.send(SseEmitter.event().name(event.getEventType()).data(event.getEventData()));
-      } catch (IOException e) {
-        throw new CustomException(errorCode);
-      }
-    }
-  }
-
-  // 첫 연결 시 더미 데이터를 전송하는 메서드
-  // 이벤트가 전송되지 않으면 연결 요청에 오류가 발생하거나 재연결 요청이 발생할 수 있기 때문
-  private void sendDummyData(SseEmitter emitter) {
+  private void sendToClient(SseEmitter emitter, String emitterId, Object data) {
     try {
-      emitter.send(SseEmitter.event().name("connect"));
-    } catch (IOException e) {
-      throw new CustomException(CustomErrorCode.SSE_SEND_DUMMY_FAIL);
+      emitter.send(SseEmitter.event()
+          .id(emitterId)
+          .data(data));
+    } catch (IOException exception) {
+      emitterRepository.deleteById(emitterId);
+      throw new CustomException(CustomErrorCode.SSE_SEND_NOTIFICATION_FAIL);
     }
-  }
-
-  // 주어진 lastEventId 이후의 모든 이벤트를 전송하는 메서드
-  private void sendAfterEvents(SseEmitter emitter, String email, String lastEventId) {
-    int eventId = Integer.parseInt(lastEventId);
-    List<Event> missedEvents = eventRepository.getMissedEvents(email, eventId);
-
-    for (Event event : missedEvents) {
-      try {
-        emitter.send(SseEmitter.event().name(event.getEventType()).data(event.getEventData()));
-      } catch (IOException e) {
-        throw new CustomException(CustomErrorCode.SSE_SEND_MISSED_EVENTS_FAIL);
-      }
-    }
-  }
-
-  private SseEmitter createEmitter(String email) {
-    SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
-    emitterRepository.save(email, emitter);
-
-    emitter.onCompletion(() -> emitterRepository.deleteByEmail(email));
-    emitter.onTimeout(() -> emitterRepository.deleteByEmail(email));
-
-    return emitter;
   }
 }

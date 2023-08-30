@@ -69,6 +69,7 @@ public class ReviewService {
     return reviewRepository.save(fixedReview);
   }
 
+  @Transactional(readOnly = true)
   public Page<Review> getReviewsByCustomerEmail(String customerEmail, Pageable pageable) {
     Customer customer = customerRepository.findByEmail(customerEmail)
         .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
@@ -81,6 +82,7 @@ public class ReviewService {
         .orElseThrow(() -> new IllegalArgumentException("리뷰가 존재하지 않습니다.")));
   }
 
+  @Transactional(readOnly = true)
   @Cacheable(value = "Review", cacheManager = "redisCacheManager")
   public List<Review> getAllReviews() {
     return reviewRepository.findAll();

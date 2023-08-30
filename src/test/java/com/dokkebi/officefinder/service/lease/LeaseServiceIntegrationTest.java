@@ -21,6 +21,7 @@ import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
+import com.dokkebi.officefinder.repository.notification.NotificationRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
@@ -68,8 +69,12 @@ public class LeaseServiceIntegrationTest {
   @Autowired
   private OfficePictureRepository officePictureRepository;
 
+  @Autowired
+  private NotificationRepository notificationRepository;
+
   @AfterEach
   void tearDown(){
+    notificationRepository.deleteAllInBatch();
     reviewRepository.deleteAllInBatch();
     leaseRepository.deleteAllInBatch();
     customerRepository.deleteAllInBatch();
