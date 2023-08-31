@@ -14,6 +14,7 @@ import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
 import com.dokkebi.officefinder.controller.office.dto.OfficeOverViewDto;
+import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
@@ -53,7 +54,7 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findByBasicCondition(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
+        .map(content -> OfficeOverViewDto.fromEntity(content, createOverview(reviewCount, reviewRate)))
         .collect(Collectors.toList());
 
     // then
@@ -83,7 +84,7 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findByBasicCondition(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
+        .map(content -> OfficeOverViewDto.fromEntity(content, createOverview(reviewCount, reviewRate)))
         .collect(Collectors.toList());
 
     // then
@@ -114,7 +115,7 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findByBasicCondition(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
+        .map(content -> OfficeOverViewDto.fromEntity(content, createOverview(reviewCount, reviewRate)))
         .collect(Collectors.toList());
 
     // then
@@ -141,7 +142,7 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findByDetailCondition(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
+        .map(content -> OfficeOverViewDto.fromEntity(content, createOverview(reviewCount, reviewRate)))
         .collect(Collectors.toList());
 
     // then
@@ -171,7 +172,7 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findByDetailCondition(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
+        .map(content -> OfficeOverViewDto.fromEntity(content, createOverview(reviewCount, reviewRate)))
         .collect(Collectors.toList());
 
     // then
@@ -202,7 +203,7 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findByDetailCondition(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
+        .map(content -> OfficeOverViewDto.fromEntity(content, createOverview(reviewCount, reviewRate)))
         .collect(Collectors.toList());
 
     // then
@@ -311,6 +312,13 @@ class OfficeRepositoryImplTest {
         .owner(owner)
         .maxCapacity(maxCapacity)
         .leaseFee(leaseFee)
+        .build();
+  }
+
+  private ReviewOverviewDto createOverview(int reviewCount, double reviewRate) {
+    return ReviewOverviewDto.builder()
+        .reviewCount(reviewCount)
+        .reviewRate(reviewRate)
         .build();
   }
 }

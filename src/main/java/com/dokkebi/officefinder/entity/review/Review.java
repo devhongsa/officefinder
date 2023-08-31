@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Review extends BaseEntity {
 
@@ -29,14 +30,27 @@ public class Review extends BaseEntity {
   @JoinColumn(name = "lease_id")
   private Lease lease;
 
+  @Column(name = "office_id")
+  private Long officeId;
+
+  @Column(name = "customer_id")
+  private Long customerId;
+
   @Column(name = "review_rating")
   private int rate;
   private String description;
 
-  @Builder
-  private Review(Long id, Lease lease, int rate, String description) {
+  public Review(Long id, Lease lease, Long officeId, Long customerId, int rate,
+      String description) {
     this.id = id;
     this.lease = lease;
+    this.officeId = officeId;
+    this.customerId = customerId;
+    this.rate = rate;
+    this.description = description;
+  }
+
+  public void updateReview(int rate, String description) {
     this.rate = rate;
     this.description = description;
   }
