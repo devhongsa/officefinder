@@ -9,6 +9,7 @@ import com.dokkebi.officefinder.service.lease.LeaseService;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
+import io.swagger.v3.oas.annotations.Operation;
 import java.security.Principal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +36,8 @@ public class LeaseController {
 
   private final LeaseService leaseService;
 
+  @Operation(summary = "임대 진행", description = "임대를 진행한다.")
+  @PreAuthorize("hasRole('CUSTOMER')")
   @PostMapping("/offices/{officeId}")
   public LeaseSuccessResponse leaseOffice(Principal principal, @PathVariable Long officeId,
       @RequestBody LeaseOfficeRequest req) {
@@ -44,6 +48,8 @@ public class LeaseController {
     return LeaseSuccessResponse.of(serviceResponse);
   }
 
+  @Operation(summary = "임대 정보 조회", description = "임대 정보를 조회할 수 있다.")
+  @PreAuthorize("hasRole('CUSTOMER')")
   @GetMapping("/customers/info/leases")
   public PageResponseDto<?> getLeaseInfo(Principal principal, Pageable pageableReceived) {
 
@@ -55,6 +61,8 @@ public class LeaseController {
     return createPageResponseDto(serviceResponses);
   }
 
+  @Operation(summary = "오피스에 신청된 임대 요청 조회", description = "자신의 오피스에 신청된 임대 요청들을 조회할 수 있다.")
+  @PreAuthorize("hasRole('OFFICE_OWNER')")
   @GetMapping("/agents/offices/{officeId}/lease-requests")
   public PageResponseDto<?> getLeaseRequest(Principal principal,
       @PathVariable Long officeId, Pageable pageableReceived) {
@@ -67,6 +75,8 @@ public class LeaseController {
     return createPageResponseDto(leaseRequestList);
   }
 
+  @Operation(summary = "오피스에 신청된 임대 수락", description = "자신의 오피스에 신청된 임대 요청을 수락한다.")
+  @PreAuthorize("hasRole('OFFICE_OWNER')")
   @PutMapping("/agents/office/lease-requests/{leaseId}/accept")
   public ResponseEntity acceptRequest(Principal principal, @PathVariable Long leaseId){
 
@@ -75,6 +85,8 @@ public class LeaseController {
     return ResponseEntity.ok().build();
   }
 
+  @Operation(summary = "오피스에 신청된 임대 거절", description = "자신의 오피스에 신청된 임대 요청을 거절한다.")
+  @PreAuthorize("hasRole('OFFICE_OWNER')")
   @PutMapping("/agents/offices/lease-requests/{leaseId}/reject")
   public ResponseEntity rejectRequest(Principal principal, @PathVariable Long leaseId){
 
