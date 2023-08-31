@@ -17,7 +17,7 @@ public class ScheduledService {
 
   private final JobLauncher jobLauncher;
 
-  private final Job updatedExpiredLeaseJob;
+  private final Job updateLeaseJob;
 
   @Scheduled(cron = "0 0 0 * * ?")
   public void runUpdateExpiredJob() throws Exception{
@@ -29,6 +29,6 @@ public class ScheduledService {
         .addDate("startDate", java.sql.Date.valueOf(startDate))
         .toJobParameters();
 
-    jobLauncher.run(updatedExpiredLeaseJob, jobParameters);
+    jobLauncher.run(updateLeaseJob, jobParameters);
   }
 }

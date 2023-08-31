@@ -28,10 +28,11 @@ public class BatchReaderConfig {
       @Value("#{jobParameters[expireDate]}") Date expireDate) {
 
     String query = "SELECT l FROM Lease l WHERE l.leaseStatus = :leaseStatus and "
-        + "l.leaseEndDate = :expireDate";
+        + "l.leaseEndDate BETWEEN :threeDaysBefore AND :expireDate";
 
     Map<String, Object> params = new HashMap<>();
     params.put("leaseStatus", LeaseStatus.PROCEEDING);
+    params.put("threeDaysBefore", expireDate.toLocalDate().minusDays(3));
     params.put("expireDate", expireDate.toLocalDate());
 
     return new JpaPagingItemReaderBuilder<Lease>()
@@ -39,7 +40,7 @@ public class BatchReaderConfig {
         .queryString(query)
         .parameterValues(params)
         .pageSize(PAGE_SIZE)
-        .name("leaseItemReader")
+        .name("leaseEndItemReader")
         .build();
   }
 
@@ -48,10 +49,12 @@ public class BatchReaderConfig {
   public JpaPagingItemReader<Lease> leaseStartItemReader(
       @Value("#{jobParameters[startDate]}") Date startDate){
 
-    String query = "SELECT l FROM Lease l WHERE l.leaseStatus = :leaseStatus and l.leaseStartDate = :startDate";
+    String query = "SELECT l FROM Lease l WHERE l.leaseStatus = :leaseStatus "
+        + "and l.leaseStartDate BETWEEN :threeDaysBefore AND :startDate";
 
     Map<String, Object> params = new HashMap<>();
     params.put("leaseStatus", LeaseStatus.AWAIT);
+    params.put("threeDaysBefore", startDate.toLocalDate().minusDays(3));
     params.put("startDate", startDate.toLocalDate());
 
     return new JpaPagingItemReaderBuilder<Lease>()
