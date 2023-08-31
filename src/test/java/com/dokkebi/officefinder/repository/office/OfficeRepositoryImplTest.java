@@ -3,8 +3,8 @@ package com.dokkebi.officefinder.repository.office;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-import com.dokkebi.officefinder.controller.office.dto.OfficeBasicSearchCond;
-import com.dokkebi.officefinder.controller.office.dto.OfficeDetailSearchCond;
+import com.dokkebi.officefinder.controller.office.dto.OfficeSearchCond;
+import com.dokkebi.officefinder.controller.office.dto.OfficeOverViewDto;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficeCondition;
@@ -13,7 +13,6 @@ import com.dokkebi.officefinder.entity.type.Address;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
-import com.dokkebi.officefinder.controller.office.dto.OfficeOverViewDto;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
@@ -44,14 +43,14 @@ class OfficeRepositoryImplTest {
     // given
     addData();
 
-    OfficeBasicSearchCond cond = new OfficeBasicSearchCond();
+    OfficeSearchCond cond = new OfficeSearchCond();
     PageRequest pageRequest = PageRequest.of(0, 20);
 
     int reviewCount = 42;
     double reviewRate = 4.82;
 
     // when
-    Page<Office> result = officeRepository.findByBasicCondition(cond, pageRequest);
+    Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
         .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
         .collect(Collectors.toList());
@@ -72,7 +71,7 @@ class OfficeRepositoryImplTest {
     // given
     addData();
 
-    OfficeBasicSearchCond cond = new OfficeBasicSearchCond();
+    OfficeSearchCond cond = new OfficeSearchCond();
     cond.setLegion("경상남도");
 
     PageRequest pageRequest = PageRequest.of(0, 20);
@@ -81,7 +80,7 @@ class OfficeRepositoryImplTest {
     double reviewRate = 4.82;
 
     // when
-    Page<Office> result = officeRepository.findByBasicCondition(cond, pageRequest);
+    Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
         .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
         .collect(Collectors.toList());
@@ -102,7 +101,7 @@ class OfficeRepositoryImplTest {
     // given
     addData();
 
-    OfficeBasicSearchCond cond = new OfficeBasicSearchCond();
+    OfficeSearchCond cond = new OfficeSearchCond();
     cond.setLegion("경상남도");
     cond.setCity("김해시");
 
@@ -112,7 +111,7 @@ class OfficeRepositoryImplTest {
     double reviewRate = 4.82;
 
     // when
-    Page<Office> result = officeRepository.findByBasicCondition(cond, pageRequest);
+    Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
         .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
         .collect(Collectors.toList());
@@ -132,14 +131,14 @@ class OfficeRepositoryImplTest {
     // given
     addData();
 
-    OfficeDetailSearchCond cond = new OfficeDetailSearchCond();
+    OfficeSearchCond cond = new OfficeSearchCond();
     PageRequest pageRequest = PageRequest.of(0, 20);
 
     int reviewCount = 42;
     double reviewRate = 4.82;
 
     // when
-    Page<Office> result = officeRepository.findByDetailCondition(cond, pageRequest);
+    Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
         .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
         .collect(Collectors.toList());
@@ -160,7 +159,7 @@ class OfficeRepositoryImplTest {
     // given
     addData();
 
-    OfficeDetailSearchCond cond = new OfficeDetailSearchCond();
+    OfficeSearchCond cond = new OfficeSearchCond();
     cond.setHaveShowerBooth(true);
 
     PageRequest pageRequest = PageRequest.of(0, 20);
@@ -169,7 +168,7 @@ class OfficeRepositoryImplTest {
     double reviewRate = 4.82;
 
     // when
-    Page<Office> result = officeRepository.findByDetailCondition(cond, pageRequest);
+    Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
         .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
         .collect(Collectors.toList());
@@ -189,7 +188,7 @@ class OfficeRepositoryImplTest {
     // given
     addData();
 
-    OfficeDetailSearchCond cond = new OfficeDetailSearchCond();
+    OfficeSearchCond cond = new OfficeSearchCond();
     cond.setHaveAirCondition(true);
     cond.setHaveHeater(true);
     cond.setHaveWhiteBoard(true);
@@ -200,7 +199,7 @@ class OfficeRepositoryImplTest {
     double reviewRate = 4.82;
 
     // when
-    Page<Office> result = officeRepository.findByDetailCondition(cond, pageRequest);
+    Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
         .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
         .collect(Collectors.toList());

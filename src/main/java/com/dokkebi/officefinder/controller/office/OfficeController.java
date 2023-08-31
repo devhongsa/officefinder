@@ -1,7 +1,7 @@
 package com.dokkebi.officefinder.controller.office;
 
 import com.dokkebi.officefinder.controller.office.dto.OfficeDetailResponseDto;
-import com.dokkebi.officefinder.controller.office.dto.OfficeDetailSearchCond;
+import com.dokkebi.officefinder.controller.office.dto.OfficeSearchCond;
 import com.dokkebi.officefinder.controller.office.dto.OfficeOverViewDto;
 import com.dokkebi.officefinder.dto.PageInfo;
 import com.dokkebi.officefinder.dto.PageResponseDto;
@@ -25,7 +25,7 @@ public class OfficeController {
   private final OfficeSearchService officeQueryService;
 
   @GetMapping
-  public PageResponseDto<?> showOfficeList(OfficeDetailSearchCond cond, Pageable pageable) {
+  public PageResponseDto<?> showOfficeList(OfficeSearchCond cond, Pageable pageable) {
     Page<Office> offices = officeQueryService.searchOfficeByDetailCondition(cond, pageable);
 
     PageInfo pageInfo = new PageInfo(pageable.getPageNumber(), pageable.getPageSize(),
