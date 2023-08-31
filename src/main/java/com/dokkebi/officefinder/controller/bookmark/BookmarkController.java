@@ -57,6 +57,7 @@ public class BookmarkController {
 
     List<BookmarkDto> list = bookmarks.stream().map(BookmarkDto::from)
         .collect(Collectors.toList());
+
     if (list.isEmpty()) {
       throw new IllegalArgumentException("등록된 북마크가 없습니다.");
     }

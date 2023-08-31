@@ -7,6 +7,7 @@ import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.service.review.ReviewService;
+import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -37,8 +38,9 @@ public class ReviewController {
 
   private final ReviewService reviewService;
 
+  @Operation(summary = "리뷰 등록", description = "회원은 만기된 임대에 대한 리뷰를 등록할 수 있다.")
   @PostMapping("api/customers/info/leases/{leaseId}/reviews")
-  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+  @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseDto<?> submitReview(
       @RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitControllerRequest,
       HttpServletRequest request, @PathVariable @Valid Long leaseId) {
@@ -48,11 +50,13 @@ public class ReviewController {
     return new ResponseDto<>("success", review.getId());
   }
 
+  @Operation(summary = "리뷰 조회", description = "자신이 등록한 리뷰를 조회할 수 있다.")
   @GetMapping("api/customers/reviews")
-  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+  @PreAuthorize("hasRole('CUSTOMER')")
   public PageResponseDto<?> getReviews(HttpServletRequest request,
       @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(defaultValue = "20") Integer size) {
+      @RequestParam(defaultValue = "20") Integer size
+  ) {
     String customerEmail = request.getUserPrincipal().getName();
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<Review> reviews = reviewService.getReviewsByCustomerEmail(customerEmail, pageable);
@@ -66,19 +70,22 @@ public class ReviewController {
     return new PageResponseDto<>(list, pageInfo);
   }
 
+  @Operation(summary = "리뷰 수정", description = "자신이 등록한 리뷰를 수정할 수 있다.")
   @PutMapping("api/customers/reviews/{reviewId}")
-  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+  @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseDto<?> updateReview(
       @RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitControllerRequest,
-      HttpServletRequest request, @PathVariable @Valid Long reviewId) {
+      HttpServletRequest request, @PathVariable @Valid Long reviewId
+  ) {
     String customerEmail = request.getUserPrincipal().getName();
     Review review = reviewService.update(submitControllerRequest, customerEmail, reviewId);
 
     return new ResponseDto<>("success", review.getId());
   }
 
+  @Operation(summary = "리뷰 삭제", description = "자신이 등록한 리뷰를 삭제할 수 있다.")
   @DeleteMapping("api/customers/reviews/{reviewId}")
-  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+  @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseDto<?> deleteReview(HttpServletRequest request,
       @PathVariable @Valid Long reviewId) {
     String customerEmail = request.getUserPrincipal().getName();
@@ -86,6 +93,5 @@ public class ReviewController {
 
     return new ResponseDto<>("success", reviewId);
   }
-
 
 }
