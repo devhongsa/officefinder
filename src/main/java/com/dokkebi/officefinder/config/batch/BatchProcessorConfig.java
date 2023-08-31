@@ -10,7 +10,18 @@ import org.springframework.context.annotation.Configuration;
 public class BatchProcessorConfig {
 
   @Bean
-  public ItemProcessor<Lease, Lease> leaseItemProcessor(){
+  public ItemProcessor<Lease, Lease> leaseStartItemProcessor(){
+    return new ItemProcessor<Lease, Lease>() {
+      @Override
+      public Lease process(Lease lease) throws Exception {
+        lease.changeLeaseStatus(LeaseStatus.PROCEEDING);
+        return lease;
+      }
+    };
+  }
+
+  @Bean
+  public ItemProcessor<Lease, Lease> leaseEndItemProcessor(){
     return new ItemProcessor<Lease, Lease>() {
       @Override
       public Lease process(Lease lease) throws Exception {

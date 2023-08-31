@@ -24,7 +24,7 @@ public class BatchReaderConfig {
 
   @Bean
   @StepScope
-  public JpaPagingItemReader<Lease> leaseItemReader(
+  public JpaPagingItemReader<Lease> leaseEndItemReader(
       @Value("#{jobParameters[expireDate]}") Date expireDate) {
 
     String query = "SELECT l FROM Lease l WHERE l.leaseStatus = :leaseStatus and "
@@ -40,6 +40,26 @@ public class BatchReaderConfig {
         .parameterValues(params)
         .pageSize(PAGE_SIZE)
         .name("leaseItemReader")
+        .build();
+  }
+
+  @Bean
+  @StepScope
+  public JpaPagingItemReader<Lease> leaseStartItemReader(
+      @Value("#{jobParameters[startDate]}") Date startDate){
+
+    String query = "SELECT l FROM Lease l WHERE l.leaseStatus = :leaseStatus and l.leaseStartDate = :startDate";
+
+    Map<String, Object> params = new HashMap<>();
+    params.put("leaseStatus", LeaseStatus.AWAIT);
+    params.put("startDate", startDate.toLocalDate());
+
+    return new JpaPagingItemReaderBuilder<Lease>()
+        .entityManagerFactory(emf)
+        .queryString(query)
+        .parameterValues(params)
+        .pageSize(PAGE_SIZE)
+        .name("leaseStartItemReader")
         .build();
   }
 }
