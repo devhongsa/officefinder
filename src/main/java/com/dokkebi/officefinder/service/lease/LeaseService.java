@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,7 +40,6 @@ public class LeaseService {
   private final CustomerRepository customerRepository;
   private final OfficeRepository officeRepository;
   private final ReviewRepository reviewRepository;
-  private final RedissonClient redissonClient;
 
   private final NotificationService notificationService;
 
