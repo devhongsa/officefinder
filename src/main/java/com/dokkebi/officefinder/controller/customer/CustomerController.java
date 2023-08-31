@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -47,6 +48,7 @@ public class CustomerController {
   private final S3Service s3Service;
 
   @PostMapping("/charge")
+  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
   public void chargeUserPoint(@RequestBody PointChargeRequestDto request, Principal principal) {
     customerService.chargeCustomerPoint(request.getChargeAmount(), principal.getName());
   }
@@ -61,6 +63,7 @@ public class CustomerController {
   }
 
   @PutMapping("/info/profileImage")
+  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
   public void modifyProfileImage(@RequestPart("value") MultipartFile multipartFile,
       Principal principal) {
 
@@ -71,7 +74,23 @@ public class CustomerController {
     if (!customer.getProfileImage().equals("None")) {
       s3Service.deleteImages(List.of(customer.getProfileImage()));
     }
-    s3Service.uploadImages(List.of(multipartFile));
+
+    String userImagePath = s3Service.uploadImages(List.of(multipartFile)).get(0);
+    customerService.changeCustomerProfileImage(userImagePath, principal.getName());
+  }
+
+  @DeleteMapping("/info/profileImage")
+  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+  public void initProfileImage(Principal principal){
+    Customer customer = customerRepository.findByEmail(principal.getName())
+        .orElseThrow(() -> new CustomException(USER_NOT_FOUND, USER_NOT_FOUND.getErrorMessage(),
+            HttpStatus.BAD_REQUEST));
+
+    if (!customer.getProfileImage().equals("None")) {
+      s3Service.deleteImages(List.of(customer.getProfileImage()));
+    }
+
+    customerService.changeCustomerProfileImage("None", principal.getName());
   }
 
   @GetMapping("/info/chargehistories")
