@@ -79,8 +79,6 @@ public class LeaseControllerDto {
 
     private LocalDate endDate;
 
-    private boolean isMonthly;
-
     private boolean isReviewed;
 
     public static LeaseLookUpResponse of (LeaseLookUpServiceResponse resp){
@@ -92,7 +90,6 @@ public class LeaseControllerDto {
           .paymentDate(resp.getPaymentDate())
           .startDate(resp.getStartDate())
           .endDate(resp.getEndDate())
-          .isMonthly(resp.isMonthlyPay())
           .isReviewed(resp.isReviewed())
           .build();
     }

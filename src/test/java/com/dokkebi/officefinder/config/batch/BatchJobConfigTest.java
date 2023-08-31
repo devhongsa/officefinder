@@ -13,6 +13,7 @@ import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
+import com.dokkebi.officefinder.repository.notification.NotificationRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
@@ -62,6 +63,9 @@ class BatchJobConfigTest {
   @Autowired
   private OfficeLocationRepository officeLocationRepository;
 
+  @Autowired
+  private NotificationRepository notificationRepository;
+
   @AfterEach
   public void tearDown(){
     // Lease가 Customer와 Office를 참조하고 있으므로 Lease를 먼저 삭제
@@ -72,6 +76,8 @@ class BatchJobConfigTest {
     officeConditionRepository.deleteAllInBatch();
     officeLocationRepository.deleteAllInBatch();
 
+    notificationRepository.deleteAllInBatch();
+
     // OfficeOwner 참고 하므로 먼저 삭제
     officeRepository.deleteAllInBatch();
 
@@ -80,7 +86,7 @@ class BatchJobConfigTest {
   }
 
   @Test
-  @DisplayName("이용 기간이 만료된 임대의 상태를 Expired 상태로 바꾸는 배치 기능 테스트")
+  @DisplayName("임대 시작 및 종료 관련 배치 기능 테스트")
   public void testUpdateExpiredLeaseJob() throws Exception{
 
     Customer customer = createCustomer("customer1", "test@test.com", "1234",
@@ -107,7 +113,7 @@ class BatchJobConfigTest {
 
     Office office = officeRepository.findById(savedId).get();
 
-    Lease lease = createLease(savedCustomer, office, 100000L, LeaseStatus.PROCEEDING, LocalDate.now().minusMonths(2), LocalDate.now().minusDays(1));
+    Lease lease = createLease(savedCustomer, office, 100000L, LeaseStatus.AWAIT, LocalDate.now(), LocalDate.now().plusDays(1));
     Lease lease2 = createLease(savedCustomer2, office, 100000L, LeaseStatus.PROCEEDING, LocalDate.now().minusMonths(2), LocalDate.now().minusDays(1));
 
     leaseRepository.save(lease);
@@ -116,6 +122,7 @@ class BatchJobConfigTest {
     // 배치 job 실행
     JobParameters jobParameters = new JobParametersBuilder()
         .addDate("expireDate", java.sql.Date.valueOf(LocalDate.now().minusDays(1)))
+        .addDate("startDate", java.sql.Date.valueOf(LocalDate.now()))
         .toJobParameters();
 
     JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
@@ -125,7 +132,11 @@ class BatchJobConfigTest {
     List<Lease> updatedLeases = leaseRepository.findAll();
 
     for(Lease l : updatedLeases){
-      assertEquals(LeaseStatus.EXPIRED, l.getLeaseStatus());
+      if(l.getId() == 1){
+        assertEquals(LeaseStatus.PROCEEDING, l.getLeaseStatus());
+      }else{
+        assertEquals(LeaseStatus.EXPIRED, l.getLeaseStatus());
+      }
     }
   }
 
