@@ -8,6 +8,7 @@ import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.security.TokenProvider;
 import com.dokkebi.officefinder.service.review.ReviewService;
+import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
@@ -39,8 +40,9 @@ public class ReviewController {
   private final ReviewService reviewService;
   private final TokenProvider tokenProvider;
 
+  @Operation(summary = "리뷰 등록", description = "회원은 만기된 임대에 대한 리뷰를 등록할 수 있다.")
   @PostMapping("api/customers/info/leases/{leaseId}/reviews")
-  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+  @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseDto<?> submitReview(
       @RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitControllerRequest,
       @RequestHeader("Authorization") String jwtHeader, @PathVariable @Valid Long leaseId) {
@@ -50,8 +52,9 @@ public class ReviewController {
     return new ResponseDto<>("success", review.getId());
   }
 
+  @Operation(summary = "리뷰 조회", description = "자신이 등록한 리뷰를 조회할 수 있다.")
   @GetMapping("api/customers/reviews")
-  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+  @PreAuthorize("hasRole('CUSTOMER')")
   public PageResponseDto<?> getCustomerReviews(@RequestHeader("Authorization") String jwtHeader,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "20") Integer size) {
@@ -68,8 +71,9 @@ public class ReviewController {
     return new PageResponseDto<>(list, pageInfo);
   }
 
+  @Operation(summary = "리뷰 수정", description = "자신이 등록한 리뷰를 수정할 수 있다.")
   @PutMapping("api/customers/reviews/{reviewId}")
-  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+  @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseDto<?> updateReview(@RequestHeader("Authorization") String jwtHeader,
       @RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitControllerRequest,
       @PathVariable @Valid Long reviewId) {
@@ -79,8 +83,9 @@ public class ReviewController {
     return new ResponseDto<>("success", review.getId());
   }
 
+  @Operation(summary = "리뷰 삭제", description = "자신이 등록한 리뷰를 삭제할 수 있다.")
   @DeleteMapping("api/customers/reviews/{reviewId}")
-  @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+  @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseDto<?> deleteReview(@RequestHeader("Authorization") String jwtHeader,
       @PathVariable @Valid Long reviewId) {
     Long customerId = tokenProvider.getUserIdFromHeader(jwtHeader);
