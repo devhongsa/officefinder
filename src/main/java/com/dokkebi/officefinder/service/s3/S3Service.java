@@ -27,7 +27,7 @@ public class S3Service {
   @Value("${cloud.aws.s3.bucket}")
   private String bucket;
 
-  public List<String> uploadOfficeImages(List<MultipartFile> multipartFileList) {
+  public List<String> uploadImages(List<MultipartFile> multipartFileList) {
     List<String> imageUrlList = new ArrayList<>();
 
     for (var image : multipartFileList) {

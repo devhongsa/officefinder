@@ -52,9 +52,11 @@ public class ReviewService {
   }
 
   @CachePut(value = "Review", key = "#reviewId", cacheManager = "redisCacheManager")
-  public Review update(SubmitControllerRequest submitControllerRequest, String customerEmail, Long reviewId) {
+  public Review update(SubmitControllerRequest submitControllerRequest, String customerEmail,
+      Long reviewId) {
     Review review = reviewRepository.findById(reviewId)
         .orElseThrow(() -> new IllegalArgumentException("리뷰가 존재하지 않습니다."));
+
     if (!review.getLease().getCustomer().getEmail().equals(customerEmail)) {
       throw new IllegalArgumentException("리뷰 작성자와 수정 요청자가 다릅니다.");
     }
@@ -73,7 +75,9 @@ public class ReviewService {
   public Page<Review> getReviewsByCustomerEmail(String customerEmail, Pageable pageable) {
     Customer customer = customerRepository.findByEmail(customerEmail)
         .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
     Page<Lease> leases = leaseRepository.findByCustomerId(customer.getId(), pageable);
+
     if (leases.isEmpty()) {
       throw new IllegalArgumentException("임대계약이 존재하지 않습니다.");
     }
@@ -92,11 +96,15 @@ public class ReviewService {
   public void delete(String customerEmail, Long reviewId) {
     Customer customer = customerRepository.findByEmail(customerEmail)
         .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
     Review review = reviewRepository.findById(reviewId)
         .orElseThrow(() -> new IllegalArgumentException("리뷰가 존재하지 않습니다."));
+
     if (!customer.getEmail().equals(review.getLease().getCustomer().getEmail())) {
       throw new IllegalArgumentException("리뷰 작성자 본인이 아닙니다.");
     }
+
     reviewRepository.delete(review);
   }
+
 }
