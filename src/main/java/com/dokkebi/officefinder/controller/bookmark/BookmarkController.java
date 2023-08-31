@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,8 @@ public class BookmarkController {
 
   private final TokenProvider tokenProvider;
   private final BookmarkService bookmarkService;
+
+  @PreAuthorize("hasRole('CUSTOMER')")
   @PostMapping("/submit")
   public ResponseDto<?> submitBookmark(@RequestHeader("Authorization") String jwtHeader,
       @RequestBody @Valid Long officeId) {
@@ -40,6 +43,7 @@ public class BookmarkController {
     return new ResponseDto<>("success", officeId);
   }
 
+  @PreAuthorize("hasRole('CUSTOMER')")
   @GetMapping
   public PageResponseDto<?> getBookmarks(@RequestHeader("Authorization") String jwtHeader,
       @RequestParam(defaultValue = "0") Integer page,
@@ -53,6 +57,7 @@ public class BookmarkController {
 
     List<BookmarkDto> list = bookmarks.stream().map(BookmarkDto::from)
         .collect(Collectors.toList());
+
     if (list.isEmpty()) {
       throw new IllegalArgumentException("등록된 북마크가 없습니다.");
     }
@@ -60,6 +65,7 @@ public class BookmarkController {
     return new PageResponseDto<>(list, pageInfo);
   }
 
+  @PreAuthorize("hasRole('CUSTOMER')")
   @DeleteMapping("/delete")
   public ResponseDto<?> deleteBookmark(@RequestHeader("Authorization") String jwtHeader,
       @RequestBody @Valid Long officeId) {

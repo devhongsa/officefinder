@@ -16,13 +16,13 @@ public class BatchTestConfig {
   private JobLauncher jobLauncher;
 
   @Autowired
-  private Job updatedExpiredLeaseJob;
+  private Job updateLeaseJob;
 
   @Bean
   public JobLauncherTestUtils jobLauncherTestUtils() {
     JobLauncherTestUtils jobLauncherTestUtils = new JobLauncherTestUtils();
     jobLauncherTestUtils.setJobLauncher(jobLauncher);
-    jobLauncherTestUtils.setJob(updatedExpiredLeaseJob);
+    jobLauncherTestUtils.setJob(updateLeaseJob);
     return jobLauncherTestUtils;
   }
 }

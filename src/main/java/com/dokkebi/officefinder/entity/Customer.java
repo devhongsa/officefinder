@@ -44,6 +44,9 @@ public class Customer extends BaseEntity implements UserDetails {
   @Convert(converter = Converter.RoleConverter.class)
   private Set<String> roles;
 
+  @Column(name = "profileImage")
+  private String profileImage;
+
   @Builder
   private Customer(Long id, String name, String email, String password, long point, Set<String> roles) {
     this.id = id;
@@ -52,6 +55,7 @@ public class Customer extends BaseEntity implements UserDetails {
     this.password = password;
     this.point = point;
     this.roles = roles;
+    this.profileImage = "None";
   }
 
   /*
@@ -76,6 +80,13 @@ public class Customer extends BaseEntity implements UserDetails {
       throw new IllegalArgumentException("포인트가 부족합니다. 충전해 주세요");
     }
     this.point -= requiredPoint;
+  }
+
+  /*
+  사진 변경 메서드
+   */
+  public void changeProfileImage(String imagePath){
+    this.profileImage = imagePath;
   }
 
   @Override

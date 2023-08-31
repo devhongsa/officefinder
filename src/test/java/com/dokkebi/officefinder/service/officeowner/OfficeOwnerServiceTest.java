@@ -90,7 +90,6 @@ class OfficeOwnerServiceTest {
         .leaseStartDate(startDate)
         .leaseEndDate(startDate.plusMonths(6))
         .leaseStatus(LeaseStatus.PROCEEDING)
-        .isMonthlyPay(false)
         .price(1000)
         .build();
     Lease lease2 = Lease.builder()
@@ -99,7 +98,6 @@ class OfficeOwnerServiceTest {
         .leaseStartDate(startDate.plusMonths(1))
         .leaseEndDate(startDate.plusMonths(6))
         .leaseStatus(LeaseStatus.EXPIRED)
-        .isMonthlyPay(false)
         .price(2000)
         .build();
 

@@ -9,9 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.dokkebi.officefinder.entity.Customer;
-import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.notification.Notification;
-import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.type.NotificationType;
 import com.dokkebi.officefinder.repository.notification.EmitterRepository;
 import com.dokkebi.officefinder.repository.notification.NotificationRepository;

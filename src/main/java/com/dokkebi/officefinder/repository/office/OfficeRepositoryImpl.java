@@ -5,8 +5,7 @@ import static com.dokkebi.officefinder.entity.office.QOffice.office;
 import static com.dokkebi.officefinder.entity.office.QOfficeCondition.officeCondition;
 import static com.dokkebi.officefinder.entity.office.QOfficeLocation.officeLocation;
 
-import com.dokkebi.officefinder.controller.office.dto.OfficeBasicSearchCond;
-import com.dokkebi.officefinder.controller.office.dto.OfficeDetailSearchCond;
+import com.dokkebi.officefinder.controller.office.dto.OfficeSearchCond;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.QOffice;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -28,7 +27,7 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
   }
 
   @Override
-  public Page<Office> findByDetailCondition(OfficeDetailSearchCond cond, Pageable pageable) {
+  public Page<Office> findBySearchCond(OfficeSearchCond cond, Pageable pageable) {
     List<Office> result = queryFactory.selectFrom(office)
         .join(office.officeCondition).fetchJoin()
         .join(office.officeLocation).fetchJoin()
@@ -81,36 +80,6 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
             haveWifiService(cond.getHaveWifi()),
             haveShowerBooth(cond.getHaveShowerBooth()),
             haveStorage(cond.getHaveStorage())
-        );
-
-    return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
-  }
-
-  @Override
-  public Page<Office> findByBasicCondition(OfficeBasicSearchCond cond, Pageable pageable) {
-    List<Office> result = queryFactory.selectFrom(office)
-        .join(office.officeCondition).fetchJoin()
-        .join(office.officeLocation).fetchJoin()
-        .where(
-            legionEquals(cond.getLegion()),
-            cityEquals(cond.getCity()),
-            townEquals(cond.getTown()),
-            villageEquals(cond.getVillage()),
-            maxCapacityLessThan(cond.getMaxCapacity())
-        )
-        .offset(pageable.getPageNumber())
-        .limit(pageable.getPageSize())
-        .fetch();
-
-    JPAQuery<Long> countQuery = queryFactory.select(office.count())
-        .join(office.officeCondition).fetchJoin()
-        .join(office.officeLocation).fetchJoin()
-        .where(
-            legionEquals(cond.getLegion()),
-            cityEquals(cond.getCity()),
-            townEquals(cond.getTown()),
-            villageEquals(cond.getVillage()),
-            maxCapacityLessThan(cond.getMaxCapacity())
         );
 
     return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
