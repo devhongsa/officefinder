@@ -27,8 +27,6 @@ public class LeaseServiceDto {
 
     private int customerCount;
 
-    private boolean isMonthlyPay;
-
     public static LeaseOfficeRequestDto of(String email, Long officeId, LeaseOfficeRequest request){
       return LeaseOfficeRequestDto.builder()
           .email(email)
