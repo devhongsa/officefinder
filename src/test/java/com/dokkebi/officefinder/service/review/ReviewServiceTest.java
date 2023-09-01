@@ -408,7 +408,7 @@ public class ReviewServiceTest {
     reviewRepository.save(review3);
     Thread.sleep(100);
 
-    Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
+    Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "id"));
     //when
     Page<Review> reviews = reviewService.getReviewsByOfficeId(infos.office.getId(), pageable);
     List<Review> reviewList = reviews.getContent();
