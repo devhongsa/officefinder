@@ -365,7 +365,7 @@ public class ReviewServiceTest {
 
   @Test
   @DisplayName("officeId로 리뷰 작성일자 역순으로 가져오기 성공")
-  public void getByOfficeId() {
+  public void getByOfficeId() throws InterruptedException {
     //given
     Infos infos = makeInfos("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
     Lease lease2 = leaseRepository.save(
@@ -398,9 +398,14 @@ public class ReviewServiceTest {
         .officeId(infos.office.getId())
         .rate(3)
         .description("test").build();
+
     reviewRepository.save(review);
+    Thread.sleep(100);
     reviewRepository.save(review2);
+    Thread.sleep(100);
     reviewRepository.save(review3);
+    Thread.sleep(100);
+
     Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
     //when
     Page<Review> reviews = reviewService.getReviewsByOfficeId(infos.office.getId(), pageable);
