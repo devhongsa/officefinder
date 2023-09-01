@@ -3,7 +3,6 @@ package com.dokkebi.officefinder.service.lease.dto;
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.LeaseOfficeRequest;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
-import com.dokkebi.officefinder.entity.type.Address;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -28,8 +27,6 @@ public class LeaseServiceDto {
 
     private int customerCount;
 
-    private boolean isMonthlyPay;
-
     public static LeaseOfficeRequestDto of(String email, Long officeId, LeaseOfficeRequest request){
       return LeaseOfficeRequestDto.builder()
           .email(email)
@@ -37,7 +34,6 @@ public class LeaseServiceDto {
           .startDate(LocalDate.parse(request.getStartDate()))
           .months(request.getMonths())
           .customerCount(request.getCustomerCount())
-          .isMonthlyPay(request.getIsMonthlyPay())
           .build();
     }
   }
@@ -93,8 +89,6 @@ public class LeaseServiceDto {
     private LocalDate startDate;
 
     private LocalDate endDate;
-
-    private boolean isMonthlyPay;
 
     private boolean isReviewed;
 

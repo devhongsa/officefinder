@@ -1,7 +1,6 @@
 package com.dokkebi.officefinder.repository.lease;
 
 import com.dokkebi.officefinder.entity.lease.Lease;
-import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

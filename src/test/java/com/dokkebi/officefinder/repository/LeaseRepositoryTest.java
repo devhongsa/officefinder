@@ -48,7 +48,7 @@ public class LeaseRepositoryTest {
     LocalDate endDate = startDate.plusDays(20);
 
     Lease lease = createLease(savedCustomer, savedOffice, 10000L, AWAIT, startDate,
-        endDate, false);
+        endDate);
     Lease savedLease = leaseRepository.save(lease);
 
     //when
@@ -57,9 +57,9 @@ public class LeaseRepositoryTest {
 
     //then
     assertThat(savedLease)
-        .extracting("price", "leaseStatus", "leaseStartDate", "leaseEndDate", "isMonthlyPay")
+        .extracting("price", "leaseStatus", "leaseStartDate", "leaseEndDate")
         .contains(
-            10000L, AWAIT, startDate, endDate, false
+            10000L, AWAIT, startDate, endDate
         );
   }
 
@@ -84,13 +84,13 @@ public class LeaseRepositoryTest {
     LocalDate endDate3 = startDate3.plusDays(20);
 
     Lease lease = createLease(customer, savedOffice, 10000L, EXPIRED, startDate,
-        endDate, false);
+        endDate);
     Lease lease2 = createLease(customer, savedOffice, 20000L, EXPIRED, startDate2,
-        endDate2, false);
+        endDate2);
     Lease lease3 = createLease(customer, savedOffice, 30000L, ACCEPTED, startDate3,
-        endDate3, false);
+        endDate3);
     Lease lease4 = createLease(customer2, savedOffice, 40000L, ACCEPTED, startDate3,
-        endDate3, false);
+        endDate3);
 
     leaseRepository.saveAll(List.of(lease, lease2, lease3, lease4));
 
@@ -102,11 +102,11 @@ public class LeaseRepositoryTest {
 
     // Then
     assertThat(content).hasSize(3)
-        .extracting("leaseStatus", "leaseStartDate", "leaseEndDate", "isMonthlyPay")
+        .extracting("leaseStatus", "leaseStartDate", "leaseEndDate")
         .containsExactlyInAnyOrder(
-            tuple(EXPIRED, startDate, endDate, false),
-            tuple(EXPIRED, startDate2, endDate2, false),
-            tuple(ACCEPTED, startDate3, endDate3, false)
+            tuple(EXPIRED, startDate, endDate),
+            tuple(EXPIRED, startDate2, endDate2),
+            tuple(ACCEPTED, startDate3, endDate3)
         );
 
     assertThat(content)
@@ -140,13 +140,13 @@ public class LeaseRepositoryTest {
     LocalDate endDate3 = startDate3.plusDays(20);
 
     Lease lease = createLease(customer, savedOffice, 10000L, AWAIT, startDate,
-        endDate, false);
+        endDate);
     Lease lease2 = createLease(customer, savedOffice, 20000L, AWAIT, startDate2,
-        endDate2, false);
+        endDate2);
     Lease lease3 = createLease(customer, savedOffice, 30000L, ACCEPTED, startDate3,
-        endDate3, false);
+        endDate3);
     Lease lease4 = createLease(customer2, savedOffice, 40000L, PROCEEDING, startDate3,
-        endDate3, false);
+        endDate3);
 
     leaseRepository.saveAll(List.of(lease, lease2, lease3, lease4));
 
@@ -158,10 +158,10 @@ public class LeaseRepositoryTest {
 
     // Then
     assertThat(content).hasSize(2)
-        .extracting("leaseStatus", "leaseStartDate", "leaseEndDate", "isMonthlyPay")
+        .extracting("leaseStatus", "leaseStartDate", "leaseEndDate")
         .containsExactlyInAnyOrder(
-            tuple(AWAIT, startDate, endDate, false),
-            tuple(AWAIT, startDate2, endDate2, false)
+            tuple(AWAIT, startDate, endDate),
+            tuple(AWAIT, startDate2, endDate2)
         );
 
     assertThat(content)
@@ -173,7 +173,7 @@ public class LeaseRepositoryTest {
   }
 
   private static Lease createLease(Customer savedCustomer, Office savedOffice, long price, LeaseStatus status,
-      LocalDate startDate, LocalDate endDate, boolean monthlyPay) {
+      LocalDate startDate, LocalDate endDate) {
 
     return Lease.builder()
         .customer(savedCustomer)
@@ -182,7 +182,6 @@ public class LeaseRepositoryTest {
         .leaseStatus(status)
         .leaseStartDate(startDate)
         .leaseEndDate(endDate)
-        .isMonthlyPay(monthlyPay)
         .build();
   }
 

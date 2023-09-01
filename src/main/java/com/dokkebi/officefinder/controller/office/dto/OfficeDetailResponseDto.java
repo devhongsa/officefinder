@@ -1,6 +1,10 @@
 package com.dokkebi.officefinder.controller.office.dto;
 
+import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.ReviewDto;
 import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.entity.review.Review;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,8 +24,11 @@ public class OfficeDetailResponseDto {
   private long leaseFee;
   private int maxCapacity;
   private OfficeOptionDto officeOptionDto;
+  private List<ReviewDto> reviews;
 
-  public static OfficeDetailResponseDto fromEntity(Office office) {
+  public static OfficeDetailResponseDto from(Office office, List<Review> reviews) {
+    List<ReviewDto> dtoList = reviews.stream().map(ReviewDto::from).collect(Collectors.toList());
+
     return OfficeDetailResponseDto.builder()
         .officeName(office.getName())
         .leaseFee(office.getLeaseFee())
@@ -29,6 +36,7 @@ public class OfficeDetailResponseDto {
         .address(office.getOfficeAddress())
         .remainOffices(office.getMaxRoomCount())
         .officeOptionDto(OfficeOptionDto.fromEntity(office.getOfficeCondition()))
+        .reviews(dtoList)
         .build();
   }
 }
