@@ -16,6 +16,7 @@ import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepositor
 import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
 import java.util.List;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
+@Slf4j
 public class ReviewServiceTest {
 
   @Autowired
@@ -385,19 +387,19 @@ public class ReviewServiceTest {
         .customerId(infos.customer.getId())
         .officeId(infos.office.getId())
         .rate(1)
-        .description("test").build();
+        .description("test1").build();
     Review review2 = Review.builder()
         .lease(lease2)
         .customerId(infos.customer.getId())
         .officeId(infos.office.getId())
         .rate(2)
-        .description("test").build();
+        .description("test2").build();
     Review review3 = Review.builder()
         .lease(lease3)
         .customerId(infos.customer.getId())
         .officeId(infos.office.getId())
         .rate(3)
-        .description("test").build();
+        .description("test3").build();
 
     reviewRepository.save(review);
     Thread.sleep(100);
@@ -411,7 +413,12 @@ public class ReviewServiceTest {
     Page<Review> reviews = reviewService.getReviewsByOfficeId(infos.office.getId(), pageable);
     List<Review> reviewList = reviews.getContent();
     //then
-    Assertions.assertThat(reviewList.get(0).getRate()).isEqualTo(3);
+
+    for (var element: reviewList){
+      log.info("element = {}", element.getRate());
+    }
+
+    Assertions.assertThat(reviewList.get(0).getDescription()).isEqualTo("test3");
   }
 
   @Test
