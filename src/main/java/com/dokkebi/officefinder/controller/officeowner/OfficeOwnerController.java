@@ -9,10 +9,12 @@ import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficePicture;
+import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.office.OfficeSearchService;
 import com.dokkebi.officefinder.service.office.OfficeService;
 import com.dokkebi.officefinder.service.officeowner.dto.OfficeOwnerServiceDto.RentalStatusDto;
+import com.dokkebi.officefinder.service.review.ReviewService;
 import com.dokkebi.officefinder.service.s3.S3Service;
 import com.dokkebi.officefinder.service.officeowner.OfficeOwnerService;
 import io.swagger.annotations.ApiOperation;
@@ -48,6 +50,7 @@ public class OfficeOwnerController {
   private final OfficePictureRepository officePictureRepository;
   private final S3Service s3Service;
   private final OfficeOwnerService officeOwnerService;
+  private final ReviewService reviewService;
 
   @ApiOperation(value = "오피스 리스트 조회", notes = "자신이 등록한 오피스 리스트를 조회할 수 있다.")
   @GetMapping("/offices")
@@ -79,8 +82,8 @@ public class OfficeOwnerController {
   @GetMapping("/offices/{officeId}")
   public OfficeDetailResponseDto showOfficeDetail(@PathVariable("officeId") Long officeId) {
     Office office = officeQueryService.getOfficeInfo(officeId);
-
-    return OfficeDetailResponseDto.fromEntity(office);
+    List<Review> reviews = reviewService.getTopTwoReviews(officeId);
+    return OfficeDetailResponseDto.from(office, reviews);
   }
 
   @Operation(summary = "오피스 정보 수정", description = "자신의 오피스 정보를 수정할 수 있다.")

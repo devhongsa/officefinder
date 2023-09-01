@@ -13,6 +13,7 @@ import com.dokkebi.officefinder.entity.type.Address;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
@@ -37,6 +38,9 @@ class OfficeRepositoryImplTest {
   @Autowired
   private OfficeConditionRepository officeConditionRepository;
 
+  private final ReviewOverviewDto reviewOverviewDto = ReviewOverviewDto.builder()
+      .reviewCount(42).reviewRate(4.82).build();
+
   @DisplayName("기본 조건인 도, 시, 군, 구, 수용 인원 수로 오피스를 검색할 수 있다. 지정하지 않으면 모든 오피스를 조회한다.")
   @Test
   public void findByBasicCondition() {
@@ -46,13 +50,10 @@ class OfficeRepositoryImplTest {
     OfficeSearchCond cond = new OfficeSearchCond();
     PageRequest pageRequest = PageRequest.of(0, 20);
 
-    int reviewCount = 42;
-    double reviewRate = 4.82;
-
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
+        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
         .collect(Collectors.toList());
 
     // then
@@ -76,13 +77,10 @@ class OfficeRepositoryImplTest {
 
     PageRequest pageRequest = PageRequest.of(0, 20);
 
-    int reviewCount = 42;
-    double reviewRate = 4.82;
-
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
+        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
         .collect(Collectors.toList());
 
     // then
@@ -107,13 +105,10 @@ class OfficeRepositoryImplTest {
 
     PageRequest pageRequest = PageRequest.of(0, 20);
 
-    int reviewCount = 42;
-    double reviewRate = 4.82;
-
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
+        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
         .collect(Collectors.toList());
 
     // then
@@ -134,13 +129,10 @@ class OfficeRepositoryImplTest {
     OfficeSearchCond cond = new OfficeSearchCond();
     PageRequest pageRequest = PageRequest.of(0, 20);
 
-    int reviewCount = 42;
-    double reviewRate = 4.82;
-
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
+        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
         .collect(Collectors.toList());
 
     // then
@@ -164,13 +156,10 @@ class OfficeRepositoryImplTest {
 
     PageRequest pageRequest = PageRequest.of(0, 20);
 
-    int reviewCount = 42;
-    double reviewRate = 4.82;
-
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
+        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
         .collect(Collectors.toList());
 
     // then
@@ -195,13 +184,10 @@ class OfficeRepositoryImplTest {
 
     PageRequest pageRequest = PageRequest.of(0, 20);
 
-    int reviewCount = 42;
-    double reviewRate = 4.82;
-
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewCount, reviewRate))
+        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
         .collect(Collectors.toList());
 
     // then
