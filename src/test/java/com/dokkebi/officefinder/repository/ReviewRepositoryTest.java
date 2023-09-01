@@ -82,13 +82,13 @@ public class ReviewRepositoryTest {
         .rate(5)
         .description("2").build();
     Review savedReview2 = reviewRepository.save(review2);
-    Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
+    Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "id"));
     //when
     Page<Review> reviews = reviewRepository.findByOfficeId(
         office.getId(), pageable);
     List<Review> reviewList = reviews.getContent();
     //then
-    Assertions.assertEquals(reviewList.get(0).getDescription(), "1");
+    Assertions.assertEquals(reviewList.get(0).getDescription(), "2");
   }
 
 
