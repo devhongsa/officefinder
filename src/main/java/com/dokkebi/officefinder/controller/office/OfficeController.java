@@ -63,7 +63,7 @@ public class OfficeController {
   public PageResponseDto<?> getOfficeReviews(@PathVariable @Valid Long officeId,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "20") Integer size) {
-    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     Page<Review> reviews = reviewService.getReviewsByOfficeId(officeId, pageable);
 
     PageInfo pageInfo = new PageInfo(pageable.getPageNumber(), pageable.getPageSize(),
