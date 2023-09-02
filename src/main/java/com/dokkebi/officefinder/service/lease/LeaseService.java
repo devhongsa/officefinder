@@ -6,6 +6,7 @@ import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
+import com.dokkebi.officefinder.entity.type.NotificationType;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
@@ -22,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,7 +40,6 @@ public class LeaseService {
   private final CustomerRepository customerRepository;
   private final OfficeRepository officeRepository;
   private final ReviewRepository reviewRepository;
-  private final RedissonClient redissonClient;
 
   private final NotificationService notificationService;
 
@@ -73,7 +72,9 @@ public class LeaseService {
     Lease lease = Lease.fromRequest(customer, office, totalPrice, leaseOfficeRequestDto);
     Lease savedLease = leaseRepository.save(lease);
 
-    notificationService.sendLeaseNotification(office);
+    notificationService.sendToOwner(office.getOwner().getEmail(),
+        NotificationType.LEASE_REQUEST_ARRIVED,
+        "임대 요청", office.getName() + "에 임대 요청이 들어왔습니다");
 
     return LeaseOfficeServiceResponse.of(savedLease);
   }
@@ -111,7 +112,9 @@ public class LeaseService {
     // 변경 후 저장안해도 더티 체킹으로 인해 반영됨
     lease.changeLeaseStatus(LeaseStatus.ACCEPTED);
 
-    notificationService.sendAcceptNotification(lease);
+    notificationService.sendToCustomer(lease.getCustomer(), NotificationType.LEASE_ACCEPTED,
+        "임대 요청 수락",
+        lease.getOffice().getName() + "에 대한 임대 요청이 수락되었습니다.");
   }
 
   @Transactional
@@ -125,7 +128,9 @@ public class LeaseService {
     // 거절 상태로 바꿈
     lease.changeLeaseStatus(LeaseStatus.DENIED);
 
-    notificationService.sendRejectNotification(lease);
+    notificationService.sendToCustomer(lease.getCustomer(), NotificationType.LEASE_DENIED,
+        "임대 요청 거절",
+        lease.getOffice().getName() + "에 대한 임대 요청이 거절되었습니다.");
   }
 
   private void refundPayment(Customer customer, long price) {

@@ -1,6 +1,7 @@
 package com.dokkebi.officefinder.controller.office.dto;
 
 import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,7 +30,7 @@ public class OfficeOverViewDto {
     this.leasePrice = leasePrice;
   }
 
-  public static OfficeOverViewDto fromEntity(Office office, int reviewCount, double reviewRate) {
+  public static OfficeOverViewDto fromEntity(Office office, ReviewOverviewDto reviewOverview) {
     StringBuilder addressBuilder = new StringBuilder();
     addressBuilder.append(office.getOfficeLocation().getAddress().getLegion()).append(" ");
     addressBuilder.append(office.getOfficeLocation().getAddress().getCity());
@@ -41,8 +42,8 @@ public class OfficeOverViewDto {
         .location(address)
         .name(office.getName())
         .leasePrice(office.getLeaseFee())
-        .reviewCount(reviewCount)
-        .reviewRate(reviewRate)
+        .reviewCount(reviewOverview.getReviewCount())
+        .reviewRate(reviewOverview.getReviewRate())
         .build();
   }
 }

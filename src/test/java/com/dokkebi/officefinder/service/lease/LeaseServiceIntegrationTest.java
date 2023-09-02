@@ -21,6 +21,7 @@ import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
+import com.dokkebi.officefinder.repository.notification.NotificationRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
@@ -68,8 +69,12 @@ public class LeaseServiceIntegrationTest {
   @Autowired
   private OfficePictureRepository officePictureRepository;
 
+  @Autowired
+  private NotificationRepository notificationRepository;
+
   @AfterEach
   void tearDown(){
+    notificationRepository.deleteAllInBatch();
     reviewRepository.deleteAllInBatch();
     leaseRepository.deleteAllInBatch();
     customerRepository.deleteAllInBatch();
@@ -106,7 +111,7 @@ public class LeaseServiceIntegrationTest {
     // set lease data
     LocalDate leaseDate = LocalDate.now();
     LeaseOfficeRequestDto leaseRequest = createLeaseRequest("test@test.com", savedId, leaseDate, 1,
-        4, false);
+        4);
 
     // when
     LeaseOfficeServiceResponse response = leaseService.leaseOffice(leaseRequest);
@@ -150,10 +155,10 @@ public class LeaseServiceIntegrationTest {
     LocalDate leaseDate = LocalDate.now();
     LeaseOfficeRequestDto leaseRequest = createLeaseRequest(customer.getEmail(), savedId, leaseDate,
         1,
-        4, false);
+        4);
     LeaseOfficeRequestDto leaseRequest2 = createLeaseRequest(customer2.getEmail(), savedId,
         leaseDate, 1,
-        4, false);
+        4);
 
     leaseService.leaseOffice(leaseRequest);
     // when
@@ -191,10 +196,10 @@ public class LeaseServiceIntegrationTest {
     LocalDate leaseDate2 = LocalDate.now();
 
     LeaseOfficeRequestDto leaseRequest = createLeaseRequest("test@test.com", savedId, leaseDate, 1,
-        4, false);
+        4);
     LeaseOfficeRequestDto leaseRequest2 = createLeaseRequest("test@test.com", savedId, leaseDate2,
         1,
-        4, false);
+        4);
     LeaseOfficeServiceResponse response = leaseService.leaseOffice(leaseRequest);
     LeaseOfficeServiceResponse response2 = leaseService.leaseOffice(leaseRequest2);
 
@@ -241,9 +246,9 @@ public class LeaseServiceIntegrationTest {
     LocalDate leaseDate2 = LocalDate.now();
 
     LeaseOfficeRequestDto leaseRequest = createLeaseRequest("test@test.com", savedId, leaseDate, 1,
-        4, false);
+        4);
     LeaseOfficeRequestDto leaseRequest2 = createLeaseRequest("test2@test.com", savedId, leaseDate2,
-        1, 4, false);
+        1, 4);
 
     leaseService.leaseOffice(leaseRequest);
     leaseService.leaseOffice(leaseRequest2);
@@ -288,7 +293,7 @@ public class LeaseServiceIntegrationTest {
     LocalDate leaseDate = LocalDate.now();
 
     LeaseOfficeRequestDto leaseRequest = createLeaseRequest("test@test.com", savedId, leaseDate, 1,
-         4, false);
+         4);
 
     LeaseOfficeServiceResponse response = leaseService.leaseOffice(leaseRequest);
 
@@ -328,7 +333,7 @@ public class LeaseServiceIntegrationTest {
     LocalDate leaseDate = LocalDate.now();
 
     LeaseOfficeRequestDto leaseRequest = createLeaseRequest("test@test.com", savedId, leaseDate, 1,
-        4, false);
+        4);
 
     LeaseOfficeServiceResponse response = leaseService.leaseOffice(leaseRequest);
 
@@ -345,7 +350,7 @@ public class LeaseServiceIntegrationTest {
   }
 
   private LeaseOfficeRequestDto createLeaseRequest(String email, Long officeId, LocalDate startDate,
-      int months, int customerCount, boolean isMonthlyPay) {
+      int months, int customerCount) {
 
     return LeaseOfficeRequestDto.builder()
         .email(email)
@@ -353,7 +358,6 @@ public class LeaseServiceIntegrationTest {
         .startDate(startDate)
         .months(months)
         .customerCount(customerCount)
-        .isMonthlyPay(isMonthlyPay)
         .build();
   }
 
