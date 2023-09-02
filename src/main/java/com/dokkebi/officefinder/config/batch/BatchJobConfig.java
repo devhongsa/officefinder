@@ -1,6 +1,7 @@
 package com.dokkebi.officefinder.config.batch;
 
 import com.dokkebi.officefinder.entity.lease.Lease;
+import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.flow.Flow;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
@@ -12,7 +13,6 @@ import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
@@ -39,47 +39,84 @@ public class BatchJobConfig {
     return taskExecutor;
   }
   @Bean
-  public Flow updateLeaseEndFlow(
-      @Qualifier("leaseEndItemReader") JpaPagingItemReader<Lease> reader,
-      @Qualifier("leaseEndItemProcessor") ItemProcessor<Lease, Lease> processor,
-      JpaItemWriter<Lease> writer){
+  public Flow updateLeaseEndFlow(JpaPagingItemReader<Lease> leaseEndItemReader,
+      ItemProcessor<Lease, Lease> leaseEndItemProcessor,
+      JpaItemWriter<Lease> leaseItemWriter){
 
     return new FlowBuilder<Flow>("updateLeaseEndFlow")
         .start(stepBuilderFactory.get("updateLeaseEndStep")
-        .<Lease, Lease>chunk(CHUNK_SIZE)
-            .reader(reader)
-            .processor(processor)
-            .writer(writer)
+            .<Lease, Lease>chunk(CHUNK_SIZE)
+            .reader(leaseEndItemReader)
+            .processor(leaseEndItemProcessor)
+            .writer(leaseItemWriter)
             .build())
         .build();
   }
 
   @Bean
-  public Flow updateLeaseStartFlow(
-      @Qualifier("leaseStartItemReader") JpaPagingItemReader<Lease> reader,
-      @Qualifier("leaseStartItemProcessor") ItemProcessor<Lease, Lease> processor,
-      JpaItemWriter<Lease> writer){
+  public Flow updateLeaseStartFlow(JpaPagingItemReader<Lease> leaseStartItemReader,
+      ItemProcessor<Lease, Lease> leaseStartItemProcessor,
+      JpaItemWriter<Lease> leaseItemWriter){
 
     return new FlowBuilder<Flow>("updateLeaseStartFlow")
         .start(stepBuilderFactory.get("updateLeaseStartStep")
             .<Lease, Lease>chunk(CHUNK_SIZE)
-            .reader(reader)
-            .processor(processor)
-            .writer(writer)
+            .reader(leaseStartItemReader)
+            .processor(leaseStartItemProcessor)
+            .writer(leaseItemWriter)
             .build())
         .build();
   }
 
   @Bean
-  public Job updateLeaseJob(@Qualifier("updateLeaseEndFlow") Flow endFlow,
-      @Qualifier("updateLeaseStartFlow") Flow startFlow){
+  public Step alarmLeaseStartStep(JpaPagingItemReader<Lease> alarmStartItemReader,
+      ItemProcessor<Lease, Lease> alarmLeaseStartProcessor,
+      JpaItemWriter<Lease> leaseItemWriter) {
 
+    return stepBuilderFactory.get("alarmLeaseStartStep")
+        .<Lease, Lease>chunk(CHUNK_SIZE)
+        .reader(alarmStartItemReader)
+        .processor(alarmLeaseStartProcessor)
+        .writer(leaseItemWriter)
+        .build();
+  }
+
+  @Bean
+  public Step alarmLeaseExpireStep(JpaPagingItemReader<Lease> alarmExpireItemReader,
+      ItemProcessor<Lease, Lease> alarmLeaseEndProcessor,
+      JpaItemWriter<Lease> leaseItemWriter) {
+
+    return stepBuilderFactory.get("alarmLeaseExpireStep")
+        .<Lease, Lease>chunk(CHUNK_SIZE)
+        .reader(alarmExpireItemReader)
+        .processor(alarmLeaseEndProcessor)
+        .writer(leaseItemWriter)
+        .build();
+  }
+
+  @Bean
+  public Job updateLeaseJob(Flow updateLeaseEndFlow, Flow updateLeaseStartFlow) {
     return jobBuilderFactory.get("updateLeaseJob")
-        .start(splitFlow(endFlow, startFlow))
+        .start(splitFlow(updateLeaseEndFlow, updateLeaseStartFlow))
         .end()
         .build();
   }
-  public Flow splitFlow(Flow endFlow, Flow startFlow) {
+
+  @Bean
+  public Job alarmLeaseStartJob(Step alarmLeaseStartStep) {
+    return jobBuilderFactory.get("alarmLeaseStartJob")
+        .start(alarmLeaseStartStep)
+        .build();
+  }
+
+  @Bean
+  public Job alarmLeaseExpireJob(Step alarmLeaseExpireStep) {
+    return jobBuilderFactory.get("alarmLeaseExpireJob")
+        .start(alarmLeaseExpireStep)
+        .build();
+  }
+
+  private Flow splitFlow(Flow endFlow, Flow startFlow) {
     return new FlowBuilder<SimpleFlow>("splitFlow")
         .split(batchTaskExecutor())
         .add(endFlow, startFlow)
