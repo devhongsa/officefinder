@@ -22,52 +22,67 @@ public class BatchProcessorConfig {
 
   @Bean
   @StepScope
-  public ItemProcessor<Lease, Lease> leaseStartItemProcessor(
-      @Value("#{jobParameters[startDate]}") Date startDate
-  ){
-    return lease -> handleLeaseStart(lease, startDate);
+  public ItemProcessor<Lease, Lease> leaseEndItemProcessor() {
+    return lease -> {
+      lease.changeLeaseStatus(LeaseStatus.EXPIRED);
+      return lease;
+    };
   }
 
   @Bean
   @StepScope
-  public ItemProcessor<Lease, Lease> leaseEndItemProcessor(
-      @Value("#{jobParameters[expireDate]}") Date expireDate
-  ){
-    return lease -> handleLeaseEnd(lease, expireDate);
-  }
-
-  private Lease handleLeaseStart(Lease lease, Date referenceDate) {
-    LocalDate currentDate = referenceDate.toLocalDate();
-    LocalDate leaseStartDate = lease.getLeaseStartDate();
-    int daysDifference = (int) ChronoUnit.DAYS.between(currentDate, leaseStartDate);
-
-    if(daysDifference > 0){
-      notificationService.sendToCustomer(lease.getCustomer(), NotificationType.LEASE_REMINDER,
-          "임대 시작 임박", "임대 시작 " + daysDifference + "일 남았습니다 :)");
-    }else{
+  public ItemProcessor<Lease, Lease> leaseStartItemProcessor() {
+    return lease -> {
       lease.changeLeaseStatus(LeaseStatus.PROCEEDING);
-      notificationService.sendToCustomer(lease.getCustomer(), NotificationType.LEASE_PROCEED,
-          "임대 시작", "임대 시작 당일입니다 :)");
-    }
-
-    return lease;
+      return lease;
+    };
   }
 
-  private Lease handleLeaseEnd(Lease lease, Date referenceDate) {
-    LocalDate currentDate = referenceDate.toLocalDate();
-    LocalDate leaseEndDate = lease.getLeaseEndDate();
-    int daysDifference = (int) ChronoUnit.DAYS.between(currentDate, leaseEndDate);
+  @Bean
+  @StepScope
+  public ItemProcessor<Lease, Lease> alarmLeaseStartProcessor(
+      @Value("#{jobParameters[startDate]}") Date startDate
+  ) {
+    LocalDate currentDate = startDate.toLocalDate();
 
-    if(daysDifference > 0){
-      notificationService.sendToCustomer(lease.getCustomer(), NotificationType.LEASE_REMINDER,
-          "임대 만료 임박", "임대 만료 " + daysDifference + "일 남았습니다 :)");
-    }else{
-      lease.changeLeaseStatus(LeaseStatus.EXPIRED);
-      notificationService.sendToCustomer(lease.getCustomer(), NotificationType.LEASE_EXPIRED,
-          "임대 만료", "임대가 만료되었습니다. 이용해 주셔서 감사합니다 :)");
-    }
+    return lease -> {
+      LocalDate leaseStartDate = lease.getLeaseStartDate();
+      int daysDifference = (int) ChronoUnit.DAYS.between(leaseStartDate, currentDate);
+      String officeName = lease.getOffice().getName();
 
-    return lease;
+      if (daysDifference == 0) {
+        notificationService.sendToCustomer(lease.getCustomer(), NotificationType.LEASE_PROCEED,
+            "임대 시작", officeName + "에 대한 임대가 시작되었습니다 :)");
+      } else {
+        notificationService.sendToCustomer(lease.getCustomer(), NotificationType.LEASE_REMINDER,
+            "임대 시작 임박", officeName + "에 대한 임대 시작 " + daysDifference + "일 남았습니다 :)");
+      }
+      return lease;
+    };
+  }
+
+  @Bean
+  @StepScope
+  public ItemProcessor<Lease, Lease> alarmLeaseEndProcessor(
+      @Value("#{jobParameters[expireDate]}") Date expireDate) {
+
+    LocalDate currentDate = expireDate.toLocalDate();
+
+    return lease -> {
+      LocalDate leaseEndDate = lease.getLeaseEndDate();
+      int daysDifference = (int) ChronoUnit.DAYS.between(leaseEndDate, currentDate);
+      String officeName = lease.getOffice().getName();
+
+      if (daysDifference == 0) {
+        notificationService.sendToCustomer(lease.getCustomer(), NotificationType.LEASE_EXPIRED,
+            "임대 만료", officeName + "에 대한 임대가 만료되었습니다. 이용해 주셔서 감사합니다 :)");
+      } else {
+        notificationService.sendToCustomer(lease.getCustomer(), NotificationType.LEASE_REMINDER,
+            "임대 만료 임박", officeName + "에 대한 임대가 만료 " + daysDifference + "일 남았습니다 :)");
+      }
+
+      return lease;
+    };
   }
 }
 
