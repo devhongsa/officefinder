@@ -10,6 +10,8 @@ import com.dokkebi.officefinder.entity.notification.OfficeOwnerNotification;
 import com.dokkebi.officefinder.entity.type.NotificationType;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
+import com.dokkebi.officefinder.repository.CustomerRepository;
+import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.notification.EmitterRepository;
 import com.dokkebi.officefinder.repository.notification.CustomerNotificationRepository;
 import com.dokkebi.officefinder.repository.notification.OfficeOwnerNotificationRepository;
@@ -18,6 +20,8 @@ import java.io.IOException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -25,6 +29,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationService {
+
+  private final OfficeOwnerRepository officeOwnerRepository;
+
+  private final CustomerRepository customerRepository;
 
   private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
 
@@ -69,6 +77,28 @@ public class NotificationService {
     OfficeOwnerNotification notification = officeOwnerNotificationRepository.save(
         createOwnerNotification(officeOwner, notificationType, title, content));
     sendNotificationToEmail(officeOwner.getEmail(), NotificationResponseDto.from(notification));
+  }
+
+  public Page<NotificationResponseDto> getNotificationByOwner(String email, Pageable pageable){
+
+    OfficeOwner officeOwner = officeOwnerRepository.findByEmail(email)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.OWNER_NOT_FOUND));
+
+    Page<OfficeOwnerNotification> notifications = officeOwnerNotificationRepository.findAllByOfficeOwner(
+        officeOwner, pageable);
+
+    return notifications.map(n -> NotificationResponseDto.from(n));
+  }
+
+  public Page<NotificationResponseDto> getNotificationByCustomer(String email, Pageable pageable){
+
+    Customer customer = customerRepository.findByEmail(email)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+
+    Page<CustomerNotification> notifications = customerNotificationRepository.findAllByCustomer(
+        customer, pageable);
+
+    return notifications.map(n -> NotificationResponseDto.from(n));
   }
 
   private void sendNotificationToEmail(String email, Object notificationData) {
