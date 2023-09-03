@@ -9,10 +9,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.dokkebi.officefinder.entity.Customer;
-import com.dokkebi.officefinder.entity.notification.Notification;
+import com.dokkebi.officefinder.entity.OfficeOwner;
+import com.dokkebi.officefinder.entity.notification.CustomerNotification;
+import com.dokkebi.officefinder.entity.notification.OfficeOwnerNotification;
 import com.dokkebi.officefinder.entity.type.NotificationType;
 import com.dokkebi.officefinder.repository.notification.EmitterRepository;
-import com.dokkebi.officefinder.repository.notification.NotificationRepository;
+import com.dokkebi.officefinder.repository.notification.CustomerNotificationRepository;
+import com.dokkebi.officefinder.repository.notification.OfficeOwnerNotificationRepository;
 import java.util.HashMap;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +32,10 @@ class NotificationServiceTest {
   private EmitterRepository emitterRepository;
 
   @Mock
-  private NotificationRepository notificationRepository;
+  private CustomerNotificationRepository customerNotificationRepository;
+
+  @Mock
+  private OfficeOwnerNotificationRepository officeOwnerNotificationRepository;
 
   @InjectMocks
   private NotificationService notificationService;
@@ -72,7 +78,7 @@ class NotificationServiceTest {
     Customer mockCustomer = mock(Customer.class);
     when(mockCustomer.getEmail()).thenReturn("test@example.com");
 
-    when(notificationRepository.save(any())).thenReturn(new Notification(
+    when(customerNotificationRepository.save(any())).thenReturn(new CustomerNotification(
         1L, "Title", "Content", NotificationType.LEASE_DENIED, mockCustomer
     ));
 
@@ -81,17 +87,25 @@ class NotificationServiceTest {
         "Content");
 
     // Then
-    verify(notificationRepository, times(1)).save(any());
+    verify(customerNotificationRepository, times(1)).save(any());
     verify(emitterRepository, times(1)).findAllEmitterStartsWithEmail("test@example.com");
   }
 
   @Test
   @DisplayName("임대 업자에게 보내는 경우")
   public void testSendToOwner(){
-    when(emitterRepository.findAllEmitterStartsWithEmail(anyString())).thenReturn(new HashMap<>());
+    // Given
+    OfficeOwner mockOfficeOwner = mock(OfficeOwner.class);
+    when(mockOfficeOwner.getEmail()).thenReturn("test@example.com");
 
-    notificationService.sendToOwner("test@example.com", NotificationType.LEASE_DENIED, "Title", "Content");
+    when(officeOwnerNotificationRepository.save(any())).thenReturn(new OfficeOwnerNotification(
+        1L, "Title", "Content", NotificationType.LEASE_REQUEST_ARRIVED, mockOfficeOwner
+    ));
 
+    notificationService.sendToOwner(mockOfficeOwner, NotificationType.LEASE_REQUEST_ARRIVED, "Title"
+        , "Content");
+
+    verify(officeOwnerNotificationRepository, times(1)).save(any());
     verify(emitterRepository, times(1)).findAllEmitterStartsWithEmail("test@example.com");
   }
 }
