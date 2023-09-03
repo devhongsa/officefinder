@@ -3,6 +3,8 @@ package com.dokkebi.officefinder.entity.chat;
 import com.dokkebi.officefinder.entity.BaseEntity;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.OfficeOwner;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,13 +37,31 @@ public class ChatRoom extends BaseEntity {
   private OfficeOwner officeOwner;
 
   @Column(nullable = false)
-  private String roomName;
+  private String roomUid;
+
+  private LocalDateTime lastSeenCustomer;
+
+  private LocalDateTime lastSeenOfficeOwner;
 
   @Builder
-  private ChatRoom(Long id, Customer customer, OfficeOwner officeOwner, String roomName) {
+  private ChatRoom(Long id, Customer customer, OfficeOwner officeOwner, String roomUid,
+      LocalDateTime lastSeenCustomer, LocalDateTime lastSeenOfficeOwner) {
     this.id = id;
     this.customer = customer;
     this.officeOwner = officeOwner;
-    this.roomName = roomName;
+    this.roomUid = roomUid;
+    this.lastSeenCustomer = lastSeenCustomer;
+    this.lastSeenOfficeOwner = lastSeenOfficeOwner;
   }
+
+  public static ChatRoom create(Customer customer, OfficeOwner officeOwner) {
+    return ChatRoom.builder()
+        .customer(customer)
+        .officeOwner(officeOwner)
+        .lastSeenCustomer(LocalDateTime.now())
+        .lastSeenOfficeOwner(LocalDateTime.now())
+        .roomUid(UUID.randomUUID().toString())
+        .build();
+  }
+
 }

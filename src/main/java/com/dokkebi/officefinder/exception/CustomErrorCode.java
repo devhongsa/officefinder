@@ -23,7 +23,11 @@ public enum CustomErrorCode {
   OFFICE_NOT_OWNED_BY_OWNER(HttpStatus.NOT_FOUND, "해당 사용자가 소유하고 있는 오피스가 아닙니다."),
   OWNER_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 이메일을 가진 임대업자를 찾을 수 없습니다."),
   LEASE_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 임대 정보가 조회되지 않습니다."),
+  SSE_SEND_ACCEPT_NOTIFICATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "임대 수락 알림 전송에 실패하였습니다."),
+  SSE_SEND_REJECT_NOTIFICATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "임대 거절 알림 전송에 실패하였습니다."),
   NO_ROOMS_AVAILABLE_FOR_LEASE(HttpStatus.BAD_REQUEST, "현재 임대예약이 가능한 방이 없습니다."),
+  CHAT_ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "채팅방을 찾을 수 없습니다."),
+  CHAT_ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "해당 오피스와의 채팅방이 이미 존재합니다."),
   SSE_SEND_NOTIFICATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "알림 전송을 실패하였습니다.");
 
   private final HttpStatus httpStatus;
