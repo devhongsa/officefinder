@@ -1,6 +1,7 @@
 package com.dokkebi.officefinder.service.notification.dto;
 
-import com.dokkebi.officefinder.entity.notification.Notification;
+import com.dokkebi.officefinder.entity.notification.CustomerNotification;
+import com.dokkebi.officefinder.entity.notification.OfficeOwnerNotification;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +20,8 @@ public class NotificationResponseDto {
 
   private LocalDateTime createdAt;
 
-  public static NotificationResponseDto NotificationToResponseDto(Notification notification){
+  // CustomerNotification을 NotificationResponseDto로 변환
+  public static NotificationResponseDto from(CustomerNotification notification) {
     return NotificationResponseDto.builder()
         .title(notification.getTitle())
         .content(notification.getContent())
@@ -27,11 +29,12 @@ public class NotificationResponseDto {
         .build();
   }
 
-  public static NotificationResponseDto makeNotificationResponseDto(String title, String content){
+  // OfficeOwnerNotification을 NotificationResponseDto로 변환
+  public static NotificationResponseDto from(OfficeOwnerNotification notification) {
     return NotificationResponseDto.builder()
-        .title(title)
-        .content(content)
-        .createdAt(LocalDateTime.now())
+        .title(notification.getTitle())
+        .content(notification.getContent())
+        .createdAt(notification.getCreatedAt())
         .build();
   }
 }

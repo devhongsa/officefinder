@@ -1,15 +1,18 @@
 package com.dokkebi.officefinder.service.notification;
 
-import static com.dokkebi.officefinder.entity.notification.Notification.createNotification;
-import static com.dokkebi.officefinder.service.notification.dto.NotificationResponseDto.makeNotificationResponseDto;
+import static com.dokkebi.officefinder.entity.notification.CustomerNotification.createCustomerNotification;
+import static com.dokkebi.officefinder.entity.notification.OfficeOwnerNotification.createOwnerNotification;
 
 import com.dokkebi.officefinder.entity.Customer;
-import com.dokkebi.officefinder.entity.notification.Notification;
+import com.dokkebi.officefinder.entity.OfficeOwner;
+import com.dokkebi.officefinder.entity.notification.CustomerNotification;
+import com.dokkebi.officefinder.entity.notification.OfficeOwnerNotification;
 import com.dokkebi.officefinder.entity.type.NotificationType;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.notification.EmitterRepository;
-import com.dokkebi.officefinder.repository.notification.NotificationRepository;
+import com.dokkebi.officefinder.repository.notification.CustomerNotificationRepository;
+import com.dokkebi.officefinder.repository.notification.OfficeOwnerNotificationRepository;
 import com.dokkebi.officefinder.service.notification.dto.NotificationResponseDto;
 import java.io.IOException;
 import java.util.Map;
@@ -27,7 +30,9 @@ public class NotificationService {
 
   private final EmitterRepository emitterRepository;
 
-  private final NotificationRepository notificationRepository;
+  private final CustomerNotificationRepository customerNotificationRepository;
+
+  private final OfficeOwnerNotificationRepository officeOwnerNotificationRepository;
 
   // 회원의 email을 바탕으로 SSE 연결을 설정
   // LastEvenId가 포함된 경우, 연결이 끊긴 이후의 Event들을 전송
@@ -54,14 +59,16 @@ public class NotificationService {
 
   public void sendToCustomer(Customer customer, NotificationType notificationType, String title,
       String content) {
-    Notification notification = notificationRepository.save(
-        createNotification(customer, notificationType, title, content));
-    sendNotificationToEmail(customer.getEmail(), notification);
+    CustomerNotification notification = customerNotificationRepository.save(
+        createCustomerNotification(customer, notificationType, title, content));
+    sendNotificationToEmail(customer.getEmail(), NotificationResponseDto.from(notification));
   }
 
-  public void sendToOwner(String email, NotificationType type, String title, String content) {
-    NotificationResponseDto dto = makeNotificationResponseDto(title, content);
-    sendNotificationToEmail(email, dto);
+  public void sendToOwner(OfficeOwner officeOwner, NotificationType notificationType, String title,
+      String content) {
+    OfficeOwnerNotification notification = officeOwnerNotificationRepository.save(
+        createOwnerNotification(officeOwner, notificationType, title, content));
+    sendNotificationToEmail(officeOwner.getEmail(), NotificationResponseDto.from(notification));
   }
 
   private void sendNotificationToEmail(String email, Object notificationData) {

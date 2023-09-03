@@ -1,7 +1,7 @@
 package com.dokkebi.officefinder.entity.notification;
 
 import com.dokkebi.officefinder.entity.BaseEntity;
-import com.dokkebi.officefinder.entity.Customer;
+import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.type.NotificationType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -26,7 +26,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Builder
-public class Notification extends BaseEntity {
+public class OfficeOwnerNotification extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,13 +40,13 @@ public class Notification extends BaseEntity {
   private NotificationType notificationType;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "customer_id")
-  private Customer customer;
+  @JoinColumn(name = "office_owner_id")
+  private OfficeOwner officeOwner;
 
-  public static Notification createNotification(Customer customer, NotificationType type,
-      String title, String content){
-    return Notification.builder()
-        .customer(customer)
+  public static OfficeOwnerNotification createOwnerNotification(OfficeOwner officeOwner,
+      NotificationType type, String title, String content) {
+    return OfficeOwnerNotification.builder()
+        .officeOwner(officeOwner)
         .notificationType(type)
         .title(title)
         .content(content)
