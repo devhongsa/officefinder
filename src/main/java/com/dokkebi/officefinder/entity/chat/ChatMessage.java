@@ -1,8 +1,6 @@
 package com.dokkebi.officefinder.entity.chat;
 
 import com.dokkebi.officefinder.entity.BaseEntity;
-import com.dokkebi.officefinder.entity.Customer;
-import com.dokkebi.officefinder.entity.OfficeOwner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -30,23 +28,20 @@ public class ChatMessage extends BaseEntity {
   @JoinColumn(name = "chat_room_id")
   private ChatRoom chatRoom;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "customer_id")
-  private Customer chatCustomer;
+  private Long customerId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "owner_id")
-  private OfficeOwner chatOwner;
+  private Long officeOwnerId;
 
-  private String content;
+  @Column(nullable = false)
+  private String message;
 
   @Builder
-  private ChatMessage(Long id, ChatRoom chatRoom, Customer chatCustomer, OfficeOwner chatOwner,
-      String content) {
+  private ChatMessage(Long id, ChatRoom chatRoom, Long customerId, Long officeOwnerId,
+      String message) {
     this.id = id;
     this.chatRoom = chatRoom;
-    this.chatCustomer = chatCustomer;
-    this.chatOwner = chatOwner;
-    this.content = content;
+    this.customerId = customerId;
+    this.officeOwnerId = officeOwnerId;
+    this.message = message;
   }
 }
