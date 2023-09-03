@@ -72,8 +72,7 @@ public class LeaseService {
     Lease lease = Lease.fromRequest(customer, office, totalPrice, leaseOfficeRequestDto);
     Lease savedLease = leaseRepository.save(lease);
 
-    notificationService.sendToOwner(office.getOwner().getEmail(),
-        NotificationType.LEASE_REQUEST_ARRIVED,
+    notificationService.sendToOwner(office.getOwner(), NotificationType.LEASE_REQUEST_ARRIVED,
         "임대 요청", office.getName() + "에 임대 요청이 들어왔습니다");
 
     return LeaseOfficeServiceResponse.of(savedLease);
