@@ -80,7 +80,7 @@ processResources.dependsOn('copyPrivate')
 task copyPrivate(type: Copy){
 	copy{
 		from './officefinder-submodule'
-		include "application-release.yml"
+		include "application-prod.yml"
 		into 'src/main/resources'
 	}
 
