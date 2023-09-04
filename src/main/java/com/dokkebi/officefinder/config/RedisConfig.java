@@ -44,7 +44,7 @@ public class RedisConfig {
     conf.setPort(port);
 
     Arrays.stream(environment.getActiveProfiles()).forEach(profile -> {
-      if (profile.equals("release")){
+      if (profile.equals("prod")){
         conf.setPassword(password);
       }
     });
@@ -90,7 +90,7 @@ public class RedisConfig {
         .setAddress(REDISSON_HOST_PREFIX + host + ":" + port);
 
     Arrays.stream(environment.getActiveProfiles()).forEach(profile -> {
-      if (profile.equals("release") || profile.equals("local")){
+      if (profile.equals("prod") || profile.equals("local")){
         config.useSingleServer().setPassword(password);
       }
     });
