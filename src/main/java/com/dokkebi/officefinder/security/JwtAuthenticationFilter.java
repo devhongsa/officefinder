@@ -55,9 +55,13 @@ public class JwtAuthenticationFilter extends
 
   private String resolveTokenFromCookie(HttpServletRequest request) {
     Cookie[] cookies = request.getCookies();
-    for (Cookie cookie : cookies) {
-      if ("Authorization".equals(cookie.getName())) {
-        return cookie.getValue();
+    if (cookies == null) {
+      return null;
+    } else {
+      for (Cookie cookie : cookies) {
+        if ("Authorization".equals(cookie.getName())) {
+          return cookie.getValue();
+        }
       }
     }
     return null;
