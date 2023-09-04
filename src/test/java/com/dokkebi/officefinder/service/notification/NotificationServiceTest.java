@@ -3,26 +3,36 @@ package com.dokkebi.officefinder.service.notification;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.dokkebi.officefinder.dto.Event;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.OfficeOwner;
-import com.dokkebi.officefinder.entity.lease.Lease;
-import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.entity.notification.CustomerNotification;
+import com.dokkebi.officefinder.entity.notification.OfficeOwnerNotification;
+import com.dokkebi.officefinder.entity.type.NotificationType;
+import com.dokkebi.officefinder.repository.CustomerRepository;
+import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.notification.EmitterRepository;
-import com.dokkebi.officefinder.repository.notification.EventRepository;
+import com.dokkebi.officefinder.repository.notification.CustomerNotificationRepository;
+import com.dokkebi.officefinder.repository.notification.OfficeOwnerNotificationRepository;
+import com.dokkebi.officefinder.service.notification.dto.NotificationResponseDto;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,123 +42,140 @@ class NotificationServiceTest {
   private EmitterRepository emitterRepository;
 
   @Mock
-  private EventRepository eventRepository;
+  private CustomerNotificationRepository customerNotificationRepository;
+
+  @Mock
+  private OfficeOwnerNotificationRepository officeOwnerNotificationRepository;
+
+  @Mock
+  private OfficeOwnerRepository officeOwnerRepository;
+
+  @Mock
+  private CustomerRepository customerRepository;
 
   @InjectMocks
   private NotificationService notificationService;
 
   @Test
-  @DisplayName("lastId가 있는 경우, 전달되지 않았던 이벤트 전송")
-  public void testSubscribe_WithLastEventId() {
-    // Given
-    String email = "test@example.com";
-    String lastEventId = "1";
-
-    when(eventRepository.getMissedEvents(email, Integer.parseInt(lastEventId)))
-        .thenReturn(Arrays.asList(new Event(), new Event()));
-
-    // When
-    SseEmitter returnedEmitter = notificationService.subscribe(email, lastEventId);
-
-    // Then
-    assertNotNull(returnedEmitter);
-    verify(eventRepository).getMissedEvents(email, Integer.parseInt(lastEventId));
-  }
-
-  @Test
-  @DisplayName("lastId가 없는 경우, 더미 데이터 전송")
+  @DisplayName("lastId가 없는 경우")
   public void testSubscribe_WithoutLastEventId() {
     // Given
     String email = "test@example.com";
     String lastEventId = "";
 
+    when(emitterRepository.save(anyString(), any())).thenReturn(new SseEmitter());
+
     // When
-    SseEmitter returnedEmitter = notificationService.subscribe(email, lastEventId);
+    SseEmitter result = notificationService.subscribe(email, lastEventId);
 
     // Then
-    assertNotNull(returnedEmitter);
-    verify(emitterRepository).save(eq(email), any());
+    assertNotNull(result);
   }
 
   @Test
-  @DisplayName("임대 알림을 보내는 경우")
-  public void testSendLeaseNotification() throws Exception{
+  @DisplayName("lastId가 있는 경우")
+  public void testSubscribe_WithLastEventId() {
     // Given
-    Office mockOffice = mock(Office.class);
-    OfficeOwner mockOwner = mock(OfficeOwner.class);
-
     String email = "test@example.com";
-    String officeName = "testOffice";
-    String expectedMessage = officeName + " 임대 요청이 들어왔습니다.";
+    String lastEventId = "lastEventId";
 
-    when(mockOffice.getOwner()).thenReturn(mockOwner);
-    when(mockOwner.getEmail()).thenReturn(email);
-    when(mockOffice.getName()).thenReturn(officeName);
+    when(emitterRepository.save(anyString(), any())).thenReturn(new SseEmitter());
+    when(emitterRepository.findAllEventCacheStartsWithEmail(email)).thenReturn(new HashMap<>());
 
-    SseEmitter mockEmitter = mock(SseEmitter.class);
-    when(emitterRepository.get(email)).thenReturn(mockEmitter);
+    SseEmitter result = notificationService.subscribe(email, lastEventId);
 
-    // When
-    notificationService.sendLeaseNotification(mockOffice);
-
-    // Then
-    verify(emitterRepository).get(email);
-    verify(mockEmitter).send(any(SseEmitter.SseEventBuilder.class));
+    assertNotNull(result);
   }
 
   @Test
-  @DisplayName("임대 수락 알림을 보내는 경우")
-  public void testSendAcceptNotification() throws Exception{
+  @DisplayName("고객에게 알림을 보내는 경우")
+  public void testSendToCustomer() throws Exception {
     // Given
-    Lease mockLease = mock(Lease.class);
-    Office mockOffice = mock(Office.class);
+    Customer mockCustomer = mock(Customer.class);
+    when(mockCustomer.getEmail()).thenReturn("test@example.com");
+
+    when(customerNotificationRepository.save(any())).thenReturn(new CustomerNotification(
+        1L, "Title", "Content", NotificationType.LEASE_DENIED, mockCustomer
+    ));
+
+    // When
+    notificationService.sendToCustomer(mockCustomer, NotificationType.LEASE_DENIED, "Title",
+        "Content");
+
+    // Then
+    verify(customerNotificationRepository, times(1)).save(any());
+    verify(emitterRepository, times(1)).findAllEmitterStartsWithEmail("test@example.com");
+  }
+
+  @Test
+  @DisplayName("임대 업자에게 보내는 경우")
+  public void testSendToOwner(){
+    // Given
+    OfficeOwner mockOfficeOwner = mock(OfficeOwner.class);
+    when(mockOfficeOwner.getEmail()).thenReturn("test@example.com");
+
+    when(officeOwnerNotificationRepository.save(any())).thenReturn(new OfficeOwnerNotification(
+        1L, "Title", "Content", NotificationType.LEASE_REQUEST_ARRIVED, mockOfficeOwner
+    ));
+
+    notificationService.sendToOwner(mockOfficeOwner, NotificationType.LEASE_REQUEST_ARRIVED, "Title"
+        , "Content");
+
+    verify(officeOwnerNotificationRepository, times(1)).save(any());
+    verify(emitterRepository, times(1)).findAllEmitterStartsWithEmail("test@example.com");
+  }
+
+  @Test
+  @DisplayName("임대 업자의 알림 리스트 조회")
+  public void testGetNotificationByOwner() {
+    // Given
+    String email = "test-owner@example.com";
+    Pageable pageable = PageRequest.of(0, 10);
+    OfficeOwner mockOfficeOwner = mock(OfficeOwner.class);
+
+    List<OfficeOwnerNotification> mockNotifications = Arrays.asList(
+        new OfficeOwnerNotification(1L, "Title1", "Content1", NotificationType.LEASE_REQUEST_ARRIVED, mockOfficeOwner),
+        new OfficeOwnerNotification(2L, "Title2", "Content2", NotificationType.LEASE_DENIED, mockOfficeOwner)
+    );
+
+    when(officeOwnerRepository.findByEmail(email)).thenReturn(Optional.of(mockOfficeOwner));
+    when(officeOwnerNotificationRepository.findAllByOfficeOwner(mockOfficeOwner, pageable))
+        .thenReturn(new PageImpl<>(mockNotifications));
+
+    // When
+    Page<NotificationResponseDto> result = notificationService.getNotificationByOwner(email, pageable);
+
+    // Then
+    assertNotNull(result);
+    assertEquals(2, result.getContent().size());
+    assertEquals("Title1", result.getContent().get(0).getTitle());
+    assertEquals("Title2", result.getContent().get(1).getTitle());
+  }
+
+  @Test
+  @DisplayName("고객의 알림 리스트 조회")
+  public void testGetNotificationByCustomer() {
+    // Given
+    String email = "test-customer@example.com";
+    Pageable pageable = PageRequest.of(0, 10);
     Customer mockCustomer = mock(Customer.class);
 
-    String email = "test@example.com";
-    String officeName = "testOffice";
-    String expectedMessage = officeName + "에 대한 임대 요청이 수락되었습니다 :)";
+    List<CustomerNotification> mockNotifications = Arrays.asList(
+        new CustomerNotification(1L, "Title1", "Content1", NotificationType.LEASE_ACCEPTED, mockCustomer),
+        new CustomerNotification(2L, "Title2", "Content2", NotificationType.LEASE_DENIED, mockCustomer)
+    );
 
-    when(mockLease.getOffice()).thenReturn(mockOffice);
-    when(mockLease.getCustomer()).thenReturn(mockCustomer);
-    when(mockOffice.getName()).thenReturn(officeName);
-    when(mockCustomer.getEmail()).thenReturn(email);
-
-    SseEmitter mockEmitter = mock(SseEmitter.class);
-    when(emitterRepository.get(email)).thenReturn(mockEmitter);
+    when(customerRepository.findByEmail(email)).thenReturn(Optional.of(mockCustomer));
+    when(customerNotificationRepository.findAllByCustomer(mockCustomer, pageable))
+        .thenReturn(new PageImpl<>(mockNotifications));
 
     // When
-    notificationService.sendAcceptNotification(mockLease);
+    Page<NotificationResponseDto> result = notificationService.getNotificationByCustomer(email, pageable);
 
     // Then
-    verify(emitterRepository).get(email);
-    verify(mockEmitter).send(any(SseEmitter.SseEventBuilder.class));
-  }
-
-  @Test
-  @DisplayName("임대 거절 알림을 보내는 경우")
-  public void testSendRejectNotification() throws Exception{
-    // Given
-    Lease mockLease = mock(Lease.class);
-    Office mockOffice = mock(Office.class);
-    Customer mockCustomer = mock(Customer.class);
-
-    String email = "test@example.com";
-    String officeName = "testOffice";
-    String expectedMessage = officeName + "에 대한 임대 요청이 거절되었습니다 :(";
-
-    when(mockLease.getOffice()).thenReturn(mockOffice);
-    when(mockLease.getCustomer()).thenReturn(mockCustomer);
-    when(mockOffice.getName()).thenReturn(officeName);
-    when(mockCustomer.getEmail()).thenReturn(email);
-
-    SseEmitter mockEmitter = mock(SseEmitter.class);
-    when(emitterRepository.get(email)).thenReturn(mockEmitter);
-
-    // When
-    notificationService.sendRejectNotification(mockLease);
-
-    // Then
-    verify(emitterRepository).get(email);
-    verify(mockEmitter).send(any(SseEmitter.SseEventBuilder.class));
+    assertNotNull(result);
+    assertEquals(2, result.getContent().size());
+    assertEquals("Title1", result.getContent().get(0).getTitle());
+    assertEquals("Title2", result.getContent().get(1).getTitle());
   }
 }

@@ -4,9 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 import com.dokkebi.officefinder.controller.office.dto.OfficeAddress;
-import com.dokkebi.officefinder.controller.office.dto.OfficeBasicSearchCond;
 import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
-import com.dokkebi.officefinder.controller.office.dto.OfficeDetailSearchCond;
+import com.dokkebi.officefinder.controller.office.dto.OfficeSearchCond;
 import com.dokkebi.officefinder.controller.office.dto.OfficeOption;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
@@ -20,14 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -50,9 +47,6 @@ public class OfficeSearchServiceTest {
   private OfficeSearchService officeQueryService;
   @Autowired
   private OfficeOwnerRepository officeOwnerRepository;
-  @Autowired
-  private RedisTemplate<String, String> redisTemplate;
-  private static final String REMAIN_ROOM_KEY = "remain-room";
 
   @AfterEach
   void tearDown() {
@@ -61,7 +55,6 @@ public class OfficeSearchServiceTest {
     officeLocationRepository.deleteAllInBatch();
     officeRepository.deleteAllInBatch();
     officeOwnerRepository.deleteAllInBatch();
-    redisTemplate.delete(REMAIN_ROOM_KEY);
   }
 
   @DisplayName("기본 조건(도 행정구역)으로 오피스를 검색할 수 있다. 검색된 오피스는 페이징 처리가 되어 반환된다.")
@@ -75,13 +68,13 @@ public class OfficeSearchServiceTest {
 
     addOfficeData(savedOfficeOwner);
 
-    OfficeBasicSearchCond cond = new OfficeBasicSearchCond();
+    OfficeSearchCond cond = new OfficeSearchCond();
     cond.setLegion("경상남도");
 
     PageRequest pageRequest = PageRequest.of(0, 5);
 
     // when
-    Page<Office> offices = officeQueryService.searchOfficeByBasicCondition(cond, pageRequest);
+    Page<Office> offices = officeQueryService.searchOfficeByDetailCondition(cond, pageRequest);
     List<Office> content = offices.getContent();
 
     // then
@@ -122,6 +115,66 @@ public class OfficeSearchServiceTest {
         );
   }
 
+  @DisplayName("오피스를 검색할 수 있다. 검색된 오피스는 페이징 처리가 되어 반환된다.")
+  @Test
+  public void searchOfficeTest() {
+    // given
+    OfficeOwner officeOwner = createOfficeOwner("kim", "owner@test.com", "12345", "123-45", 1000L,
+        Set.of("ROLE_OFFICE_OWNER"));
+
+    OfficeOwner savedOfficeOwner = officeOwnerRepository.save(officeOwner);
+
+    addOfficeData(savedOfficeOwner);
+
+    OfficeSearchCond cond = new OfficeSearchCond();
+    PageRequest pageRequest = PageRequest.of(0, 5);
+
+    // when
+    Page<Office> offices = officeQueryService.searchOfficeByDetailCondition(cond, pageRequest);
+    List<Office> content = offices.getContent();
+
+    // then
+    assertThat(content).hasSize(5)
+        .extracting("name", "leaseFee", "maxCapacity", "officeAddress")
+        .containsExactlyInAnyOrder(
+            tuple("office1", 500000L, 5, "경상남도 김해시 삼계동 삼계로 223"),
+            tuple("office2", 1000000L, 10, "경상남도 김해시 삼계동 삼계로 224"),
+            tuple("office3", 1500000L, 10, "부산광역시 동구 좌천동 좌천로 123"),
+            tuple("office4", 1500000L, 10, "경상남도 진영시 가츠동 가츠로 4"),
+            tuple("office5", 2000000L, 15, "경상남도 김해시 내외동 내외로 12")
+        );
+
+    assertThat(content)
+        .extracting(Office::getOfficeLocation)
+        .extracting(OfficeLocation::getAddress)
+        .extracting("legion", "city", "town", "village", "zipcode")
+        .containsExactlyInAnyOrder(
+            tuple("경상남도", "김해시", "삼계동", "", 12345),
+            tuple("경상남도", "김해시", "삼계동", "", 12348),
+            tuple("부산광역시", "동구", "좌천동", "", 12398),
+            tuple("경상남도", "진영시", "가츠동", "", 12598),
+            tuple("경상남도", "김해시", "내외동", "", 12508)
+        );
+
+    assertThat(content)
+        .extracting(Office::getOfficeCondition)
+        .extracting("airCondition", "heaterCondition", "cafe", "printer", "packageSendService",
+            "doorLock", "fax", "publicKitchen", "publicLounge", "privateLocker", "tvProjector",
+            "whiteboard", "wifi", "showerBooth", "storage")
+        .containsExactlyInAnyOrder(
+            tuple(false, false, true, true, true, true, true, true, true, true, true, true, true,
+                true, true),
+            tuple(true, true, false, true, true, true, true, false, false, true, true, true, true,
+                true, true),
+            tuple(true, true, true, true, true, true, true, true, true, true, true, true, true,
+                true, true),
+            tuple(true, true, true, true, true, true, true, true, true, true, true, true, true,
+                true, true),
+            tuple(true, true, true, true, true, true, true, false, false, true, true, true, true,
+                false, true)
+        );
+  }
+
   @DisplayName("기본 조건(시, 도 행정구역)으로 오피스를 검색할 수 있다. 검색된 오피스는 페이징 처리가 되어 반환된다.")
   @Test
   public void searchOfficeByBasicConditionTest2() {
@@ -133,14 +186,14 @@ public class OfficeSearchServiceTest {
 
     addOfficeData(savedOfficeOwner);
 
-    OfficeBasicSearchCond cond = new OfficeBasicSearchCond();
+    OfficeSearchCond cond = new OfficeSearchCond();
     cond.setLegion("경상남도");
     cond.setCity("김해시");
 
     PageRequest pageRequest = PageRequest.of(0, 5);
 
     // when
-    Page<Office> offices = officeQueryService.searchOfficeByBasicCondition(cond, pageRequest);
+    Page<Office> offices = officeQueryService.searchOfficeByDetailCondition(cond, pageRequest);
     List<Office> content = offices.getContent();
 
     // then
@@ -188,7 +241,7 @@ public class OfficeSearchServiceTest {
 
     addOfficeData(savedOfficeOwner);
 
-    OfficeBasicSearchCond cond = new OfficeBasicSearchCond();
+    OfficeSearchCond cond = new OfficeSearchCond();
     cond.setLegion("경상남도");
     cond.setCity("김해시");
     cond.setMaxCapacity(5);
@@ -196,7 +249,7 @@ public class OfficeSearchServiceTest {
     PageRequest pageRequest = PageRequest.of(0, 5);
 
     // when
-    Page<Office> offices = officeQueryService.searchOfficeByBasicCondition(cond, pageRequest);
+    Page<Office> offices = officeQueryService.searchOfficeByDetailCondition(cond, pageRequest);
     List<Office> content = offices.getContent();
 
     // then
@@ -236,7 +289,7 @@ public class OfficeSearchServiceTest {
 
     addOfficeData(savedOfficeOwner);
 
-    OfficeDetailSearchCond cond = new OfficeDetailSearchCond();
+    OfficeSearchCond cond = new OfficeSearchCond();
     cond.setHaveWhiteBoard(true);
     cond.setHavePublicKitchen(true);
     cond.setMaxCapacity(10);
@@ -292,7 +345,7 @@ public class OfficeSearchServiceTest {
 
     addOfficeData(savedOfficeOwner);
 
-    OfficeDetailSearchCond cond = new OfficeDetailSearchCond();
+    OfficeSearchCond cond = new OfficeSearchCond();
     cond.setLegion("경상남도");
     cond.setHaveWhiteBoard(true);
     cond.setHavePublicKitchen(true);

@@ -32,9 +32,6 @@ public class LeaseControllerDto {
     @NotNull(message = "사용할 인원 수는 필수로 입력해야 합니다.")
     @Min(value = 1, message = "사용할 인원은 최소 1명 이상이어야 합니다.")
     private Integer customerCount;
-
-    @NotNull(message = "월별 자동 결제 여부를 선택해 주세요.")
-    private Boolean isMonthlyPay;
   }
 
   @Getter
@@ -82,8 +79,6 @@ public class LeaseControllerDto {
 
     private LocalDate endDate;
 
-    private boolean isMonthly;
-
     private boolean isReviewed;
 
     public static LeaseLookUpResponse of (LeaseLookUpServiceResponse resp){
@@ -95,7 +90,6 @@ public class LeaseControllerDto {
           .paymentDate(resp.getPaymentDate())
           .startDate(resp.getStartDate())
           .endDate(resp.getEndDate())
-          .isMonthly(resp.isMonthlyPay())
           .isReviewed(resp.isReviewed())
           .build();
     }

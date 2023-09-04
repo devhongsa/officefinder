@@ -1,8 +1,10 @@
 package com.dokkebi.officefinder.repository.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,47 +16,130 @@ class EmitterRepositoryTest {
   private SseEmitter emitter;
 
   @BeforeEach
-  void setUp(){
+  void setUp() {
     repository = new EmitterRepository();
     emitter = new SseEmitter();
   }
 
   @Test
   @DisplayName("Emitter 저장 테스트")
-  void saveEmitterTest(){
+  void saveEmitterTest() {
     //Given
-    String email = "test@example.com";
+    String emitterId = "test@example.com" + "_" + System.currentTimeMillis();
 
     //When
-    repository.save(email, emitter);
+    SseEmitter savedSseEmitter = repository.save(emitterId, emitter);
 
     //Then
-    assertEquals(emitter, repository.get(email));
+    assertEquals(emitter, savedSseEmitter);
   }
 
   @Test
-  void deleteEmitterByEmail(){
-    //Given
-    String email = "test@example.com";
-    repository.save(email, emitter);
+  @DisplayName("EventCache 저장 테스트")
+  void saveEventCacheTest() {
+    // Given
+    String emitterId = "test@example.com" + "_" + System.currentTimeMillis();
+    String testEvent = "Test Event";
 
-    //When
-    repository.deleteByEmail(email);
+    // When
+    repository.saveEventCache(emitterId, testEvent);
 
-    //Then
-    assertNull(repository.get(email));
+    // Then
+    Map<String, Object> events = repository.findAllEventCacheStartsWithEmail("test@example.com");
+    assertTrue(events.containsValue(testEvent));
   }
 
   @Test
-  void getEmitterTest(){
-    //Given
-    String email = "test@example.com";
-    repository.save(email, emitter);
+  @DisplayName("Emitter 삭제 테스트")
+  void deleteByIdTest() {
+    // Given
+    String emitterId = "test@example.com" + "_" + System.currentTimeMillis();
+    repository.save(emitterId, emitter);
 
-    //When
-    SseEmitter retrievedEmitter = repository.get(email);
+    // When
+    repository.deleteById(emitterId);
 
-    //Then
-    assertEquals(emitter, retrievedEmitter);
+    // Then
+    Map<String, SseEmitter> emitters = repository.findAllEmitterStartsWithEmail("test@example.com");
+    assertFalse(emitters.containsKey(emitterId));
+  }
+
+  @Test
+  @DisplayName("Emitter 검색 테스트")
+  void findAllEmitterStartsWithEmailTest() {
+    // Given
+    String emitterId1 = "test@example.com" + "_" + System.currentTimeMillis();
+    String emitterId2 = "test@example.com" + "_" + (System.currentTimeMillis() + 1);
+    String emitterId3 = "different@example.com" + "_" + System.currentTimeMillis();
+    repository.save(emitterId1, emitter);
+    repository.save(emitterId2, emitter);
+    repository.save(emitterId3, emitter);
+
+    // When
+    Map<String, SseEmitter> emitters = repository.findAllEmitterStartsWithEmail("test@example.com");
+
+    // Then
+    assertEquals(2, emitters.size());
+    assertTrue(emitters.containsKey(emitterId1));
+    assertTrue(emitters.containsKey(emitterId2));
+    assertFalse(emitters.containsKey(emitterId3));
+  }
+
+  @Test
+  @DisplayName("EventCache 검색 테스트")
+  void findAllEventCacheStartsWithEmailTest() {
+    // Given
+    String emitterId1 = "test@example.com" + "_" + System.currentTimeMillis();
+    String emitterId2 = "test@example.com" + "_" + (System.currentTimeMillis() + 1);
+    String emitterId3 = "different@example.com" + "_" + System.currentTimeMillis();
+    String event1 = "Event 1";
+    String event2 = "Event 2";
+    String event3 = "Event 3";
+    repository.saveEventCache(emitterId1, event1);
+    repository.saveEventCache(emitterId2, event2);
+    repository.saveEventCache(emitterId3, event3);
+
+    // When
+    Map<String, Object> events = repository.findAllEventCacheStartsWithEmail("test@example.com");
+
+    // Then
+    assertEquals(2, events.size());
+    assertTrue(events.containsValue(event1));
+    assertTrue(events.containsValue(event2));
+    assertFalse(events.containsValue(event3));
+  }
+
+  @Test
+  @DisplayName("Emitter 전체 삭제 테스트")
+  void deleteAllEmitterStartWithEmailTest() {
+    // Given
+    String emitterId1 = "test@example.com" + "_" + System.currentTimeMillis();
+    String emitterId2 = "test@example.com" + "_" + (System.currentTimeMillis() + 1);
+    repository.save(emitterId1, emitter);
+    repository.save(emitterId2, emitter);
+
+    // When
+    repository.deleteAllEmitterStartWithEmail("test@example.com");
+
+    // Then
+    Map<String, SseEmitter> emitters = repository.findAllEmitterStartsWithEmail("test@example.com");
+    assertTrue(emitters.isEmpty());
+  }
+
+  @Test
+  @DisplayName("EventCache 전체 삭제 테스트")
+  void deleteAllEventCacheStartWithEmailTest() {
+    // Given
+    String emitterId1 = "test@example.com" + "_" + System.currentTimeMillis();
+    String emitterId2 = "test@example.com" + "_" + (System.currentTimeMillis() + 1);
+    repository.saveEventCache(emitterId1, "Event 1");
+    repository.saveEventCache(emitterId2, "Event 2");
+
+    // When
+    repository.deleteAllEventCacheStartWithEmail("test@example.com");
+
+    // Then
+    Map<String, Object> events = repository.findAllEventCacheStartsWithEmail("test@example.com");
+    assertTrue(events.isEmpty());
   }
 }

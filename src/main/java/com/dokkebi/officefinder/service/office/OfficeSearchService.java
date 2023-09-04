@@ -1,7 +1,6 @@
 package com.dokkebi.officefinder.service.office;
 
-import com.dokkebi.officefinder.controller.office.dto.OfficeBasicSearchCond;
-import com.dokkebi.officefinder.controller.office.dto.OfficeDetailSearchCond;
+import com.dokkebi.officefinder.controller.office.dto.OfficeSearchCond;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +21,10 @@ public class OfficeSearchService {
         .orElseThrow(() -> new IllegalArgumentException("해당 오피스는 존재하지 않습니다."));
   }
 
-  public Page<Office> searchOfficeByBasicCondition(OfficeBasicSearchCond cond,
+  public Page<Office> searchOfficeByDetailCondition(OfficeSearchCond cond,
       Pageable pageable) {
 
-    return officeRepository.findByBasicCondition(cond, pageable);
-  }
-
-  public Page<Office> searchOfficeByDetailCondition(OfficeDetailSearchCond cond,
-      Pageable pageable) {
-
-    return officeRepository.findByDetailCondition(cond, pageable);
+    return officeRepository.findBySearchCond(cond, pageable);
   }
 
   public Page<Office> getAllOffices(String ownerEmail, Pageable pageable) {

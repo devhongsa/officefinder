@@ -30,7 +30,6 @@ public class OfficeService {
   private final OfficeLocationRepository officeLocationRepository;
   private final OfficeConditionRepository officeConditionRepository;
   private final OfficePictureRepository officePictureRepository;
-  private final S3Service s3Service;
   private final OfficeOwnerRepository ownerRepository;
 
   public Long createOfficeInfo(OfficeCreateRequestDto request, List<String> imageList,
