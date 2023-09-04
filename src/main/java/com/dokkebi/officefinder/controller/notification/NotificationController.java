@@ -1,8 +1,18 @@
 package com.dokkebi.officefinder.controller.notification;
 
+import com.dokkebi.officefinder.dto.PageInfo;
+import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.service.notification.NotificationService;
+import com.dokkebi.officefinder.service.notification.dto.NotificationResponseDto;
+import io.swagger.v3.oas.annotations.Operation;
 import java.security.Principal;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -24,5 +34,43 @@ public class NotificationController {
       @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId){
 
     return notificationService.subscribe(principal.getName(), lastEventId);
+  }
+
+  @Operation(summary = "알림 리스트 조회", description = "임대 업자가 본인에게 도착한 알림 내역 조회")
+  @PreAuthorize("hasRole('OFFICE_OWNER')")
+  @GetMapping("/api/agents/notifications")
+  public PageResponseDto<?> getNotificationListByOwner(Principal principal, Pageable pageableReceived) {
+
+    Pageable pageable = createPageable(pageableReceived, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+    Page<NotificationResponseDto> notificationByOwner = notificationService.getNotificationByOwner(
+        principal.getName(), pageable);
+
+    return createPageResponseDto(notificationByOwner);
+  }
+
+  @Operation(summary = "알림 리스트 조회", description = "고객이 본인에게 도착한 알림 내역 조회")
+  @PreAuthorize("hasRole('CUSTOMER')")
+  @GetMapping("/api/customers/notifications")
+  public PageResponseDto<?> getNotificationListByCustomer(Principal principal, Pageable pageableReceived){
+
+    Pageable pageable = createPageable(pageableReceived, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+    Page<NotificationResponseDto> notificationByCustomer = notificationService.getNotificationByCustomer(
+        principal.getName(), pageable);
+
+    return createPageResponseDto(notificationByCustomer);
+  }
+
+  private Pageable createPageable(Pageable pageableReceived, Sort sort) {
+    return PageRequest.of(pageableReceived.getPageNumber(), pageableReceived.getPageSize(), sort);
+  }
+
+  private <T> PageResponseDto<List<T>> createPageResponseDto(Page<T> pageData) {
+
+    PageInfo pageInfo = new PageInfo(pageData.getNumber(), pageData.getSize(),
+        (int) pageData.getTotalElements(), pageData.getTotalPages());
+
+    return new PageResponseDto<>(pageData.getContent(), pageInfo);
   }
 }

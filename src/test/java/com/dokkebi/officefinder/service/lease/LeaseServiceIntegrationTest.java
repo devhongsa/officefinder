@@ -14,14 +14,14 @@ import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
-import com.dokkebi.officefinder.entity.office.OfficeLocation;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
-import com.dokkebi.officefinder.repository.notification.NotificationRepository;
+import com.dokkebi.officefinder.repository.notification.CustomerNotificationRepository;
+import com.dokkebi.officefinder.repository.notification.OfficeOwnerNotificationRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
@@ -70,11 +70,15 @@ public class LeaseServiceIntegrationTest {
   private OfficePictureRepository officePictureRepository;
 
   @Autowired
-  private NotificationRepository notificationRepository;
+  private CustomerNotificationRepository customerNotificationRepository;
+
+  @Autowired
+  private OfficeOwnerNotificationRepository officeOwnerNotificationRepository;
 
   @AfterEach
   void tearDown(){
-    notificationRepository.deleteAllInBatch();
+    customerNotificationRepository.deleteAllInBatch();
+    officeOwnerNotificationRepository.deleteAllInBatch();
     reviewRepository.deleteAllInBatch();
     leaseRepository.deleteAllInBatch();
     customerRepository.deleteAllInBatch();
