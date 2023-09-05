@@ -1,5 +1,7 @@
 package com.dokkebi.officefinder.service.s3;
 
+import static com.dokkebi.officefinder.exception.CustomErrorCode.FILE_IS_NOT_PICTURE;
+
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -75,7 +77,7 @@ public class S3Service {
     String idxFileName = fileName.substring(fileName.lastIndexOf("."));
 
     if (!fileExtensionSet.contains(idxFileName)) {
-      throw new CustomException();
+      throw new CustomException(FILE_IS_NOT_PICTURE);
     }
 
     return fileName.substring(fileName.lastIndexOf("."));

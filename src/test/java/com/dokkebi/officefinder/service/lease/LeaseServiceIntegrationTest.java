@@ -16,6 +16,7 @@ import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
+import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
@@ -41,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -107,7 +109,7 @@ public class LeaseServiceIntegrationTest {
     setOfficeInfo(request, "office1", 5, 500000, 5);
     request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
         savedOfficeOwner.getEmail());
@@ -151,7 +153,7 @@ public class LeaseServiceIntegrationTest {
     setOfficeInfo(request, "office1", 5, 500000, 1);
     request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
         savedOfficeOwner.getEmail());
@@ -167,9 +169,10 @@ public class LeaseServiceIntegrationTest {
     leaseService.leaseOffice(leaseRequest);
     // when
     // then
-//    assertThatThrownBy(() -> leaseService.leaseOffice(leaseRequest2))
-//        .isInstanceOf(IllegalArgumentException.class)
-//        .hasMessage("room is full");
+    assertThatThrownBy(() -> leaseService.leaseOffice(leaseRequest2))
+        .isInstanceOf(CustomException.class)
+        .extracting("errorMessage", "status")
+        .contains("현재 임대예약이 가능한 방이 없습니다.", HttpStatus.BAD_REQUEST);
   }
 
   @DisplayName("회원이 진행중이거나 진행했던 임대 계약을 페이징으로 조회할 수 있다.")
@@ -190,7 +193,7 @@ public class LeaseServiceIntegrationTest {
     setOfficeInfo(request, "office1", 5, 500000, 5);
     request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
         savedOfficeOwner.getEmail());
@@ -241,7 +244,7 @@ public class LeaseServiceIntegrationTest {
     setOfficeInfo(request, "office1", 5, 500000, 5);
     request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
         savedOfficeOwner.getEmail());
@@ -289,7 +292,7 @@ public class LeaseServiceIntegrationTest {
     setOfficeInfo(request, "office1", 5, 500000, 5);
     request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
         savedOfficeOwner.getEmail());
@@ -329,7 +332,7 @@ public class LeaseServiceIntegrationTest {
     setOfficeInfo(request, "office1", 5, 500000, 5);
     request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
         savedOfficeOwner.getEmail());
@@ -423,7 +426,7 @@ public class LeaseServiceIntegrationTest {
       boolean cafe,
       boolean printer, boolean packageSendService, boolean doorLock, boolean fax,
       boolean publicKitchen, boolean publicLounge, boolean privateLocker, boolean tvProjector,
-      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage) {
+      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage, boolean parkArea) {
 
     return OfficeOption.builder()
         .haveAirCondition(airCondition)
@@ -441,6 +444,7 @@ public class LeaseServiceIntegrationTest {
         .haveWifi(wifi)
         .haveShowerBooth(showerBooth)
         .haveStorage(storage)
+        .haveParkArea(parkArea)
         .build();
   }
 }
