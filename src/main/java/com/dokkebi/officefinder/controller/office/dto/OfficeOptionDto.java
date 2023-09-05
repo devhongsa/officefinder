@@ -25,6 +25,7 @@ public class OfficeOptionDto {
   private boolean haveShowerBooth;
   private boolean haveStorage;
   private boolean haveHeater;
+  private boolean haveParkArea;
 
   public static OfficeOptionDto fromEntity(OfficeCondition officeCondition) {
     return OfficeOptionDto.builder()
@@ -43,6 +44,7 @@ public class OfficeOptionDto {
         .haveShowerBooth(officeCondition.isShowerBooth())
         .haveStorage(officeCondition.isStorage())
         .haveHeater(officeCondition.isHeaterCondition())
+        .haveParkArea(officeCondition.isParkArea())
         .build();
   }
 }

@@ -11,6 +11,8 @@ import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficeCondition;
 import com.dokkebi.officefinder.entity.office.OfficeLocation;
+import com.dokkebi.officefinder.exception.CustomErrorCode;
+import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
@@ -71,7 +73,7 @@ class OfficeServiceTest {
     setOfficeInfo(request, "office1", 5, 500000, 5);
     request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     // when
     Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
@@ -121,7 +123,7 @@ class OfficeServiceTest {
     setOfficeInfo(request, "office1", 5, 500000, 5);
     request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
         savedOfficeOwner.getEmail());
@@ -132,7 +134,7 @@ class OfficeServiceTest {
     modifyRequest.setAddress(
         setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     modifyRequest.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     // when
     Long modifiedOfficeId = officeService.modifyOfficeInfo(modifyRequest, new ArrayList<>(),
@@ -187,7 +189,7 @@ class OfficeServiceTest {
     setOfficeInfo(request, "office1", 5, 500000, 5);
     request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
         savedOfficeOwner.getEmail());
@@ -198,15 +200,18 @@ class OfficeServiceTest {
     modifyRequest.setAddress(
         setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     modifyRequest.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     // when
     // then
     assertThatThrownBy(
         () -> officeService.modifyOfficeInfo(modifyRequest, new ArrayList<>(),
             savedOfficeOwner2.getEmail(), savedId))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("잘못된 접근입니다.");
+        .isInstanceOf(CustomException.class)
+        .extracting("errorCode", "errorMessage", "status")
+        .contains(
+            CustomErrorCode.OFFICE_NOT_OWNED_BY_OWNER
+        );
   }
 
   @DisplayName("오피스 정보를 삭제할 수 있다.")
@@ -222,7 +227,7 @@ class OfficeServiceTest {
     setOfficeInfo(request, "office1", 5, 500000, 5);
     request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     Long savedId = officeService.createOfficeInfo(request, new ArrayList<>(),
         savedOfficeOwner.getEmail());
@@ -286,7 +291,7 @@ class OfficeServiceTest {
       boolean cafe,
       boolean printer, boolean packageSendService, boolean doorLock, boolean fax,
       boolean publicKitchen, boolean publicLounge, boolean privateLocker, boolean tvProjector,
-      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage) {
+      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage, boolean parkArea) {
 
     return OfficeOption.builder()
         .haveAirCondition(airCondition)
@@ -304,6 +309,7 @@ class OfficeServiceTest {
         .haveWifi(wifi)
         .haveShowerBooth(showerBooth)
         .haveStorage(storage)
+        .haveParkArea(parkArea)
         .build();
   }
 }
