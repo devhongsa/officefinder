@@ -392,7 +392,7 @@ public class OfficeSearchServiceTest {
     setOfficeInfo(request, "office1", 5, 500000, 5);
     request.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 223", 12345));
     request.setOfficeOption(setOfficeCondition(false, false, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     officeService.createOfficeInfo(request, new ArrayList<>(), savedOfficeOwner.getEmail());
 
@@ -400,7 +400,7 @@ public class OfficeSearchServiceTest {
     setOfficeInfo(request2, "office2", 10, 1000000, 10);
     request2.setAddress(setOfficeLocation("경상남도", "김해시", "삼계동", "", "경상남도 김해시 삼계동 삼계로 224", 12348));
     request2.setOfficeOption(setOfficeCondition(true, true, false, true, true, true,
-        true, false, false, true, true, true, true, true, true));
+        true, false, false, true, true, true, true, true, true, true));
 
     officeService.createOfficeInfo(request2, new ArrayList<>(), savedOfficeOwner.getEmail());
 
@@ -408,7 +408,7 @@ public class OfficeSearchServiceTest {
     setOfficeInfo(request3, "office3", 10, 1500000, 10);
     request3.setAddress(setOfficeLocation("부산광역시", "동구", "좌천동", "", "부산광역시 동구 좌천동 좌천로 123", 12398));
     request3.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     officeService.createOfficeInfo(request3, new ArrayList<>(), savedOfficeOwner.getEmail());
 
@@ -416,7 +416,7 @@ public class OfficeSearchServiceTest {
     setOfficeInfo(request4, "office4", 10, 1500000, 10);
     request4.setAddress(setOfficeLocation("경상남도", "진영시", "가츠동", "", "경상남도 진영시 가츠동 가츠로 4", 12598));
     request4.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
-        true, true, true, true, true, true, true, true, true));
+        true, true, true, true, true, true, true, true, true, true));
 
     officeService.createOfficeInfo(request4, new ArrayList<>(), savedOfficeOwner.getEmail());
 
@@ -424,7 +424,7 @@ public class OfficeSearchServiceTest {
     setOfficeInfo(request5, "office5", 15, 2000000, 10);
     request5.setAddress(setOfficeLocation("경상남도", "김해시", "내외동", "", "경상남도 김해시 내외동 내외로 12", 12508));
     request5.setOfficeOption(setOfficeCondition(true, true, true, true, true, true,
-        true, false, false, true, true, true, true, false, true));
+        true, false, false, true, true, true, true, false, true, true));
 
     officeService.createOfficeInfo(request5, new ArrayList<>(), savedOfficeOwner.getEmail());
   }
@@ -467,7 +467,7 @@ public class OfficeSearchServiceTest {
       boolean cafe,
       boolean printer, boolean packageSendService, boolean doorLock, boolean fax,
       boolean publicKitchen, boolean publicLounge, boolean privateLocker, boolean tvProjector,
-      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage) {
+      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage, boolean parkArea) {
 
     return OfficeOption.builder()
         .haveAirCondition(airCondition)
@@ -485,6 +485,7 @@ public class OfficeSearchServiceTest {
         .haveWifi(wifi)
         .haveShowerBooth(showerBooth)
         .haveStorage(storage)
+        .haveParkArea(parkArea)
         .build();
   }
 }
