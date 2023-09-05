@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @Slf4j
@@ -19,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity(debug = true)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class SecurityConfig implements WebMvcConfigurer {
 
   /*
       client에서 요청을 날리면 Spring Security의 여러 filterChain 들을 거치게 됨.
@@ -28,6 +30,9 @@ public class SecurityConfig {
    */
 
   private final TokenProvider tokenProvider;
+  public static final String ALLOWED_METHOD_NAMES = "GET,HEAD,POST,PUT,DELETE,TRACE,OPTIONS,PATCH";
+
+
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -39,7 +44,7 @@ public class SecurityConfig {
         .authorizeHttpRequests((authz) -> authz
             .antMatchers("/ws/**").permitAll() // 개발환경에서만 우선 설정
             .antMatchers("/webjars/**").permitAll() // 개발환경에서만 우선 설정
-            .antMatchers("/swagger*/**","/v2/api-docs").permitAll()
+            .antMatchers("/swagger*/**","/v3/api-docs", "/v2/api-docs").permitAll()
             .antMatchers("/**/signup", "/**/login/**").permitAll()
             .anyRequest().authenticated()
         )
@@ -54,4 +59,10 @@ public class SecurityConfig {
         .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
   }
 
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/**")
+        .allowedOrigins("https://officefinder.site")
+        .allowedMethods(ALLOWED_METHOD_NAMES.split(","));
+  }
 }
