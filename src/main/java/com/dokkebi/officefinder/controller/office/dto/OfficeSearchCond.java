@@ -29,4 +29,5 @@ public class OfficeSearchCond {
   Boolean haveShowerBooth;
   Boolean haveStorage;
   Boolean haveHeater;
+  Boolean haveParkArea;
 }

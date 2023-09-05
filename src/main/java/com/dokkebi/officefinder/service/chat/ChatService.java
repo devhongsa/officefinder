@@ -1,5 +1,10 @@
 package com.dokkebi.officefinder.service.chat;
 
+import static com.dokkebi.officefinder.exception.CustomErrorCode.CHAT_ROOM_ALREADY_EXISTS;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.CHAT_ROOM_NOT_FOUND;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.INVALID_OFFICE_ID;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.USER_NOT_FOUND;
+
 import com.dokkebi.officefinder.controller.chat.dto.ChatRoomDto.ChatMessageResponse;
 import com.dokkebi.officefinder.controller.chat.dto.ChatRoomDto.ChatRoomStatus;
 import com.dokkebi.officefinder.controller.chat.dto.ChatRoomDto.CreateRoomResponse;
@@ -9,7 +14,6 @@ import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.chat.ChatMessage;
 import com.dokkebi.officefinder.entity.chat.ChatRoom;
 import com.dokkebi.officefinder.entity.office.Office;
-import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
@@ -45,7 +49,7 @@ public class ChatService {
     List<ChatRoomStatus> result = new ArrayList<>();
     if (tokenProvider.getUserType(jwt).equals("customer")) {
       Customer customer = customerRepository.findById(userId)
-          .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+          .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
       List<ChatRoom> chatRooms = chatRoomRepository.findByCustomer(
           customer);
       HashMap<ChatRoom, ChatMessage> chatMap = getChatMessageHashMap(
@@ -75,7 +79,7 @@ public class ChatService {
       }
     } else {
       OfficeOwner officeOwner = officeOwnerRepository.findById(userId)
-          .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+          .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
       List<ChatRoom> chatRooms = chatRoomRepository.findByOfficeOwner(officeOwner);
       HashMap<ChatRoom, ChatMessage> chatMap = getChatMessageHashMap(
           chatRooms);
@@ -112,7 +116,7 @@ public class ChatService {
     String userType = tokenProvider.getUserType(jwt);
 
     ChatRoom chatRoom = chatRoomRepository.findByRoomUid(roomUid)
-        .orElseThrow(() -> new CustomException(CustomErrorCode.CHAT_ROOM_NOT_FOUND));
+        .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
     List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoom(chatRoom);
 
     String customerName = chatRoom.getCustomer().getName();
@@ -163,14 +167,14 @@ public class ChatService {
   public CreateRoomResponse createRoom(Long officeId, String jwt) {
     Long customerId = tokenProvider.getUserId(jwt);
     Customer customer = customerRepository.findById(customerId)
-        .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
     Office office = officeRepository.findById(officeId)
-        .orElseThrow(() -> new CustomException(CustomErrorCode.INVALID_OFFICE_ID));
+        .orElseThrow(() -> new CustomException(INVALID_OFFICE_ID));
     OfficeOwner officeOwner = office.getOwner();
 
     if (chatRoomRepository.existsByCustomerAndOfficeOwner(customer, officeOwner)) {
-      throw new CustomException(CustomErrorCode.CHAT_ROOM_ALREADY_EXISTS);
+      throw new CustomException(CHAT_ROOM_ALREADY_EXISTS);
     }
 
     ChatRoom chatRoom = chatRoomRepository.save(ChatRoom.create(customer, officeOwner));
@@ -180,7 +184,7 @@ public class ChatService {
   @Transactional
   public void send(SendMessage message) {
     ChatRoom chatRoom = chatRoomRepository.findByRoomUid(message.getRoomUid())
-        .orElseThrow(() -> new CustomException(CustomErrorCode.CHAT_ROOM_NOT_FOUND));
+        .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
 
     if (message.getSender().equals(chatRoom.getCustomer().getName())) {
       chatMessageRepository.save(

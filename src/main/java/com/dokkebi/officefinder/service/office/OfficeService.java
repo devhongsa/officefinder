@@ -1,5 +1,9 @@
 package com.dokkebi.officefinder.service.office;
 
+import static com.dokkebi.officefinder.exception.CustomErrorCode.EMAIL_NOT_REGISTERED;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.OFFICE_NOT_EXISTS;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.OFFICE_NOT_OWNED_BY_OWNER;
+
 import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeModifyRequestDto;
 import com.dokkebi.officefinder.entity.OfficeOwner;
@@ -7,6 +11,7 @@ import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficeCondition;
 import com.dokkebi.officefinder.entity.office.OfficeLocation;
 import com.dokkebi.officefinder.entity.office.OfficePicture;
+import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
@@ -14,9 +19,7 @@ import com.dokkebi.officefinder.repository.office.location.OfficeLocationReposit
 import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.office.dto.OfficeConditionDto;
 import com.dokkebi.officefinder.service.office.dto.OfficeLocationDto;
-import com.dokkebi.officefinder.service.s3.S3Service;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +38,7 @@ public class OfficeService {
   public Long createOfficeInfo(OfficeCreateRequestDto request, List<String> imageList,
       String ownerEmail) {
     OfficeOwner officeOwner = ownerRepository.findByEmail(ownerEmail)
-        .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+        .orElseThrow(() -> new CustomException(EMAIL_NOT_REGISTERED));
 
     Office office = Office.createFromRequest(request, officeOwner);
 
@@ -62,7 +65,7 @@ public class OfficeService {
       String ownerEmail, Long officeId) {
 
     Office office = officeRepository.findByOfficeId(officeId)
-        .orElseThrow(() -> new IllegalArgumentException("해당 오피스는 존재하지 않습니다."));
+        .orElseThrow(() -> new CustomException(OFFICE_NOT_EXISTS));
 
     // 다른 임대업자가 수정하는 것을 금지
     validateCorrectOwner(ownerEmail, office);
@@ -83,14 +86,14 @@ public class OfficeService {
 
   public void deleteOfficeInfo(Long officeId) {
     Office office = officeRepository.findByOfficeId(officeId)
-        .orElseThrow(() -> new IllegalArgumentException("해당 오피스는 존재하지 않습니다."));
+        .orElseThrow(() -> new CustomException(OFFICE_NOT_EXISTS));
 
     officeRepository.delete(office);
   }
 
   private void validateCorrectOwner(String ownerEmail, Office office) {
     if (!office.getOwner().getEmail().equals(ownerEmail)) {
-      throw new IllegalArgumentException("잘못된 접근입니다.");
+      throw new CustomException(OFFICE_NOT_OWNED_BY_OWNER);
     }
   }
 

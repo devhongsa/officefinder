@@ -74,11 +74,13 @@ public class OfficeCondition extends BaseEntity {
   @Column(name = "storage_available_status")
   private boolean storage;
 
+  private boolean parkArea;
+
   @Builder
   private OfficeCondition(Long id, Office office, boolean airCondition, boolean heaterCondition, boolean cafe,
       boolean printer, boolean packageSendService, boolean doorLock, boolean fax,
       boolean publicKitchen, boolean publicLounge, boolean privateLocker, boolean tvProjector,
-      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage) {
+      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage, boolean parkArea) {
     this.id = id;
 
     this.office = office;
@@ -99,6 +101,7 @@ public class OfficeCondition extends BaseEntity {
     this.wifi = wifi;
     this.showerBooth = showerBooth;
     this.storage = storage;
+    this.parkArea = parkArea;
   }
 
   /*
@@ -122,6 +125,7 @@ public class OfficeCondition extends BaseEntity {
         .wifi(request.isHaveWifi())
         .showerBooth(request.isHaveShowerBooth())
         .storage(request.isHaveStorage())
+        .parkArea(request.isHaveParkArea())
         .build();
   }
 
