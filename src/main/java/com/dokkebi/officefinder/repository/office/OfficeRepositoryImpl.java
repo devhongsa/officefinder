@@ -50,7 +50,8 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
             haveWhiteBoard(cond.getHaveWhiteBoard()),
             haveWifiService(cond.getHaveWifi()),
             haveShowerBooth(cond.getHaveShowerBooth()),
-            haveStorage(cond.getHaveStorage())
+            haveStorage(cond.getHaveStorage()),
+            haveParkArea(cond.getHaveParkArea())
         )
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
@@ -79,7 +80,8 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
             haveWhiteBoard(cond.getHaveWhiteBoard()),
             haveWifiService(cond.getHaveWifi()),
             haveShowerBooth(cond.getHaveShowerBooth()),
-            haveStorage(cond.getHaveStorage())
+            haveStorage(cond.getHaveStorage()),
+            haveParkArea(cond.getHaveParkArea())
         );
 
     return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
@@ -119,6 +121,10 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
         .fetchOne();
 
     return Optional.ofNullable(office);
+  }
+
+  private BooleanExpression haveParkArea(Boolean haveParkArea) {
+    return haveParkArea != null ? office.officeCondition.parkArea.eq(haveParkArea) : null;
   }
 
   private BooleanExpression legionEquals(String legion) {

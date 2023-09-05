@@ -30,6 +30,7 @@ public class OfficeConditionDto {
   boolean haveShowerBooth;
   boolean haveStorage;
   boolean haveHeater;
+  boolean haveParkArea;
 
   public static OfficeConditionDto fromRequest(OfficeCreateRequestDto request) {
     return OfficeConditionDto.builder()
@@ -48,6 +49,7 @@ public class OfficeConditionDto {
         .haveHeater(request.getOfficeOption().getHaveHeater())
         .haveWifi(request.getOfficeOption().getHaveWifi())
         .haveShowerBooth(request.getOfficeOption().getHaveShowerBooth())
+        .haveParkArea(request.getOfficeOption().getHaveParkArea())
         .build();
   }
 
@@ -68,6 +70,7 @@ public class OfficeConditionDto {
         .haveHeater(request.getOfficeOption().getHaveHeater())
         .haveWifi(request.getOfficeOption().getHaveWifi())
         .haveShowerBooth(request.getOfficeOption().getHaveShowerBooth())
+        .haveParkArea(request.getOfficeOption().getHaveParkArea())
         .build();
   }
 }

@@ -53,7 +53,6 @@ public class OfficeOwnerService {
         offices, startDate, today, leaseStatus);
 
     return getRevenue(leases);
-
   }
 
   public RentalStatusDto getOfficeRentalStatus(Long officeId, String jwtHeader) {
@@ -85,7 +84,6 @@ public class OfficeOwnerService {
 
     return new RentalStatusDto(totalRoomCount, countProceeding, leaseRate);
   }
-
 
   private HashMap<String, Long> getRevenue(List<Lease> leases) {
     HashMap<String, Long> revenueMap = new HashMap<>();

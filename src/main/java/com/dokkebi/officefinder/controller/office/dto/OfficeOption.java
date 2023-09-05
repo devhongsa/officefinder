@@ -44,5 +44,7 @@ public class OfficeOption {
   private Boolean haveStorage;
   @NotNull
   private Boolean haveHeater;
+  @NotNull
+  private Boolean haveParkArea;
 
 }
