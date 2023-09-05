@@ -87,7 +87,7 @@ public class NotificationService {
     Page<OfficeOwnerNotification> notifications = officeOwnerNotificationRepository.findAllByOfficeOwner(
         officeOwner, pageable);
 
-    return notifications.map(n -> NotificationResponseDto.from(n));
+    return notifications.map(NotificationResponseDto::from);
   }
 
   public Page<NotificationResponseDto> getNotificationByCustomer(String email, Pageable pageable){
@@ -98,7 +98,7 @@ public class NotificationService {
     Page<CustomerNotification> notifications = customerNotificationRepository.findAllByCustomer(
         customer, pageable);
 
-    return notifications.map(n -> NotificationResponseDto.from(n));
+    return notifications.map(NotificationResponseDto::from);
   }
 
   private void sendNotificationToEmail(String email, Object notificationData) {
