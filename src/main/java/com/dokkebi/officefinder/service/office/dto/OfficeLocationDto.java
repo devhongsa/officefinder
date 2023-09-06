@@ -18,7 +18,7 @@ public class OfficeLocationDto {
   private String legion;
   private String city;
   private String town;
-  private String village;
+  private String detail;
   private int zipcode;
 
   public static OfficeLocationDto fromRequest(OfficeCreateRequestDto request) {
@@ -26,7 +26,7 @@ public class OfficeLocationDto {
         .legion(request.getAddress().getLegion())
         .city(request.getAddress().getCity())
         .town(request.getAddress().getTown())
-        .village(request.getAddress().getVillage())
+        .detail(request.getAddress().getDetail())
         .zipcode(Integer.parseInt(request.getAddress().getZipcode()))
         .build();
   }
@@ -36,7 +36,7 @@ public class OfficeLocationDto {
         .legion(request.getAddress().getLegion())
         .city(request.getAddress().getCity())
         .town(request.getAddress().getTown())
-        .village(request.getAddress().getVillage())
+        .detail(request.getAddress().getDetail())
         .zipcode(Integer.parseInt(request.getAddress().getZipcode()))
         .build();
   }

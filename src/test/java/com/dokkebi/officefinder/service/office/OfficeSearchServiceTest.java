@@ -90,7 +90,7 @@ public class OfficeSearchServiceTest {
     assertThat(content)
         .extracting(Office::getOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "zipcode")
+        .extracting("legion", "city", "town", "detail", "zipcode")
         .containsExactlyInAnyOrder(
             tuple("경상남도", "김해시", "삼계동", "", 12345),
             tuple("경상남도", "김해시", "삼계동", "", 12348),
@@ -147,7 +147,7 @@ public class OfficeSearchServiceTest {
     assertThat(content)
         .extracting(Office::getOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "zipcode")
+        .extracting("legion", "city", "town", "detail", "zipcode")
         .containsExactlyInAnyOrder(
             tuple("경상남도", "김해시", "삼계동", "", 12345),
             tuple("경상남도", "김해시", "삼계동", "", 12348),
@@ -208,7 +208,7 @@ public class OfficeSearchServiceTest {
     assertThat(content)
         .extracting(Office::getOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "zipcode")
+        .extracting("legion", "city", "town", "detail", "zipcode")
         .containsExactlyInAnyOrder(
             tuple("경상남도", "김해시", "삼계동", "", 12345),
             tuple("경상남도", "김해시", "삼계동", "", 12348),
@@ -262,7 +262,7 @@ public class OfficeSearchServiceTest {
     assertThat(content)
         .extracting(Office::getOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "zipcode")
+        .extracting("legion", "city", "town", "detail", "zipcode")
         .containsExactlyInAnyOrder(
             tuple("경상남도", "김해시", "삼계동", "", 12345)
         );
@@ -312,7 +312,7 @@ public class OfficeSearchServiceTest {
     assertThat(content)
         .extracting(Office::getOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "zipcode")
+        .extracting("legion", "city", "town", "detail", "zipcode")
         .containsExactlyInAnyOrder(
             tuple("경상남도", "김해시", "삼계동", "", 12345),
             tuple("부산광역시", "동구", "좌천동", "", 12398),
@@ -367,7 +367,7 @@ public class OfficeSearchServiceTest {
     assertThat(content)
         .extracting(Office::getOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "zipcode")
+        .extracting("legion", "city", "town", "detail", "zipcode")
         .containsExactlyInAnyOrder(
             tuple("경상남도", "김해시", "삼계동", "", 12345),
             tuple("경상남도", "진영시", "가츠동", "", 12598)
@@ -450,14 +450,14 @@ public class OfficeSearchServiceTest {
     request.setMaxRoomCount(maxRoomCount);
   }
 
-  private OfficeAddress setOfficeLocation(String legion, String city, String town, String village,
+  private OfficeAddress setOfficeLocation(String legion, String city, String town, String detail,
       String street, int zipcode) {
 
     return OfficeAddress.builder()
         .legion(legion)
         .city(city)
         .town(town)
-        .village(village)
+        .detail(detail)
         .street(street)
         .zipcode(String.valueOf(zipcode))
         .build();
