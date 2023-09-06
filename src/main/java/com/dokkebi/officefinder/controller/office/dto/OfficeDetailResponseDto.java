@@ -3,7 +3,6 @@ package com.dokkebi.officefinder.controller.office.dto;
 import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.ReviewDto;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficePicture;
-import com.dokkebi.officefinder.entity.review.Review;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -28,12 +27,8 @@ public class OfficeDetailResponseDto {
   private List<ReviewDto> reviews;
   private List<String> officePictureList;
 
-  public static OfficeDetailResponseDto from(Office office, List<Review> reviews,
-      List<OfficePicture> pictures) {
-
-    List<ReviewDto> dtoList = reviews.stream()
-        .map(ReviewDto::from)
-        .collect(Collectors.toList());
+  public static OfficeDetailResponseDto from(Office office,
+      List<ReviewDto> reviewDtoList, List<OfficePicture> pictures) {
 
     List<String> picturePath = pictures.stream()
         .map(OfficePicture::getFileName)
@@ -46,7 +41,7 @@ public class OfficeDetailResponseDto {
         .address(office.getOfficeAddress())
         .maxRoomCount(office.getMaxRoomCount())
         .officeOptionDto(OfficeOptionDto.fromEntity(office.getOfficeCondition()))
-        .reviews(dtoList)
+        .reviews(reviewDtoList)
         .officePictureList(picturePath)
         .build();
   }
