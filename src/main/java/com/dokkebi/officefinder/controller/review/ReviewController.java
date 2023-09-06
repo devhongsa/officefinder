@@ -4,6 +4,9 @@ import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto;
 import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.ReviewDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.review.Review;
+import com.dokkebi.officefinder.exception.CustomErrorCode;
+import com.dokkebi.officefinder.exception.CustomException;
+import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.security.TokenProvider;
 import com.dokkebi.officefinder.service.review.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +38,7 @@ public class ReviewController {
 
   private final ReviewService reviewService;
   private final TokenProvider tokenProvider;
+  private final CustomerRepository customerRepository;
 
   @Operation(summary = "리뷰 등록", description = "회원은 만기된 임대에 대한 리뷰를 등록할 수 있다.")
   @PostMapping("api/customers/info/leases/{leaseId}/reviews")
@@ -59,7 +63,9 @@ public class ReviewController {
 
     Page<Review> reviews = reviewService.getReviewsByCustomerId(customerId, pageable);
 
-    return reviews.map(ReviewDto::from);
+    return reviews.map(content -> ReviewDto.from(content,
+        customerRepository.findById(customerId).orElseThrow(() -> new CustomException(
+            CustomErrorCode.USER_NOT_FOUND))));
   }
 
   @Operation(summary = "리뷰 수정", description = "자신이 등록한 리뷰를 수정할 수 있다.")
