@@ -46,12 +46,16 @@ public class OfficeOwner extends BaseEntity implements UserDetails {
   @Column(name = "owner_point", nullable = false)
   private long point;
 
+  @Column(name = "office_owner_image")
+  private String officeOwnerProfileImage;
+
   @Column(name = "owner_roles", nullable = false)
   @Convert(converter = Converter.RoleConverter.class)
   private Set<String> roles;
 
   @Builder
-  private OfficeOwner(Long id, String name, String email, String password, String businessNumber, long point, Set<String> roles) {
+  private OfficeOwner(Long id, String name, String email, String password, String businessNumber,
+      long point, Set<String> roles) {
     this.id = id;
     this.name = name;
     this.email = email;
@@ -59,6 +63,7 @@ public class OfficeOwner extends BaseEntity implements UserDetails {
     this.businessNumber = businessNumber;
     this.point = point;
     this.roles = roles;
+    this.officeOwnerProfileImage = "None";
   }
 
   public void changePassword(String newPassword) {
@@ -67,6 +72,14 @@ public class OfficeOwner extends BaseEntity implements UserDetails {
 
   public void addPoint(int additionalPoint) {
     this.point += additionalPoint;
+  }
+
+  public void changeOfficeOwnerProfileImage(String newImagePath){
+    this.officeOwnerProfileImage = newImagePath;
+  }
+
+  public void changeOwnerName(String newName){
+    this.name = newName;
   }
 
   @Override

@@ -89,6 +89,10 @@ public class Customer extends BaseEntity implements UserDetails {
     this.profileImage = imagePath;
   }
 
+  public void changeUserName(String newName){
+    this.name = newName;
+  }
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return roles.stream()
