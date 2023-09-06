@@ -1,14 +1,10 @@
 package com.dokkebi.officefinder.controller.bookmark;
 
 import com.dokkebi.officefinder.controller.bookmark.dto.BookmarkDto;
-import com.dokkebi.officefinder.dto.PageInfo;
-import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.bookmark.Bookmark;
 import com.dokkebi.officefinder.security.TokenProvider;
 import com.dokkebi.officefinder.service.bookmark.BookmarkService;
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,7 +31,7 @@ public class BookmarkController {
 
   @PreAuthorize("hasRole('CUSTOMER')")
   @PostMapping("/submit")
-  public ResponseDto<?> submitBookmark(@RequestHeader("Authorization") String jwtHeader,
+  public ResponseDto<Long> submitBookmark(@RequestHeader("Authorization") String jwtHeader,
       @RequestBody @Valid Long officeId) {
     Long customerId = tokenProvider.getUserIdFromHeader(jwtHeader);
     bookmarkService.submitBookmark(customerId, officeId);
@@ -45,29 +41,20 @@ public class BookmarkController {
 
   @PreAuthorize("hasRole('CUSTOMER')")
   @GetMapping
-  public PageResponseDto<?> getBookmarks(@RequestHeader("Authorization") String jwtHeader,
+  public Page<BookmarkDto> getBookmarks(@RequestHeader("Authorization") String jwtHeader,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "20") Integer size) {
     Long customerId = tokenProvider.getUserIdFromHeader(jwtHeader);
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
     Page<Bookmark> bookmarks = bookmarkService.getBookmarks(customerId, pageable);
 
-    PageInfo pageInfo = new PageInfo(pageable.getPageNumber(), pageable.getPageSize(),
-        (int) bookmarks.getTotalElements(), bookmarks.getTotalPages());
-
-    List<BookmarkDto> list = bookmarks.stream().map(BookmarkDto::from)
-        .collect(Collectors.toList());
-
-    if (list.isEmpty()) {
-      throw new IllegalArgumentException("등록된 북마크가 없습니다.");
-    }
-
-    return new PageResponseDto<>(list, pageInfo);
+    return bookmarks.map(BookmarkDto::from);
   }
 
   @PreAuthorize("hasRole('CUSTOMER')")
   @DeleteMapping("/delete")
-  public ResponseDto<?> deleteBookmark(@RequestHeader("Authorization") String jwtHeader,
+  public ResponseDto<Long> deleteBookmark(@RequestHeader("Authorization") String jwtHeader,
       @RequestBody @Valid Long officeId) {
     Long customerId = tokenProvider.getUserIdFromHeader(jwtHeader);
     bookmarkService.deleteBookmark(customerId, officeId);
