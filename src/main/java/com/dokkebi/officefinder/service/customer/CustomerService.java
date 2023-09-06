@@ -2,7 +2,8 @@ package com.dokkebi.officefinder.service.customer;
 
 import static com.dokkebi.officefinder.exception.CustomErrorCode.USER_NOT_FOUND;
 
-import com.dokkebi.officefinder.controller.customer.dto.CustomerControllerDto.CustomerInfo;
+import com.dokkebi.officefinder.controller.customer.dto.CustomerInfoDto;
+import com.dokkebi.officefinder.controller.customer.dto.CustomerOverViewInfoDto;
 import com.dokkebi.officefinder.controller.customer.dto.PointChargeHistoryDto;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.PointChargeHistory;
@@ -36,25 +37,25 @@ public class CustomerService {
     customer.chargePoint(amount);
   }
 
-  @Transactional
-  public CustomerInfo getCustomerInfo(Long id) {
+  public CustomerInfoDto getCustomerInfo(Long id) {
     Customer customer = customerRepository.findById(id)
         .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
     Set<PointChargeHistory> histories = chargeHistoryRepository.findTop10ByCustomerIdOrderByCreatedAtDesc(
         id);
+
     Set<PointChargeHistoryDto> historyDtoSet = toDtoSet(histories);
 
-    return CustomerInfo.builder()
-        .id(customer.getId())
-        .email(customer.getEmail())
-        .name(customer.getName())
-        .point(customer.getPoint())
-        .roles(customer.getRoles())
-        .histories(historyDtoSet)
-        .build();
+    return CustomerInfoDto.from(customer, historyDtoSet);
   }
 
-  @Transactional
+  public CustomerOverViewInfoDto getCustomerOverViewInfo(Long id) {
+    Customer customer = customerRepository.findById(id)
+        .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+    return CustomerOverViewInfoDto.from(customer);
+  }
+
   public Page<PointChargeHistory> getAllHistories(Long id, Pageable pageable) {
     Customer customer = customerRepository.findById(id)
         .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
@@ -67,6 +68,14 @@ public class CustomerService {
         .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
     customer.changeProfileImage(imagePath);
+  }
+
+  @Transactional
+  public void changeCustomerName(String newCustomerName, Long customerId){
+    Customer customer = customerRepository.findById(customerId)
+        .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+    customer.changeUserName(newCustomerName);
   }
 
   private Set<PointChargeHistoryDto> toDtoSet(Set<PointChargeHistory> histories) {
