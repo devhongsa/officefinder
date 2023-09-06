@@ -3,6 +3,7 @@ package com.dokkebi.officefinder.controller.bookmark;
 import com.dokkebi.officefinder.controller.bookmark.dto.BookmarkDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.bookmark.Bookmark;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.security.TokenProvider;
 import com.dokkebi.officefinder.service.bookmark.BookmarkService;
 import javax.validation.Valid;
@@ -28,11 +29,13 @@ public class BookmarkController {
 
   private final TokenProvider tokenProvider;
   private final BookmarkService bookmarkService;
+  private final OfficePictureRepository officePictureRepository;
 
   @PreAuthorize("hasRole('CUSTOMER')")
   @PostMapping("/submit")
   public ResponseDto<Long> submitBookmark(@RequestHeader("Authorization") String jwtHeader,
       @RequestBody @Valid Long officeId) {
+
     Long customerId = tokenProvider.getUserIdFromHeader(jwtHeader);
     bookmarkService.submitBookmark(customerId, officeId);
 
@@ -49,7 +52,8 @@ public class BookmarkController {
 
     Page<Bookmark> bookmarks = bookmarkService.getBookmarks(customerId, pageable);
 
-    return bookmarks.map(BookmarkDto::from);
+    return bookmarks.map(content -> BookmarkDto.from(content,
+        officePictureRepository.findByOfficeId(content.getOffice().getId())));
   }
 
   @PreAuthorize("hasRole('CUSTOMER')")

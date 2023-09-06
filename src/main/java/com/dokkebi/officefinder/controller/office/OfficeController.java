@@ -14,6 +14,7 @@ import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepositor
 import com.dokkebi.officefinder.service.office.OfficeSearchService;
 import com.dokkebi.officefinder.service.review.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
@@ -57,6 +58,16 @@ public class OfficeController {
     Office officeInfo = officeQueryService.getOfficeInfo(officeId);
     List<OfficePicture> officeImages = officePictureRepository.findByOfficeId(officeId);
 
+    List<String> imagePath = new ArrayList<>();
+
+    for (OfficePicture element: officeImages){
+      imagePath.add(element.getFileName());
+    }
+
+    while(imagePath.size() < 5){
+      imagePath.add("None");
+    }
+
     List<Review> reviews = reviewService.getTopTwoReviews(officeId);
 
     List<ReviewDto> reviewDtoList = reviews.stream()
@@ -64,7 +75,7 @@ public class OfficeController {
             .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND))))
         .collect(Collectors.toList());
 
-    return OfficeDetailResponseDto.from(officeInfo, reviewDtoList, officeImages);
+    return OfficeDetailResponseDto.from(officeInfo, reviewDtoList, imagePath);
   }
 
   @Operation(summary = "오피스 리뷰조회", description = "특정 오피스의 리뷰를 조회할 수 있다.")

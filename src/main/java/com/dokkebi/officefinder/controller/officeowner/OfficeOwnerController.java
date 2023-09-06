@@ -29,6 +29,7 @@ import com.dokkebi.officefinder.service.officeowner.OfficeOwnerService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -153,13 +154,23 @@ public class OfficeOwnerController {
     //오피스의 사진을 가져올 수 있어야 한다.
     List<OfficePicture> pictures = officePictureRepository.findByOfficeId(office.getId());
 
+    List<String> imagePath = new ArrayList<>();
+
+    for (OfficePicture element: pictures){
+      imagePath.add(element.getFileName());
+    }
+
+    while(imagePath.size() < 5){
+      imagePath.add("None");
+    }
+
     List<Review> reviews = reviewService.getTopTwoReviews(officeId);
     List<ReviewDto> reviewDtoList = reviews.stream()
         .map(content -> ReviewDto.from(content, customerRepository.findById(content.getCustomerId())
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND))))
         .collect(Collectors.toList());
 
-    return OfficeDetailResponseDto.from(office, reviewDtoList, pictures);
+    return OfficeDetailResponseDto.from(office, reviewDtoList, imagePath);
   }
 
   @Operation(summary = "오피스 정보 수정", description = "자신의 오피스 정보를 수정할 수 있다.")
