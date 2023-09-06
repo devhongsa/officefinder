@@ -15,13 +15,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,8 +41,8 @@ public class ReviewController {
   @PreAuthorize("hasRole('CUSTOMER')")
   public ResponseDto<Long> submitReview(
       @RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitControllerRequest,
-      @RequestHeader("Authorization") String jwtHeader, @PathVariable @Valid Long leaseId) {
-    Long customerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+      @CookieValue("Authorization") String jwt, @PathVariable @Valid Long leaseId) {
+    Long customerId = tokenProvider.getUserId(jwt);
     Review review = reviewService.submit(submitControllerRequest, customerId, leaseId);
 
     return new ResponseDto<>("success", review.getId());
@@ -51,10 +51,10 @@ public class ReviewController {
   @Operation(summary = "리뷰 조회", description = "자신이 등록한 리뷰를 조회할 수 있다.")
   @GetMapping("api/customers/reviews")
   @PreAuthorize("hasRole('CUSTOMER')")
-  public Page<ReviewDto> getCustomerReviews(@RequestHeader("Authorization") String jwtHeader,
+  public Page<ReviewDto> getCustomerReviews(@CookieValue("Authorization") String jwt,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "20") Integer size) {
-    Long customerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+    Long customerId = tokenProvider.getUserId(jwt);
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
     Page<Review> reviews = reviewService.getReviewsByCustomerId(customerId, pageable);
@@ -65,10 +65,10 @@ public class ReviewController {
   @Operation(summary = "리뷰 수정", description = "자신이 등록한 리뷰를 수정할 수 있다.")
   @PutMapping("api/customers/reviews/{reviewId}")
   @PreAuthorize("hasRole('CUSTOMER')")
-  public ResponseDto<Long> updateReview(@RequestHeader("Authorization") String jwtHeader,
+  public ResponseDto<Long> updateReview(@CookieValue("Authorization") String jwt,
       @RequestBody @Valid ReviewControllerDto.SubmitControllerRequest submitControllerRequest,
       @PathVariable @Valid Long reviewId) {
-    Long customerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+    Long customerId = tokenProvider.getUserId(jwt);
     Review review = reviewService.update(submitControllerRequest, customerId, reviewId);
 
     return new ResponseDto<>("success", review.getId());
@@ -77,9 +77,9 @@ public class ReviewController {
   @Operation(summary = "리뷰 삭제", description = "자신이 등록한 리뷰를 삭제할 수 있다.")
   @DeleteMapping("api/customers/reviews/{reviewId}")
   @PreAuthorize("hasRole('CUSTOMER')")
-  public ResponseDto<Long> deleteReview(@RequestHeader("Authorization") String jwtHeader,
+  public ResponseDto<Long> deleteReview(@CookieValue("Authorization") String jwt,
       @PathVariable @Valid Long reviewId) {
-    Long customerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+    Long customerId = tokenProvider.getUserId(jwt);
     reviewService.delete(customerId, reviewId);
 
     return new ResponseDto<>("success", reviewId);
