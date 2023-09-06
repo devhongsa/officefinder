@@ -15,15 +15,15 @@ public class Address {
   private String legion;
   private String city;
   private String town;
-  private String village;
+  private String detail;
   private int zipcode;
 
   @Builder
-  private Address(String legion, String city, String town, String village, int zipcode) {
+  private Address(String legion, String city, String town, String detail, int zipcode) {
     this.legion = legion;
     this.city = city;
     this.town = town;
-    this.village = village;
+    this.detail = detail;
     this.zipcode = zipcode;
   }
 
@@ -35,7 +35,7 @@ public class Address {
         .legion(request.getLegion())
         .city(request.getCity())
         .town(request.getTown())
-        .village(request.getVillage())
+        .detail(request.getDetail())
         .zipcode(request.getZipcode())
         .build();
   }

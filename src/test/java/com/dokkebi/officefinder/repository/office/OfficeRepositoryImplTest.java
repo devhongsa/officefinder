@@ -243,12 +243,12 @@ class OfficeRepositoryImplTest {
     officeConditionRepository.saveAll(List.of(officeCondition, officeCondition2, officeCondition3));
   }
 
-  private Address createAddress(String legion, String city, String town, String village,
+  private Address createAddress(String legion, String city, String town, String detail,
       String street,int zipcode) {
     return Address.builder()
         .legion(legion)
         .city(city)
-        .village(village)
+        .detail(detail)
         .town(town)
         .zipcode(zipcode)
         .build();
