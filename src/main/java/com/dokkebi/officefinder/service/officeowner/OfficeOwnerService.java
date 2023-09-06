@@ -1,10 +1,14 @@
 package com.dokkebi.officefinder.service.officeowner;
 
+import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerInfoDto;
+import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerOverViewDto;
+import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
+import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.security.TokenProvider;
@@ -15,11 +19,14 @@ import java.util.HashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OfficeOwnerService {
 
+  private final OfficeOwnerRepository officeOwnerRepository;
   private final LeaseRepository leaseRepository;
   private final OfficeRepository officeRepository;
   private final TokenProvider tokenProvider;
@@ -31,6 +38,36 @@ public class OfficeOwnerService {
   private final LocalDate startDate = LocalDate.of(start.getYear(), start.getMonth(), 1);
   private final List<LeaseStatus> leaseStatus = Arrays.asList(LeaseStatus.EXPIRED,
       LeaseStatus.PROCEEDING);
+
+  public OfficeOwnerInfoDto getAgentInfo(Long officeOwnerId) {
+    OfficeOwner officeOwner = officeOwnerRepository.findById(officeOwnerId)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+
+    return OfficeOwnerInfoDto.from(officeOwner);
+  }
+
+  public OfficeOwnerOverViewDto getAgentOverViewInfo(Long officeOwnerId) {
+    OfficeOwner officeOwner = officeOwnerRepository.findById(officeOwnerId)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+
+    return OfficeOwnerOverViewDto.from(officeOwner);
+  }
+
+  @Transactional
+  public void changeAgentProfileImage(String userImagePath, String officeOwnerEmail) {
+    OfficeOwner officeOwner = officeOwnerRepository.findByEmail(officeOwnerEmail)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+
+    officeOwner.changeOfficeOwnerProfileImage(userImagePath);
+  }
+
+  @Transactional
+  public void changeAgentName(String newAgentName, Long officeOwnerId){
+    OfficeOwner officeOwner = officeOwnerRepository.findById(officeOwnerId)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+
+    officeOwner.changeOwnerName(newAgentName);
+  }
 
   public HashMap<String, Long> getOfficeRevenue(Long officeId, String jwtHeader) {
     Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwtHeader);
@@ -102,5 +139,4 @@ public class OfficeOwnerService {
     }
     return revenueMap;
   }
-
 }

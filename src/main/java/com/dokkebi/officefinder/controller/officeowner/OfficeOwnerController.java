@@ -1,14 +1,23 @@
 package com.dokkebi.officefinder.controller.officeowner;
 
+import static com.dokkebi.officefinder.exception.CustomErrorCode.USER_NOT_FOUND;
+
 import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeDetailResponseDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeModifyRequestDto;
+import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerInfoDto;
+import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerModifyDto;
+import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerOverViewDto;
 import com.dokkebi.officefinder.controller.officeowner.dto.OwnerOfficeOverViewDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
+import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficePicture;
 import com.dokkebi.officefinder.entity.review.Review;
+import com.dokkebi.officefinder.exception.CustomException;
+import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
+import com.dokkebi.officefinder.security.TokenProvider;
 import com.dokkebi.officefinder.service.office.OfficeSearchService;
 import com.dokkebi.officefinder.service.office.OfficeService;
 import com.dokkebi.officefinder.service.officeowner.dto.OfficeOwnerServiceDto.RentalStatusDto;
@@ -21,15 +30,18 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -46,16 +58,77 @@ public class OfficeOwnerController {
   private final OfficeService officeService;
   private final OfficeSearchService officeQueryService;
   private final OfficePictureRepository officePictureRepository;
+  private final OfficeOwnerRepository officeOwnerRepository;
   private final S3Service s3Service;
   private final OfficeOwnerService officeOwnerService;
   private final ReviewService reviewService;
+  private final TokenProvider tokenProvider;
+
+  @ApiOperation(value = "임대주 요약 정보 조회", notes = "임대주 요약 정보(이름, 역할, 사진, 포인트)를 가져올 수 있다.")
+  @GetMapping("/info-overview")
+  public OfficeOwnerOverViewDto getOfficeOwnerOverView(
+      @RequestHeader("Authorization") String jwtHeader) {
+
+    return officeOwnerService.getAgentOverViewInfo(tokenProvider.getUserIdFromHeader(jwtHeader));
+  }
+
+  @ApiOperation(value = "임대주 정보 조회", notes = "임대주 정보를 가져올 수 있다.")
+  @GetMapping("/info")
+  public OfficeOwnerInfoDto getOfficeOwnerInfo(@RequestHeader("Authorization") String jwtHeader) {
+    return officeOwnerService.getAgentInfo(tokenProvider.getUserIdFromHeader(jwtHeader));
+  }
+
+  @Operation(summary = "임대주 이미지 등록 및 수정", description = "임대주의 프로필 이미지를 등록하거나 수정할 수 있다.")
+  @PutMapping("/info/profileImage")
+  public ResponseDto<String> modifyProfileImage(@RequestPart("value") MultipartFile multipartFile,
+      Principal principal) {
+
+    OfficeOwner officeOwner = officeOwnerRepository.findByEmail(principal.getName())
+        .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+    if (!officeOwner.getOfficeOwnerProfileImage().equals("None")) {
+      s3Service.deleteImages(List.of(officeOwner.getOfficeOwnerProfileImage()));
+    }
+
+    String userImagePath = s3Service.uploadImages(List.of(multipartFile)).get(0);
+    officeOwnerService.changeAgentProfileImage(userImagePath, principal.getName());
+
+    return new ResponseDto<>("success", "image modify success");
+  }
+
+  @Operation(summary = "임대주 이름 수정", description = "임대주의 이름을 수정할 수 있다.")
+  @PutMapping("/info/username")
+  public String changeAgentName(@RequestBody @Valid OfficeOwnerModifyDto officeOwnerModifyDto,
+      @RequestHeader("Authorization") String jwtHeader) {
+
+    officeOwnerService.changeAgentName(officeOwnerModifyDto.getName(),
+        tokenProvider.getUserIdFromHeader(jwtHeader));
+
+    return "success";
+  }
+
+  @Operation(summary = "임대주 프로필 이미지 초기화", description = "임대주의 프로필 이미지를 기본 이미지로 초기화한다.")
+  @DeleteMapping("/info/profileImage")
+  public ResponseDto<String> initProfileImage(Principal principal) {
+    OfficeOwner officeOwner = officeOwnerRepository.findByEmail(principal.getName())
+        .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+    if (!officeOwner.getOfficeOwnerProfileImage().equals("None")) {
+      s3Service.deleteImages(List.of(officeOwner.getOfficeOwnerProfileImage()));
+    }
+
+    officeOwnerService.changeAgentProfileImage("None", principal.getName());
+
+    return new ResponseDto<>("success", "image modify success");
+  }
 
   @ApiOperation(value = "오피스 리스트 조회", notes = "자신이 등록한 오피스 리스트를 조회할 수 있다.")
   @GetMapping("/offices")
   public Page<OwnerOfficeOverViewDto> showOfficeList(Principal principal, Pageable pageable) {
     Page<Office> result = officeQueryService.getAllOffices(principal.getName(), pageable);
 
-    return result.map(OwnerOfficeOverViewDto::fromEntity);
+    return result.map(content -> OwnerOfficeOverViewDto.fromEntity(content,
+        officePictureRepository.findByOfficeId(content.getId()).get(0).getFileName()));
   }
 
   @ApiOperation(value = "오피스 등록", notes = "자신이 가진 오피스를 서비스에 등록할 수 있다.")
@@ -73,9 +146,12 @@ public class OfficeOwnerController {
   @GetMapping("/offices/{officeId}")
   public OfficeDetailResponseDto showOfficeDetail(@PathVariable("officeId") Long officeId) {
     Office office = officeQueryService.getOfficeInfo(officeId);
+
+    //오피스의 사진을 가져올 수 있어야 한다.
+    List<OfficePicture> pictures = officePictureRepository.findByOfficeId(office.getId());
     List<Review> reviews = reviewService.getTopTwoReviews(officeId);
 
-    return OfficeDetailResponseDto.from(office, reviews);
+    return OfficeDetailResponseDto.from(office, reviews, pictures);
   }
 
   @Operation(summary = "오피스 정보 수정", description = "자신의 오피스 정보를 수정할 수 있다.")
@@ -104,7 +180,7 @@ public class OfficeOwnerController {
 
   @Operation(summary = "해당 오피스의 매출 조회", description = "특정 오피스의 매출을 가져올 수 있다.")
   @GetMapping("/offices/revenue/{officeId}")
-  public ResponseDto<HashMap<String,Long>> getOfficeRevenue(@PathVariable Long officeId,
+  public ResponseDto<HashMap<String, Long>> getOfficeRevenue(@PathVariable Long officeId,
       @RequestHeader("Authorization") String jwtHeader) {
     HashMap<String, Long> officeRevenue = officeOwnerService.getOfficeRevenue(officeId, jwtHeader);
 
@@ -113,7 +189,8 @@ public class OfficeOwnerController {
 
   @Operation(summary = "오피스 전체 매출 조회", description = "임대주가 가진 모든 오피스의 매출 합을 가져올 수 있다.")
   @GetMapping("/offices/total-revenue")
-  public ResponseDto<HashMap<String,Long>> getOfficesTotalRevenue(@RequestHeader("Authorization") String jwtHeader) {
+  public ResponseDto<HashMap<String, Long>> getOfficesTotalRevenue(
+      @RequestHeader("Authorization") String jwtHeader) {
     HashMap<String, Long> officeRevenue = officeOwnerService.getOfficesTotalRevenue(jwtHeader);
 
     return new ResponseDto<>("success", officeRevenue);
@@ -131,7 +208,8 @@ public class OfficeOwnerController {
 
   @Operation(summary = "오피스 총 임대 현황 조회", description = "모든 오피스의 임대 현황을 조회할 수 있다.")
   @GetMapping("/offices/overall-rental-status")
-  public ResponseDto<RentalStatusDto> getOfficeOverallRentalStatus(@RequestHeader("Authorization") String jwtHeader) {
+  public ResponseDto<RentalStatusDto> getOfficeOverallRentalStatus(
+      @RequestHeader("Authorization") String jwtHeader) {
     RentalStatusDto officeLeaseRate = officeOwnerService.getOfficeOverallRentalStatus(jwtHeader);
 
     return new ResponseDto<>("success", officeLeaseRate);

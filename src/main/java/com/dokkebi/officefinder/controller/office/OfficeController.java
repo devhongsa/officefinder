@@ -5,7 +5,9 @@ import com.dokkebi.officefinder.controller.office.dto.OfficeOverViewDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeSearchCond;
 import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.ReviewDto;
 import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.entity.office.OfficePicture;
 import com.dokkebi.officefinder.entity.review.Review;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.office.OfficeSearchService;
 import com.dokkebi.officefinder.service.review.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OfficeController {
 
   private final OfficeSearchService officeQueryService;
+  private final OfficePictureRepository officePictureRepository;
   private final ReviewService reviewService;
 
   @Operation(summary = "오피스 검색", description = "오피스를 특정 조건에 맞게 검색할 수 있다.")
@@ -45,10 +48,11 @@ public class OfficeController {
   @GetMapping("/{officeId}")
   public OfficeDetailResponseDto showOfficeDetail(@PathVariable("officeId") Long officeId) {
     Office officeInfo = officeQueryService.getOfficeInfo(officeId);
+    List<OfficePicture> officeImages = officePictureRepository.findByOfficeId(officeId);
 
     List<Review> reviews = reviewService.getTopTwoReviews(officeId);
 
-    return OfficeDetailResponseDto.from(officeInfo, reviews);
+    return OfficeDetailResponseDto.from(officeInfo, reviews, officeImages);
   }
 
   @Operation(summary = "오피스 리뷰조회", description = "특정 오피스의 리뷰를 조회할 수 있다.")

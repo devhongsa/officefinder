@@ -12,11 +12,13 @@ public class OwnerOfficeOverViewDto {
 
   private String officeName;
   private String address;
+  private String imagePath;
 
-  public static OwnerOfficeOverViewDto fromEntity(Office office) {
+  public static OwnerOfficeOverViewDto fromEntity(Office office, String imagePath) {
     return OwnerOfficeOverViewDto.builder()
         .officeName(office.getName())
         .address(office.getOfficeAddress())
+        .imagePath(imagePath)
         .build();
   }
 }
