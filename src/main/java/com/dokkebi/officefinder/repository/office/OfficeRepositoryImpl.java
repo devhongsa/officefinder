@@ -134,7 +134,7 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
   }
 
   private BooleanExpression townEquals(String town) {
-    return town != null ? office.officeLocation.address.village.eq(town) : null;
+    return town != null ? office.officeLocation.address.town.eq(town) : null;
   }
 
   private BooleanExpression maxCapacityLessThan(Integer maxCapacity) {
