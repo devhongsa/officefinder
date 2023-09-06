@@ -9,12 +9,14 @@ import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerInfoDto;
 import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerModifyDto;
 import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerOverViewDto;
 import com.dokkebi.officefinder.controller.officeowner.dto.OwnerOfficeOverViewDto;
+import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.ReviewDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficePicture;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.exception.CustomException;
+import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.security.TokenProvider;
@@ -59,6 +61,7 @@ public class OfficeOwnerController {
   private final OfficeSearchService officeQueryService;
   private final OfficePictureRepository officePictureRepository;
   private final OfficeOwnerRepository officeOwnerRepository;
+  private final CustomerRepository customerRepository;
   private final S3Service s3Service;
   private final OfficeOwnerService officeOwnerService;
   private final ReviewService reviewService;
@@ -149,9 +152,14 @@ public class OfficeOwnerController {
 
     //오피스의 사진을 가져올 수 있어야 한다.
     List<OfficePicture> pictures = officePictureRepository.findByOfficeId(office.getId());
-    List<Review> reviews = reviewService.getTopTwoReviews(officeId);
 
-    return OfficeDetailResponseDto.from(office, reviews, pictures);
+    List<Review> reviews = reviewService.getTopTwoReviews(officeId);
+    List<ReviewDto> reviewDtoList = reviews.stream()
+        .map(content -> ReviewDto.from(content, customerRepository.findById(content.getCustomerId())
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND))))
+        .collect(Collectors.toList());
+
+    return OfficeDetailResponseDto.from(office, reviewDtoList, pictures);
   }
 
   @Operation(summary = "오피스 정보 수정", description = "자신의 오피스 정보를 수정할 수 있다.")
