@@ -69,8 +69,8 @@ public class OfficeOwnerService {
     officeOwner.changeOwnerName(newAgentName);
   }
 
-  public HashMap<String, Long> getOfficeRevenue(Long officeId, String jwtHeader) {
-    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+  public HashMap<String, Long> getOfficeRevenue(Long officeId, String jwt) {
+    Long officeOwnerId = tokenProvider.getUserId(jwt);
 
     Office office = officeRepository.findByIdAndOwnerId(officeId, officeOwnerId)
         .orElseThrow(() -> new CustomException(CustomErrorCode.OFFICE_NOT_OWNED_BY_OWNER));
@@ -81,8 +81,8 @@ public class OfficeOwnerService {
     return getRevenue(leases);
   }
 
-  public HashMap<String, Long> getOfficesTotalRevenue(String jwtHeader) {
-    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+  public HashMap<String, Long> getOfficesTotalRevenue(String jwt) {
+    Long officeOwnerId = tokenProvider.getUserId(jwt);
 
     List<Office> offices = officeRepository.findByOwnerId(officeOwnerId);
 
@@ -92,8 +92,8 @@ public class OfficeOwnerService {
     return getRevenue(leases);
   }
 
-  public RentalStatusDto getOfficeRentalStatus(Long officeId, String jwtHeader) {
-    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+  public RentalStatusDto getOfficeRentalStatus(Long officeId, String jwt) {
+    Long officeOwnerId = tokenProvider.getUserId(jwt);
     Office office = officeRepository.findByIdAndOwnerId(officeId, officeOwnerId)
         .orElseThrow(() -> new CustomException(CustomErrorCode.OFFICE_NOT_OWNED_BY_OWNER));
 
@@ -106,8 +106,8 @@ public class OfficeOwnerService {
     return new RentalStatusDto(office.getMaxRoomCount(), countProceeding, leaseRate);
   }
 
-  public RentalStatusDto getOfficeOverallRentalStatus(String jwtHeader) {
-    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+  public RentalStatusDto getOfficeOverallRentalStatus(String jwt) {
+    Long officeOwnerId = tokenProvider.getUserId(jwt);
 
     List<Office> offices = officeRepository.findByOwnerId(officeOwnerId);
 
