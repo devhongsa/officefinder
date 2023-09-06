@@ -37,9 +37,9 @@ public class OAuthController {
 
   @ApiOperation(value="Hidden API",hidden = true)
   @GetMapping("/login/oauth2/code/google")
-  public ResponseDto<?> googleLogin(@RequestParam String code) {
+  public ResponseDto<LoginResponseCustomer> googleLogin(@RequestParam String code) {
     LoginResponseCustomer customer = oAuthService.socialLogin(code);
 
-    return new ResponseDto<>("success",customer);
+    return new ResponseDto<>("success", customer);
   }
 }
