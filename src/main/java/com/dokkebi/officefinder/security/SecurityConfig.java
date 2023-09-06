@@ -62,7 +62,9 @@ public class SecurityConfig implements WebMvcConfigurer {
   @Override
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**")
-        //.allowedOrigins("https://officefinder.site")
-        .allowedMethods(ALLOWED_METHOD_NAMES.split(","));
+        .allowedOrigins("http://127.0.0.1:5173")
+        .allowedOrigins("http://localhost:5173")
+        .allowedMethods(ALLOWED_METHOD_NAMES.split(","))
+        .allowCredentials(true);
   }
 }
