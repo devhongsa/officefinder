@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -42,6 +43,7 @@ public class SecurityConfig implements WebMvcConfigurer {
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeHttpRequests((authz) -> authz
+            .antMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
             .antMatchers("/ws/**").permitAll() // 개발환경에서만 우선 설정
             .antMatchers("/webjars/**").permitAll() // 개발환경에서만 우선 설정
             .antMatchers("/swagger*/**","/v3/api-docs", "/v2/api-docs").permitAll()
@@ -63,7 +65,9 @@ public class SecurityConfig implements WebMvcConfigurer {
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**")
         .allowedOrigins("http://127.0.0.1:5173", "http://localhost:5173")
-        .allowedMethods(ALLOWED_METHOD_NAMES.split(","))
+        .allowedMethods("*")
+        .allowedHeaders("Content-Type","X-AUTH-TOKEN","Authorization","Access-Control-Allow-Origin","Access-Control-Allow-Credentials")
+        .exposedHeaders("Content-Disposition","X-AUTH-TOKEN","Authorization","Access-Control-Allow-Origin","Access-Control-Allow-Credentials")
         .allowCredentials(true);
   }
 }

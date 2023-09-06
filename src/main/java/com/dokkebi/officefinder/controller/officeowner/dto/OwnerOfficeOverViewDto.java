@@ -10,12 +10,14 @@ import lombok.Getter;
 @Builder
 public class OwnerOfficeOverViewDto {
 
+  private Long id;
   private String officeName;
   private String address;
   private String imagePath;
 
   public static OwnerOfficeOverViewDto fromEntity(Office office, String imagePath) {
     return OwnerOfficeOverViewDto.builder()
+        .id(office.getId())
         .officeName(office.getName())
         .address(office.getOfficeAddress())
         .imagePath(imagePath)

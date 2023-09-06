@@ -13,6 +13,7 @@ import com.dokkebi.officefinder.entity.type.Address;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +39,9 @@ class OfficeRepositoryImplTest {
   @Autowired
   private OfficeConditionRepository officeConditionRepository;
 
+  @Autowired
+  private OfficePictureRepository officePictureRepository;
+
   private final ReviewOverviewDto reviewOverviewDto = ReviewOverviewDto.builder()
       .reviewCount(42).reviewRate(4.82).build();
 
@@ -53,7 +57,8 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
+        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto,
+            "none"))
         .collect(Collectors.toList());
 
     // then
@@ -80,7 +85,8 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
+        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto,
+            "none"))
         .collect(Collectors.toList());
 
     // then
@@ -108,7 +114,8 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
+        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto,
+            "none"))
         .collect(Collectors.toList());
 
     // then
@@ -132,7 +139,8 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
+        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto,
+            "none"))
         .collect(Collectors.toList());
 
     // then
@@ -159,7 +167,8 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
+        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto,
+            "none"))
         .collect(Collectors.toList());
 
     // then
@@ -187,7 +196,8 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
+        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto,
+            "none"))
         .collect(Collectors.toList());
 
     // then
