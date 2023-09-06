@@ -1,12 +1,9 @@
 package com.dokkebi.officefinder.controller.notification;
 
-import com.dokkebi.officefinder.dto.PageInfo;
-import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.service.notification.NotificationService;
 import com.dokkebi.officefinder.service.notification.dto.NotificationResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import java.security.Principal;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,7 +28,7 @@ public class NotificationController {
   public SseEmitter subscribe(@AuthenticationPrincipal Principal principal,
       // 만약 연결이 끊기거나 다른 이유로 이벤트를 받지 못하게 된다면, 브라우저는 다시 연결을 시도할때
       // 이 Last-Event-ID 헤더를 포함하여 어디서부터 데이터를 다시 받아야 하는지 서버에 알림
-      @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId){
+      @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId) {
 
     return notificationService.subscribe(principal.getName(), lastEventId);
   }
@@ -39,38 +36,27 @@ public class NotificationController {
   @Operation(summary = "알림 리스트 조회", description = "임대 업자가 본인에게 도착한 알림 내역 조회")
   @PreAuthorize("hasRole('OFFICE_OWNER')")
   @GetMapping("/api/agents/notifications")
-  public PageResponseDto<?> getNotificationListByOwner(Principal principal, Pageable pageableReceived) {
-
+  public Page<NotificationResponseDto> getNotificationListByOwner(Principal principal,
+      Pageable pageableReceived) {
     Pageable pageable = createPageable(pageableReceived, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-    Page<NotificationResponseDto> notificationByOwner = notificationService.getNotificationByOwner(
+    return notificationService.getNotificationByOwner(
         principal.getName(), pageable);
-
-    return createPageResponseDto(notificationByOwner);
   }
 
   @Operation(summary = "알림 리스트 조회", description = "고객이 본인에게 도착한 알림 내역 조회")
   @PreAuthorize("hasRole('CUSTOMER')")
   @GetMapping("/api/customers/notifications")
-  public PageResponseDto<?> getNotificationListByCustomer(Principal principal, Pageable pageableReceived){
+  public Page<NotificationResponseDto> getNotificationListByCustomer(Principal principal,
+      Pageable pageableReceived) {
 
     Pageable pageable = createPageable(pageableReceived, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-    Page<NotificationResponseDto> notificationByCustomer = notificationService.getNotificationByCustomer(
+    return notificationService.getNotificationByCustomer(
         principal.getName(), pageable);
-
-    return createPageResponseDto(notificationByCustomer);
   }
 
   private Pageable createPageable(Pageable pageableReceived, Sort sort) {
     return PageRequest.of(pageableReceived.getPageNumber(), pageableReceived.getPageSize(), sort);
-  }
-
-  private <T> PageResponseDto<List<T>> createPageResponseDto(Page<T> pageData) {
-
-    PageInfo pageInfo = new PageInfo(pageData.getNumber(), pageData.getSize(),
-        (int) pageData.getTotalElements(), pageData.getTotalPages());
-
-    return new PageResponseDto<>(pageData.getContent(), pageInfo);
   }
 }

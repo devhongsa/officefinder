@@ -5,8 +5,6 @@ import static com.dokkebi.officefinder.exception.CustomErrorCode.*;
 import com.dokkebi.officefinder.controller.customer.dto.CustomerControllerDto.CustomerInfo;
 import com.dokkebi.officefinder.controller.customer.dto.PointChargeHistoryDto;
 import com.dokkebi.officefinder.controller.customer.dto.PointChargeRequestDto;
-import com.dokkebi.officefinder.dto.PageInfo;
-import com.dokkebi.officefinder.dto.PageResponseDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.PointChargeHistory;
@@ -18,7 +16,6 @@ import com.dokkebi.officefinder.service.s3.S3Service;
 import io.swagger.v3.oas.annotations.Operation;
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -51,7 +48,9 @@ public class CustomerController {
 
   @Operation(summary = "회원 포인트 충전", description = "회원의 포인트를 충전할 수 있다.")
   @PostMapping("/charge")
-  public ResponseDto<?> chargeUserPoint(@RequestBody PointChargeRequestDto request, Principal principal) {
+  public ResponseDto<String> chargeUserPoint(@RequestBody PointChargeRequestDto request,
+      Principal principal) {
+
     customerService.chargeCustomerPoint(request.getChargeAmount(), principal.getName());
 
     return new ResponseDto<>("success", "charge success");
@@ -59,7 +58,9 @@ public class CustomerController {
 
   @Operation(summary = "회원 정보 가져오기", description = "회원 정보를 가져올 수 있다.")
   @GetMapping("/info")
-  public ResponseDto<?> getCustomerInfo(@RequestHeader("Authorization") String jwtHeader) {
+  public ResponseDto<CustomerInfo> getCustomerInfo(
+      @RequestHeader("Authorization") String jwtHeader) {
+
     Long id = tokenProvider.getUserIdFromHeader(jwtHeader);
     CustomerInfo customerInfo = customerService.getCustomerInfo(id);
 
@@ -68,7 +69,7 @@ public class CustomerController {
 
   @Operation(summary = "회원 이미지 등록 및 수정", description = "회원의 프로필 이미지를 등록하거나 수정할 수 있다.")
   @PutMapping("/info/profileImage")
-  public ResponseDto<?> modifyProfileImage(@RequestPart("value") MultipartFile multipartFile,
+  public ResponseDto<String> modifyProfileImage(@RequestPart("value") MultipartFile multipartFile,
       Principal principal) {
 
     Customer customer = customerRepository.findByEmail(principal.getName())
@@ -87,7 +88,7 @@ public class CustomerController {
 
   @Operation(summary = "회원 프로필 이미지 초기화", description = "회원의 프로필 이미지를 기본 이미지로 초기화한다.")
   @DeleteMapping("/info/profileImage")
-  public ResponseDto<?> initProfileImage(Principal principal){
+  public ResponseDto<String> initProfileImage(Principal principal) {
     Customer customer = customerRepository.findByEmail(principal.getName())
         .orElseThrow(() -> new CustomException(USER_NOT_FOUND, USER_NOT_FOUND.getErrorMessage(),
             HttpStatus.BAD_REQUEST));
@@ -103,7 +104,7 @@ public class CustomerController {
 
   @Operation(summary = "회원의 포인트 충전 이력 조회", description = "회원의 포인트 충전 내역을 가져올 수 있다.")
   @GetMapping("/info/charge-histories")
-  public PageResponseDto<?> getChargeHistoryDetails(
+  public Page<PointChargeHistoryDto> getChargeHistoryDetails(
       @RequestHeader("Authorization") String jwtHeader,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "20") Integer size) {
@@ -112,16 +113,7 @@ public class CustomerController {
 
     Page<PointChargeHistory> histories = customerService.getAllHistories(id, pageable);
 
-    PageInfo pageInfo = new PageInfo(pageable.getPageNumber(), pageable.getPageSize(),
-        (int) histories.getTotalElements(), histories.getTotalPages());
-
-    List<PointChargeHistoryDto> list = histories.stream().map(o ->
-            PointChargeHistoryDto.builder()
-                .chargeAmount(o.getChargeAmount())
-                .createdAt(o.getCreatedAt()).build())
-        .collect(Collectors.toList());
-
-    return new PageResponseDto<>(list, pageInfo);
+    return histories.map(PointChargeHistoryDto::from);
   }
 
 }
