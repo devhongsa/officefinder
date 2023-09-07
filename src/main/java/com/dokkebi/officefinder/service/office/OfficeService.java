@@ -77,8 +77,8 @@ public class OfficeService {
     List<OfficePicture> oldOfficePicture = officePictureRepository.findByOfficeId(officeId);
     officePictureRepository.deleteAll(oldOfficePicture);
 
-    for (String image : imageList) {
-      officePictureRepository.save(OfficePicture.createFromPath(image, office));
+    for (String imageUrl : imageList) {
+      officePictureRepository.save(OfficePicture.createFromPath(imageUrl, office));
     }
 
     return office.getId();

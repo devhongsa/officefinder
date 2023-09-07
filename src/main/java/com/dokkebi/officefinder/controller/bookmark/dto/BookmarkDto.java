@@ -23,7 +23,7 @@ public class BookmarkDto {
     Office office = bookmark.getOffice();
     String representImagePath;
 
-    if (imagePaths.isEmpty()){
+    if (imagePaths == null || imagePaths.isEmpty()){
       representImagePath = "None";
     } else{
       representImagePath = imagePaths.get(0).getFileName();
