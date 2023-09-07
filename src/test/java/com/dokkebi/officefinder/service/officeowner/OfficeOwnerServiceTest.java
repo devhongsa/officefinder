@@ -114,7 +114,7 @@ class OfficeOwnerServiceTest {
   @Test
   void getOfficeRevenue() {
     // given
-    given(leaseRepository.findByOfficeIdAndLeaseStartDateBetweenAndLeaseStatusInOrderByLeaseStartDate(anyLong(),any(),any(),any()))
+    given(leaseRepository.findOfficeRevenueLastSixMonth(anyLong(),any(),any(),any()))
         .willReturn(leases);
 
     // when
