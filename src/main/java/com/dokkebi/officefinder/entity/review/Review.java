@@ -1,5 +1,6 @@
 package com.dokkebi.officefinder.entity.review;
 
+import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.SubmitControllerRequest;
 import com.dokkebi.officefinder.entity.BaseEntity;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import javax.persistence.Column;
@@ -53,6 +54,16 @@ public class Review extends BaseEntity {
   public void updateReview(int rate, String description) {
     this.rate = rate;
     this.description = description;
+  }
+
+  public static Review from(Lease lease, Long customerId, SubmitControllerRequest reviewRequest) {
+    return Review.builder()
+        .lease(lease)
+        .customerId(customerId)
+        .officeId(lease.getOffice().getId())
+        .rate(reviewRequest.getRate())
+        .description(reviewRequest.getDescription())
+        .build();
   }
 
 }
