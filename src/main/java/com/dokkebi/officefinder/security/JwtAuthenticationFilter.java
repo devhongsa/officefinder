@@ -32,8 +32,8 @@ public class JwtAuthenticationFilter extends
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
-    //String token = resolveTokenFromRequest(request); // 요청 헤더에서 jwt 토큰 가져오기
-    String token = resolveTokenFromCookie(request);
+    String token = resolveTokenFromRequest(request); // 요청 헤더에서 jwt 토큰 가져오기
+    //String token = resolveTokenFromCookie(request);
 
     if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) { //토큰이 시간만료되었는지 체크
       Authentication auth = tokenProvider.getAuthentication(token); // 사용자와 사용자권한정보가 포함된 인증토큰 리턴

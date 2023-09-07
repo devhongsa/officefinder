@@ -70,7 +70,7 @@ public class OfficeOwnerService {
   }
 
   public HashMap<String, Long> getOfficeRevenue(Long officeId, String jwt) {
-    Long officeOwnerId = tokenProvider.getUserId(jwt);
+    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwt);
 
     Office office = officeRepository.findByIdAndOwnerId(officeId, officeOwnerId)
         .orElseThrow(() -> new CustomException(CustomErrorCode.OFFICE_NOT_OWNED_BY_OWNER));
@@ -82,7 +82,7 @@ public class OfficeOwnerService {
   }
 
   public HashMap<String, Long> getOfficesTotalRevenue(String jwt) {
-    Long officeOwnerId = tokenProvider.getUserId(jwt);
+    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwt);
 
     List<Office> offices = officeRepository.findByOwnerId(officeOwnerId);
 
@@ -93,7 +93,7 @@ public class OfficeOwnerService {
   }
 
   public RentalStatusDto getOfficeRentalStatus(Long officeId, String jwt) {
-    Long officeOwnerId = tokenProvider.getUserId(jwt);
+    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwt);
     Office office = officeRepository.findByIdAndOwnerId(officeId, officeOwnerId)
         .orElseThrow(() -> new CustomException(CustomErrorCode.OFFICE_NOT_OWNED_BY_OWNER));
 
@@ -107,7 +107,7 @@ public class OfficeOwnerService {
   }
 
   public RentalStatusDto getOfficeOverallRentalStatus(String jwt) {
-    Long officeOwnerId = tokenProvider.getUserId(jwt);
+    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwt);
 
     List<Office> offices = officeRepository.findByOwnerId(officeOwnerId);
 
