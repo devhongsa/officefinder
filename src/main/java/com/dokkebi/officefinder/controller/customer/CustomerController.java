@@ -7,7 +7,6 @@ import com.dokkebi.officefinder.controller.customer.dto.CustomerModifyDto;
 import com.dokkebi.officefinder.controller.customer.dto.CustomerOverViewInfoDto;
 import com.dokkebi.officefinder.controller.customer.dto.PointChargeHistoryDto;
 import com.dokkebi.officefinder.controller.customer.dto.PointChargeRequestDto;
-import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerModifyDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.PointChargeHistory;

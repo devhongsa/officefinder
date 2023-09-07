@@ -35,7 +35,6 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
             legionEquals(cond.getLegion()),
             cityEquals(cond.getCity()),
             townEquals(cond.getTown()),
-            villageEquals(cond.getVillage()),
             maxCapacityLessThan(cond.getMaxCapacity()),
             haveAirCondition(cond.getHaveAirCondition()),
             haveCafe(cond.getHaveCafe()),
@@ -65,7 +64,6 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
             legionEquals(cond.getLegion()),
             cityEquals(cond.getCity()),
             townEquals(cond.getTown()),
-            villageEquals(cond.getVillage()),
             maxCapacityLessThan(cond.getMaxCapacity()),
             haveAirCondition(cond.getHaveAirCondition()),
             haveCafe(cond.getHaveCafe()),
@@ -136,11 +134,7 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
   }
 
   private BooleanExpression townEquals(String town) {
-    return town != null ? office.officeLocation.address.village.eq(town) : null;
-  }
-
-  private BooleanExpression villageEquals(String village) {
-    return village != null ? office.officeLocation.address.village.eq(village) : null;
+    return town != null ? office.officeLocation.address.town.eq(town) : null;
   }
 
   private BooleanExpression maxCapacityLessThan(Integer maxCapacity) {

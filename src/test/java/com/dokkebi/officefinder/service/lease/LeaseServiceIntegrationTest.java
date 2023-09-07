@@ -416,7 +416,7 @@ public class LeaseServiceIntegrationTest {
         .legion(legion)
         .city(city)
         .town(town)
-        .village(village)
+        .detail(village)
         .street(street)
         .zipcode(String.valueOf(zipcode))
         .build();

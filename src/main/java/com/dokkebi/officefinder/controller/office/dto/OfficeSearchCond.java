@@ -12,7 +12,6 @@ public class OfficeSearchCond {
   String legion;
   String city;
   String town;
-  String village;
   Integer maxCapacity;
   Boolean haveAirCondition;
   Boolean haveCafe;

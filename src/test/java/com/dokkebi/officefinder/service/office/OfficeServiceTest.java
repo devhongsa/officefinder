@@ -94,7 +94,7 @@ class OfficeServiceTest {
 
     assertThat(resultOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "zipcode")
+        .extracting("legion", "city", "town", "detail", "zipcode")
         .contains(
             "경상남도", "김해시", "삼계동", "", 12345
         );
@@ -155,7 +155,7 @@ class OfficeServiceTest {
 
     assertThat(resultOfficeLocation)
         .extracting(OfficeLocation::getAddress)
-        .extracting("legion", "city", "town", "village", "zipcode")
+        .extracting("legion", "city", "town", "detail", "zipcode")
         .contains(
             "경상남도", "김해시", "삼계동", "", 12345
         );
@@ -281,7 +281,7 @@ class OfficeServiceTest {
         .legion(legion)
         .city(city)
         .town(town)
-        .village(village)
+        .detail(village)
         .street(street)
         .zipcode(String.valueOf(zipcode))
         .build();
