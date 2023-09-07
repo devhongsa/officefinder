@@ -64,4 +64,13 @@ public class ChatRoom extends BaseEntity {
         .build();
   }
 
+  public void readMessage(String userType) {
+    if (userType.equals("customer")){
+      this.lastSeenCustomer = LocalDateTime.now();
+    } else{
+      this.lastSeenOfficeOwner = LocalDateTime.now();
+    }
+
+  }
+
 }
