@@ -132,7 +132,7 @@ public class OfficeOwnerController {
     Page<Office> result = officeQueryService.getAllOffices(principal.getName(), pageable);
 
     return result.map(content -> OwnerOfficeOverViewDto.fromEntity(content,
-        officePictureRepository.findByOfficeId(content.getId()).get(0).getFileName()));
+        officePictureRepository.findByOfficeId(content.getId())));
   }
 
   @ApiOperation(value = "오피스 등록", notes = "자신이 가진 오피스를 서비스에 등록할 수 있다.")
