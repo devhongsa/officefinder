@@ -132,7 +132,7 @@ public class OfficeOwnerController {
     Page<Office> result = officeQueryService.getAllOffices(principal.getName(), pageable);
 
     return result.map(content -> OwnerOfficeOverViewDto.fromEntity(content,
-        officePictureRepository.findByOfficeId(content.getId()).get(0).getFileName()));
+        officePictureRepository.findByOfficeId(content.getId())));
   }
 
   @ApiOperation(value = "오피스 등록", notes = "자신이 가진 오피스를 서비스에 등록할 수 있다.")
@@ -198,7 +198,7 @@ public class OfficeOwnerController {
   }
 
   @Operation(summary = "해당 오피스의 매출 조회", description = "특정 오피스의 매출을 가져올 수 있다.")
-  @GetMapping("/offices/revenue/{officeId}")
+  @GetMapping("/offices/{officeId}/revenue")
   public ResponseDto<HashMap<String, Long>> getOfficeRevenue(@PathVariable Long officeId,
       @CookieValue("Authorization") String jwt) {
     HashMap<String, Long> officeRevenue = officeOwnerService.getOfficeRevenue(officeId, jwt);
@@ -217,7 +217,7 @@ public class OfficeOwnerController {
 
 
   @Operation(summary = "오피스 임대 현황 조회", description = "특정 오피스의 임대 현황을 조회할 수 있다.")
-  @GetMapping("/offices/rental-status/{officeId}")
+  @GetMapping("/offices/{officeId}/rental-status")
   public ResponseDto<RentalStatusDto> getOfficeRentalStatus(@PathVariable Long officeId,
       @CookieValue("Authorization") String jwt) {
     RentalStatusDto officeLeaseRate = officeOwnerService.getOfficeRentalStatus(officeId, jwt);
