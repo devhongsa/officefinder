@@ -61,14 +61,7 @@ public class ReviewService {
       throw new CustomException(LEASE_NOT_EXPIRED);
     }
 
-    Review review = Review.builder()
-        .lease(lease)
-        .customerId(customerId)
-        .officeId(lease.getOffice().getId())
-        .rate(controllerRequest.getRate())
-        .description(controllerRequest.getDescription())
-        .build();
-
+    Review review = Review.from(lease, customerId, controllerRequest);
     return reviewRepository.save(review);
   }
 

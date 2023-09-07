@@ -160,10 +160,10 @@ public class LeaseService {
     LocalDate endDate = office.getStartDate().plusMonths(office.getMonths());
     List<LeaseStatus> leaseStatus = Arrays.asList(LeaseStatus.AWAIT, LeaseStatus.ACCEPTED);
 
-    int CurrentRoomUsed = leaseRepository.countByOfficeIdAndLeaseStatusInAndLeaseEndDateGreaterThanEqualAndLeaseStartDateLessThanEqualOrderByLeaseStartDate(
-        office.getOfficeId(), leaseStatus, office.getStartDate(), endDate);
+    Long roomUsed = leaseRepository.countOfficeRoomInUse(office.getOfficeId(), leaseStatus,
+        office.getStartDate(), endDate);
 
-    if (CurrentRoomUsed >= maxRoomCount) {
+    if (roomUsed != null && roomUsed >= maxRoomCount) {
       throw new CustomException(NO_ROOMS_AVAILABLE_FOR_LEASE);
     }
   }
