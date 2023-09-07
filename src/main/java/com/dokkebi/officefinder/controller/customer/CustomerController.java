@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -61,9 +62,9 @@ public class CustomerController {
   @Operation(summary = "회원 정보 가져오기", description = "회원 정보를 가져올 수 있다.")
   @GetMapping("/info")
   public ResponseDto<CustomerInfoDto> getCustomerInfo(
-      @CookieValue("Authorization") String jwt) {
+      @RequestHeader("Authorization") String jwt) {
 
-    Long id = tokenProvider.getUserId(jwt);
+    Long id = tokenProvider.getUserIdFromHeader(jwt);
     CustomerInfoDto customerInfoDto = customerService.getCustomerInfo(id);
 
     return new ResponseDto<>("success", customerInfoDto);
@@ -72,10 +73,10 @@ public class CustomerController {
   @Operation(summary = "회원 이름 수정", description = "회원의 이름을 수정할 수 있다.")
   @PutMapping("/info/username")
   public String changeAgentName(@RequestBody @Valid CustomerModifyDto customerModifyDto,
-      @CookieValue("Authorization") String jwt) {
+      @RequestHeader("Authorization") String jwt) {
 
     customerService.changeCustomerName(customerModifyDto.getNewName(),
-        tokenProvider.getUserId(jwt));
+        tokenProvider.getUserIdFromHeader(jwt));
 
     return "success";
   }
@@ -83,9 +84,9 @@ public class CustomerController {
   @Operation(summary = "회원 요약 정보 조회", description = "회원 요약 정보(이름, 역할, 사진, 포인트)를 가져올 수 있다.")
   @GetMapping("/user-overviews")
   public CustomerOverViewInfoDto getCustomerOverViewInfo(
-      @CookieValue("Authorization") String jwt) {
+      @RequestHeader("Authorization") String jwt) {
 
-    Long id = tokenProvider.getUserId(jwt);
+    Long id = tokenProvider.getUserIdFromHeader(jwt);
 
     return customerService.getCustomerOverViewInfo(id);
   }
@@ -126,11 +127,11 @@ public class CustomerController {
   @Operation(summary = "회원의 포인트 충전 이력 조회", description = "회원의 포인트 충전 내역을 가져올 수 있다.")
   @GetMapping("/info/charge-histories")
   public Page<PointChargeHistoryDto> getChargeHistoryDetails(
-      @CookieValue("Authorization") String jwt,
+      @RequestHeader("Authorization") String jwt,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "20") Integer size
   ) {
-    Long id = tokenProvider.getUserId(jwt);
+    Long id = tokenProvider.getUserIdFromHeader(jwt);
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
     Page<PointChargeHistory> histories = customerService.getAllHistories(id, pageable);

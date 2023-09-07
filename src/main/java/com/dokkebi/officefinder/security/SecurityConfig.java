@@ -66,7 +66,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     registry.addMapping("/**")
         .allowedOrigins("http://127.0.0.1:5173", "http://localhost:5173")
         .allowedMethods("*")
-        .allowedHeaders("Content-Type","X-AUTH-TOKEN","Authorization","Access-Control-Allow-Origin","Access-Control-Allow-Credentials")
+        .allowedHeaders("*")
         .exposedHeaders("Content-Disposition","X-AUTH-TOKEN","Authorization","Access-Control-Allow-Origin","Access-Control-Allow-Credentials")
         .allowCredentials(true);
   }

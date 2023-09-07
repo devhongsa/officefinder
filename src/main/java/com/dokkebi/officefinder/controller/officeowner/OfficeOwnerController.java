@@ -46,6 +46,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,15 +72,15 @@ public class OfficeOwnerController {
   @ApiOperation(value = "임대주 요약 정보 조회", notes = "임대주 요약 정보(이름, 역할, 사진, 포인트)를 가져올 수 있다.")
   @GetMapping("/info-overview")
   public OfficeOwnerOverViewDto getOfficeOwnerOverView(
-      @CookieValue("Authorization") String jwt) {
+      @RequestHeader("Authorization") String jwt) {
 
-    return officeOwnerService.getAgentOverViewInfo(tokenProvider.getUserId(jwt));
+    return officeOwnerService.getAgentOverViewInfo(tokenProvider.getUserIdFromHeader(jwt));
   }
 
   @ApiOperation(value = "임대주 정보 조회", notes = "임대주 정보를 가져올 수 있다.")
   @GetMapping("/info")
-  public OfficeOwnerInfoDto getOfficeOwnerInfo(@CookieValue("Authorization") String jwt) {
-    return officeOwnerService.getAgentInfo(tokenProvider.getUserId(jwt));
+  public OfficeOwnerInfoDto getOfficeOwnerInfo(@RequestHeader("Authorization") String jwt) {
+    return officeOwnerService.getAgentInfo(tokenProvider.getUserIdFromHeader(jwt));
   }
 
   @Operation(summary = "임대주 이미지 등록 및 수정", description = "임대주의 프로필 이미지를 등록하거나 수정할 수 있다.")
@@ -103,10 +104,10 @@ public class OfficeOwnerController {
   @Operation(summary = "임대주 이름 수정", description = "임대주의 이름을 수정할 수 있다.")
   @PutMapping("/info/username")
   public String changeAgentName(@RequestBody @Valid OfficeOwnerModifyDto officeOwnerModifyDto,
-      @CookieValue("Authorization") String jwt) {
+      @RequestHeader("Authorization") String jwt) {
 
     officeOwnerService.changeAgentName(officeOwnerModifyDto.getName(),
-        tokenProvider.getUserId(jwt));
+        tokenProvider.getUserIdFromHeader(jwt));
 
     return "success";
   }
@@ -200,7 +201,7 @@ public class OfficeOwnerController {
   @Operation(summary = "해당 오피스의 매출 조회", description = "특정 오피스의 매출을 가져올 수 있다.")
   @GetMapping("/offices/{officeId}/revenue")
   public ResponseDto<HashMap<String, Long>> getOfficeRevenue(@PathVariable Long officeId,
-      @CookieValue("Authorization") String jwt) {
+      @RequestHeader("Authorization") String jwt) {
     HashMap<String, Long> officeRevenue = officeOwnerService.getOfficeRevenue(officeId, jwt);
 
     return new ResponseDto<>("success", officeRevenue);
@@ -209,7 +210,7 @@ public class OfficeOwnerController {
   @Operation(summary = "오피스 전체 매출 조회", description = "임대주가 가진 모든 오피스의 매출 합을 가져올 수 있다.")
   @GetMapping("/offices/total-revenue")
   public ResponseDto<HashMap<String, Long>> getOfficesTotalRevenue(
-      @CookieValue("Authorization") String jwt) {
+      @RequestHeader("Authorization") String jwt) {
     HashMap<String, Long> officeRevenue = officeOwnerService.getOfficesTotalRevenue(jwt);
 
     return new ResponseDto<>("success", officeRevenue);
@@ -219,7 +220,7 @@ public class OfficeOwnerController {
   @Operation(summary = "오피스 임대 현황 조회", description = "특정 오피스의 임대 현황을 조회할 수 있다.")
   @GetMapping("/offices/{officeId}/rental-status")
   public ResponseDto<RentalStatusDto> getOfficeRentalStatus(@PathVariable Long officeId,
-      @CookieValue("Authorization") String jwt) {
+      @RequestHeader("Authorization") String jwt) {
     RentalStatusDto officeLeaseRate = officeOwnerService.getOfficeRentalStatus(officeId, jwt);
 
     return new ResponseDto<>("success", officeLeaseRate);
@@ -228,7 +229,7 @@ public class OfficeOwnerController {
   @Operation(summary = "오피스 총 임대 현황 조회", description = "모든 오피스의 임대 현황을 조회할 수 있다.")
   @GetMapping("/offices/overall-rental-status")
   public ResponseDto<RentalStatusDto> getOfficeOverallRentalStatus(
-      @CookieValue("Authorization") String jwt) {
+      @RequestHeader("Authorization") String jwt) {
     RentalStatusDto officeLeaseRate = officeOwnerService.getOfficeOverallRentalStatus(jwt);
 
     return new ResponseDto<>("success", officeLeaseRate);

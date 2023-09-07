@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,12 +20,12 @@ public class TestController {
   @PreAuthorize(("hasRole('OFFICE_OWNER')"))
 //  @PreAuthorize("hasRole('CUSTOMER')")
   @GetMapping("/test")
-  public String test(HttpServletRequest request, @CookieValue("Authorization") String jwt) {
+  public String test(HttpServletRequest request, @RequestHeader("Authorization") String jwt) {
     // 유저 email 추출
     String email = request.getUserPrincipal().getName();
     System.out.println(email);
     // 유저 id 추출
-    Long id = tokenProvider.getUserId(jwt);
+    Long id = tokenProvider.getUserIdFromHeader(jwt);
     System.out.println(id);
     return "success";
   }
