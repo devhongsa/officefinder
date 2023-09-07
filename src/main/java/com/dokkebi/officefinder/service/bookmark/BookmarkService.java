@@ -1,6 +1,5 @@
 package com.dokkebi.officefinder.service.bookmark;
 
-import static com.dokkebi.officefinder.exception.CustomErrorCode.BOOKMARK_NOT_EXISTS;
 import static com.dokkebi.officefinder.exception.CustomErrorCode.OFFICE_NOT_EXISTS;
 import static com.dokkebi.officefinder.exception.CustomErrorCode.USER_NOT_FOUND;
 
@@ -33,22 +32,21 @@ public class BookmarkService {
     Office office = officeRepository.findById(officeId)
         .orElseThrow(() -> new CustomException(OFFICE_NOT_EXISTS));
 
-    Bookmark bookmark = Bookmark.builder()
-        .customer(customer)
-        .office(office)
-        .build();
+    Bookmark bookmark = Bookmark.from(customer, office);
 
     return bookmarkRepository.save(bookmark);
   }
 
+  @Transactional(readOnly = true)
   public Page<Bookmark> getBookmarks(Long customerId, Pageable pageable) {
     return bookmarkRepository.findByCustomerId(customerId, pageable);
   }
 
-  public void deleteBookmark(Long customerId, Long officeId) {
-    Bookmark bookmark = bookmarkRepository.findByCustomerIdAndOfficeId(customerId, officeId)
-        .orElseThrow(() -> new CustomException(BOOKMARK_NOT_EXISTS));
+  public void deleteBookmark(Long bookmarkId) {
+    bookmarkRepository.deleteById(bookmarkId);
+  }
 
-    bookmarkRepository.delete(bookmark);
+  public void deleteAllBookMark(Long customerId){
+    bookmarkRepository.deleteAllByCustomerId(customerId);
   }
 }

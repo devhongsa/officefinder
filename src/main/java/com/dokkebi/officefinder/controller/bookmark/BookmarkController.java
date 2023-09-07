@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -26,13 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/bookmarks")
+@PreAuthorize("hasRole('CUSTOMER')")
 public class BookmarkController {
 
   private final TokenProvider tokenProvider;
   private final BookmarkService bookmarkService;
   private final OfficePictureRepository officePictureRepository;
 
-  @PreAuthorize("hasRole('CUSTOMER')")
   @PostMapping("/submit")
   public ResponseDto<Long> submitBookmark(@RequestHeader("Authorization") String jwt,
       @RequestBody @Valid Long officeId) {
@@ -42,7 +43,6 @@ public class BookmarkController {
     return new ResponseDto<>("success", officeId);
   }
 
-  @PreAuthorize("hasRole('CUSTOMER')")
   @GetMapping
   public Page<BookmarkDto> getBookmarks(@RequestHeader("Authorization") String jwt,
       @RequestParam(defaultValue = "0") Integer page,
@@ -56,14 +56,18 @@ public class BookmarkController {
         officePictureRepository.findByOfficeId(content.getOffice().getId())));
   }
 
-  @PreAuthorize("hasRole('CUSTOMER')")
-  @DeleteMapping("/delete")
+  @DeleteMapping("/{bookmarkId}")
   public ResponseDto<Long> deleteBookmark(@RequestHeader("Authorization") String jwt,
-      @RequestBody @Valid Long officeId) {
+      @PathVariable("bookmarkId") Long bookmarkId) {
     Long customerId = tokenProvider.getUserIdFromHeader(jwt);
-    bookmarkService.deleteBookmark(customerId, officeId);
+    bookmarkService.deleteBookmark(bookmarkId);
 
-    return new ResponseDto<>("success", officeId);
+    return new ResponseDto<>("success", bookmarkId);
+  }
+
+  @DeleteMapping
+  public void deleteAllBookmark(@RequestHeader("Authorization") String jwt){
+    bookmarkService.deleteAllBookMark(tokenProvider.getUserIdFromHeader(jwt));
   }
 
 }

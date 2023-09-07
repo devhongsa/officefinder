@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,7 +63,7 @@ public class OfficeOwnerService {
   }
 
   @Transactional
-  public void changeAgentName(String newAgentName, Long officeOwnerId){
+  public void changeAgentName(String newAgentName, Long officeOwnerId) {
     OfficeOwner officeOwner = officeOwnerRepository.findById(officeOwnerId)
         .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
 
@@ -75,8 +76,8 @@ public class OfficeOwnerService {
     Office office = officeRepository.findByIdAndOwnerId(officeId, officeOwnerId)
         .orElseThrow(() -> new CustomException(CustomErrorCode.OFFICE_NOT_OWNED_BY_OWNER));
 
-    List<Lease> leases = leaseRepository.findByOfficeIdAndLeaseStartDateBetweenAndLeaseStatusInOrderByLeaseStartDate(
-        office.getId(), startDate, today, leaseStatus);
+    List<Lease> leases = leaseRepository.findOfficeRevenueLastSixMonth(office.getId(), startDate,
+        today, leaseStatus);
 
     return getRevenue(leases);
   }
@@ -86,8 +87,12 @@ public class OfficeOwnerService {
 
     List<Office> offices = officeRepository.findByOwnerId(officeOwnerId);
 
-    List<Lease> leases = leaseRepository.findByOfficeInAndLeaseStartDateBetweenAndLeaseStatusInOrderByLeaseStartDate(
-        offices, startDate, today, leaseStatus);
+    List<Long> officeIdList = offices.stream()
+        .map(Office::getId)
+        .collect(Collectors.toList());
+
+    List<Lease> leases = leaseRepository.findTotalRevenueLastSixMonth(officeIdList, startDate, today,
+        leaseStatus);
 
     return getRevenue(leases);
   }

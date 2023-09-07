@@ -38,4 +38,11 @@ public class Bookmark extends BaseEntity {
     this.customer = customer;
     this.office = office;
   }
+
+  public static Bookmark from(Customer customer, Office office){
+    return Bookmark.builder()
+        .customer(customer)
+        .office(office)
+        .build();
+  }
 }
