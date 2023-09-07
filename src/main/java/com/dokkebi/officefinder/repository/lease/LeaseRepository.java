@@ -13,18 +13,11 @@ import org.springframework.data.repository.query.Param;
 public interface LeaseRepository extends JpaRepository<Lease, Long>, LeaseRepositoryCustom {
 
   @Query("select l from Lease l join fetch l.customer join fetch l.office where l.id = :leaseId")
-  Optional<Lease> findById(@Param("leaseId") Long leaseId);
+  Optional<Lease> findById(@Param("leaseId") long leaseId);
 
-//  @Query("select l from Lease l join fetch l.customer where l.office = :office "
-//      + "and l.leaseStatus = :leaseStatus")
-//  Page<Lease> findByOfficeAndLeaseStatus(Office office, LeaseStatus leaseStatus, Pageable pageable);
+//  List<Lease> findByOfficeIdAndLeaseStartDateBetweenAndLeaseStatusInOrderByLeaseStartDate(Long officeId, LocalDate startDate, LocalDate endDate, List<LeaseStatus> leaseStatus);
 
-  List<Lease> findByOfficeIdAndLeaseStartDateBetweenAndLeaseStatusInOrderByLeaseStartDate(Long officeId, LocalDate startDate, LocalDate endDate, List<LeaseStatus> leaseStatus);
-
-  List<Lease> findByOfficeInAndLeaseStartDateBetweenAndLeaseStatusInOrderByLeaseStartDate(List<Office> offices, LocalDate startDate, LocalDate endDate, List<LeaseStatus> leaseStatus);
-
-  int countByOfficeIdAndLeaseStatusInAndLeaseEndDateGreaterThanEqualAndLeaseStartDateLessThanEqualOrderByLeaseStartDate(
-      Long officeId, List<LeaseStatus> leaseStatus, LocalDate startDate, LocalDate endDate);
+//  List<Lease> findByOfficeInAndLeaseStartDateBetweenAndLeaseStatusInOrderByLeaseStartDate(List<Office> offices, LocalDate startDate, LocalDate endDate, List<LeaseStatus> leaseStatus);
 
   int countByOfficeIdAndLeaseStatus(Long officeId, LeaseStatus leaseStatus);
 
