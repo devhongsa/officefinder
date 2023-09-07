@@ -31,9 +31,6 @@ public class SecurityConfig implements WebMvcConfigurer {
    */
 
   private final TokenProvider tokenProvider;
-  public static final String ALLOWED_METHOD_NAMES = "GET,HEAD,POST,PUT,DELETE,TRACE,OPTIONS,PATCH";
-
-
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

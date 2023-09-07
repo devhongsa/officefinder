@@ -3,7 +3,6 @@ package com.dokkebi.officefinder.security;
 import javax.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -21,8 +20,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends
     OncePerRequestFilter { //OncePerRequestFilter는 요청이 올때마다 이 필터가 실행됨.
 
-  @Value("${spring.jwt.token-header}")
-  private String TOKEN_HEADER;
+  private final String TOKEN_HEADER = "Authorization";
 
   private final TokenProvider tokenProvider;
 
