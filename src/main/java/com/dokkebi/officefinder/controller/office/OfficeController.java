@@ -47,9 +47,8 @@ public class OfficeController {
     Page<Office> offices = officeQueryService.searchOfficeByDetailCondition(cond, pageable);
 
     return offices.map(
-        content -> OfficeOverViewDto.fromEntity(content, reviewService.getReviewOverviewByOfficeId(
-                content.getId()),
-            officePictureRepository.findByOfficeId(content.getId()).get(0).getFileName()));
+        content -> OfficeOverViewDto.fromEntity(content,
+            officePictureRepository.findByOfficeId(content.getId())));
   }
 
   @Operation(summary = "오피스 조회", description = "특정 오피스를 조회할 수 있다.")
