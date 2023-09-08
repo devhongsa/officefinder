@@ -21,6 +21,7 @@ public class OfficeDetailResponseDto {
   private int maxRoomCount;
   private long leaseFee;
   private int maxCapacity;
+  private String reviewCount;
   private OfficeOptionDto officeOptionDto;
   private List<ReviewDto> reviews;
   private List<String> officePictureList;
@@ -36,6 +37,7 @@ public class OfficeDetailResponseDto {
         .maxRoomCount(office.getMaxRoomCount())
         .officeOptionDto(OfficeOptionDto.fromEntity(office.getOfficeCondition()))
         .reviews(reviewDtoList)
+        .reviewCount(String.valueOf(office.getReviewCount()))
         .officePictureList(imagePaths)
         .build();
   }
