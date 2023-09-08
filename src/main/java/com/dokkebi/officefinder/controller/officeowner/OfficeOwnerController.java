@@ -60,10 +60,8 @@ public class OfficeOwnerController {
   private final OfficeSearchService officeQueryService;
   private final OfficePictureRepository officePictureRepository;
   private final OfficeOwnerRepository officeOwnerRepository;
-  private final CustomerRepository customerRepository;
   private final S3Service s3Service;
   private final OfficeOwnerService officeOwnerService;
-  private final ReviewService reviewService;
   private final TokenProvider tokenProvider;
 
   @ApiOperation(value = "임대주 요약 정보 조회", notes = "임대주 요약 정보(이름, 역할, 사진, 포인트)를 가져올 수 있다.")
