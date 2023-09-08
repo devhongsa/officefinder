@@ -5,13 +5,12 @@ import static com.dokkebi.officefinder.entity.lease.QLease.lease;
 import static com.dokkebi.officefinder.entity.office.QOffice.office;
 
 import com.dokkebi.officefinder.entity.lease.Lease;
-import com.dokkebi.officefinder.entity.office.Office;
-import com.dokkebi.officefinder.entity.office.QOffice;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -117,6 +116,19 @@ public class LeaseRepositoryImpl implements LeaseRepositoryCustom{
             lease.leaseStatus.in(leaseStatus)
         )
         .fetchOne();
+  }
+
+  @Override
+  public Optional<Lease> findByLeaseId(long leaseId) {
+    Lease result = queryFactory.selectFrom(lease)
+        .join(lease.office, office).fetchJoin()
+        .join(lease.customer, customer).fetchJoin()
+        .where(
+            lease.id.eq(leaseId)
+        )
+        .fetchOne();
+
+    return Optional.ofNullable(result);
   }
 
 }

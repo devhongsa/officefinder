@@ -18,6 +18,8 @@ public class BookmarkDto {
   private String officeName;
   private String officeAddress;
   private String officeImagePath;
+  private String officeReviewAmount;
+  private String officeReviewRate;
 
   public static BookmarkDto from(Bookmark bookmark, List<OfficePicture> imagePaths) {
     Office office = bookmark.getOffice();
@@ -29,12 +31,17 @@ public class BookmarkDto {
       representImagePath = imagePaths.get(0).getFileName();
     }
 
+    double totalRate = (double)(office.getTotalRate() / office.getReviewCount());
+    totalRate = Math.round(totalRate * 100.0) / 100.0;
+
     return BookmarkDto.builder()
         .id(bookmark.getId())
         .officeId(office.getId())
         .officeName(office.getName())
         .officeAddress(office.getOfficeAddress())
         .officeImagePath(representImagePath)
+        .officeReviewAmount(String.valueOf(office.getReviewCount()))
+        .officeReviewRate(String.valueOf(totalRate))
         .build();
   }
 }
