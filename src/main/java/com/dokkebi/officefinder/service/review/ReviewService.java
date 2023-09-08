@@ -22,8 +22,11 @@ import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -42,11 +45,12 @@ public class ReviewService {
   private final LeaseRepository leaseRepository;
   private final CustomerRepository customerRepository;
   private final OfficeRepository officeRepository;
+  private final RedissonClient redissonClient;
 
   @Transactional
   public Review submit(SubmitControllerRequest controllerRequest,
       Long customerId, Long leaseId) {
-    Lease lease = leaseRepository.findById(leaseId)
+    Lease lease = leaseRepository.findByLeaseId(leaseId)
         .orElseThrow(() -> new CustomException(LEASE_NOT_FOUND));
 
     if (!lease.getCustomer().getId().equals(customerId)) {
@@ -62,6 +66,8 @@ public class ReviewService {
     }
 
     Review review = Review.from(lease, customerId, controllerRequest);
+    addReviewRateInfo(lease.getOffice(), review.getRate());
+
     return reviewRepository.save(review);
   }
 
@@ -132,5 +138,27 @@ public class ReviewService {
 
   public List<Review> getTopTwoReviews(Long officeId) {
     return reviewRepository.findTop2ByOfficeIdOrderByCreatedAtDesc(officeId);
+  }
+
+  private void addReviewRateInfo(Office office, int rate) {
+    RLock lock = redissonClient.getLock(office.getId() + ":lock");
+
+    try{
+      if (!lock.tryLock(1, 3, TimeUnit.SECONDS)) return;
+
+      final long reviewCount = office.getReviewCount();
+      final long currentRate = office.getTotalRate();
+
+      office.setReviewCount(reviewCount + 1);
+      office.setReviewRate(currentRate + rate);
+
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } finally {
+      if (lock != null && lock.isLocked()){
+        lock.unlock();
+      }
+    }
+
   }
 }

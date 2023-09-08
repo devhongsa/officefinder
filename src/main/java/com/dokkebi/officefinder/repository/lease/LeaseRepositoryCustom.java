@@ -4,6 +4,7 @@ import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -22,4 +23,6 @@ public interface LeaseRepositoryCustom {
 
   Long countOfficeRoomInUse(Long officeId, List<LeaseStatus> leaseStatus, LocalDate startDate,
       LocalDate endDate);
+
+  Optional<Lease> findByLeaseId(long leaseId);
 }
