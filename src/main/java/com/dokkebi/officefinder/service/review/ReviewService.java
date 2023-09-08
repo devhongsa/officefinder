@@ -22,13 +22,15 @@ import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,11 +45,12 @@ public class ReviewService {
   private final LeaseRepository leaseRepository;
   private final CustomerRepository customerRepository;
   private final OfficeRepository officeRepository;
+  private final RedissonClient redissonClient;
 
   @Transactional
   public Review submit(SubmitControllerRequest controllerRequest,
       Long customerId, Long leaseId) {
-    Lease lease = leaseRepository.findById(leaseId)
+    Lease lease = leaseRepository.findByLeaseId(leaseId)
         .orElseThrow(() -> new CustomException(LEASE_NOT_FOUND));
 
     if (!lease.getCustomer().getId().equals(customerId)) {
@@ -63,6 +66,8 @@ public class ReviewService {
     }
 
     Review review = Review.from(lease, customerId, controllerRequest);
+    addReviewRateInfo(lease.getOffice(), review.getRate());
+
     return reviewRepository.save(review);
   }
 
@@ -98,6 +103,11 @@ public class ReviewService {
     return ReviewOverviewDto.from(reviews);
   }
 
+  @Cacheable(value = "Review", cacheManager = "redisCacheManager")
+  public List<Review> getAllReviews() {
+    return reviewRepository.findAll();
+  }
+
   @CacheEvict(value = "Review", key = "#reviewId", cacheManager = "redisCacheManager")
   public void delete(Long customerId, Long reviewId) {
     Customer customer = customerRepository.findById(customerId)
@@ -130,22 +140,25 @@ public class ReviewService {
     return reviewRepository.findTop2ByOfficeIdOrderByCreatedAtDesc(officeId);
   }
 
-  public Page<Review> getAllReviewsByOfficeOwnerId(Long officeOwnerId, Pageable pageable) {
-    List<Office> list = officeRepository.findByOwnerId(officeOwnerId);
+  private void addReviewRateInfo(Office office, int rate) {
+    RLock lock = redissonClient.getLock(office.getId() + ":lock");
 
-    List<Review> allReviews = list.stream()
-        .flatMap(o -> reviewRepository.findByOfficeId(o.getId()).stream())
-        .sorted((o1, o2) -> Long.compare(o2.getId(), o1.getId()))
-        .collect(Collectors.toList());
+    try{
+      if (!lock.tryLock(1, 3, TimeUnit.SECONDS)) return;
 
-    if (allReviews.isEmpty()) {
-      throw new CustomException(REVIEW_NOT_EXISTS);
+      final long reviewCount = office.getReviewCount();
+      final long currentRate = office.getTotalRate();
+
+      office.setReviewCount(reviewCount + 1);
+      office.setReviewRate(currentRate + rate);
+
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } finally {
+      if (lock != null && lock.isLocked()){
+        lock.unlock();
+      }
     }
 
-    int start = (int) pageable.getOffset();
-    int end = Math.min((start + pageable.getPageSize()), allReviews.size());
-    List<Review> pagedReviews = allReviews.subList(start, end);
-
-    return new PageImpl<>(pagedReviews, pageable, allReviews.size());
   }
 }

@@ -3,13 +3,13 @@ package com.dokkebi.officefinder.controller.officeowner;
 import static com.dokkebi.officefinder.exception.CustomErrorCode.USER_NOT_FOUND;
 
 import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
-import com.dokkebi.officefinder.controller.office.dto.OfficeDetailResponseDto;
+import com.dokkebi.officefinder.controller.office.dto.OfficeDashboardDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeModifyRequestDto;
+import com.dokkebi.officefinder.controller.office.dto.OfficeNameDto;
 import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerInfoDto;
 import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerModifyDto;
 import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerOverViewDto;
 import com.dokkebi.officefinder.controller.officeowner.dto.OwnerOfficeOverViewDto;
-import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.ReviewDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
@@ -29,7 +29,6 @@ import com.dokkebi.officefinder.service.officeowner.OfficeOwnerService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -64,11 +63,10 @@ public class OfficeOwnerController {
   private final OfficeSearchService officeQueryService;
   private final OfficePictureRepository officePictureRepository;
   private final OfficeOwnerRepository officeOwnerRepository;
-  private final CustomerRepository customerRepository;
   private final S3Service s3Service;
   private final OfficeOwnerService officeOwnerService;
-  private final ReviewService reviewService;
   private final TokenProvider tokenProvider;
+  private final ReviewService reviewService;
 
   @ApiOperation(value = "임대주 요약 정보 조회", notes = "임대주 요약 정보(이름, 역할, 사진, 포인트)를 가져올 수 있다.")
   @GetMapping("/info-overview")
@@ -137,6 +135,22 @@ public class OfficeOwnerController {
         officePictureRepository.findByOfficeId(content.getId())));
   }
 
+  @Operation(summary = "소유 오피스 이름 조회", description = "모든 오피스의 이름을 조회할 수 있다.")
+  @GetMapping("/offices/names")
+  public ResponseDto<List<OfficeNameDto>> getAllOfficeNames(
+      @RequestHeader("Authorization") String jwt) {
+    List<Office> officeList = officeQueryService.getAllOfficeName(
+        tokenProvider.getUserIdFromHeader(jwt));
+
+    List<OfficeNameDto> result = officeList.stream()
+        .map(OfficeNameDto::from)
+        .collect(Collectors.toList());
+
+    result.add(0, new OfficeNameDto(-1L, "전체"));
+
+    return new ResponseDto<>("success", result);
+  }
+
   @ApiOperation(value = "오피스 등록", notes = "자신이 가진 오피스를 서비스에 등록할 수 있다.")
   @PostMapping("/offices")
   public void addOffice(
@@ -150,29 +164,10 @@ public class OfficeOwnerController {
 
   @Operation(summary = "오피스 상세 조회", description = "자신이 등록한 오피스의 상세 정보롤 볼 수 있다.")
   @GetMapping("/offices/{officeId}")
-  public OfficeDetailResponseDto showOfficeDetail(@PathVariable("officeId") Long officeId) {
+  public OfficeDashboardDto showOfficeDetail(@PathVariable("officeId") Long officeId) {
     Office office = officeQueryService.getOfficeInfo(officeId);
 
-    //오피스의 사진을 가져올 수 있어야 한다.
-    List<OfficePicture> pictures = officePictureRepository.findByOfficeId(office.getId());
-
-    List<String> imagePath = new ArrayList<>();
-
-    for (OfficePicture element: pictures){
-      imagePath.add(element.getFileName());
-    }
-
-    while(imagePath.size() < 5){
-      imagePath.add("None");
-    }
-
-    List<Review> reviews = reviewService.getTopTwoReviews(officeId);
-    List<ReviewDto> reviewDtoList = reviews.stream()
-        .map(content -> ReviewDto.from(content, customerRepository.findById(content.getCustomerId())
-            .orElseThrow(() -> new CustomException(USER_NOT_FOUND))))
-        .collect(Collectors.toList());
-
-    return OfficeDetailResponseDto.from(office, reviewDtoList, imagePath);
+    return OfficeDashboardDto.from(office);
   }
 
   @Operation(summary = "오피스 정보 수정", description = "자신의 오피스 정보를 수정할 수 있다.")

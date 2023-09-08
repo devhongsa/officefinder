@@ -79,12 +79,11 @@ public class OfficeController {
   }
 
   @Operation(summary = "오피스 리뷰조회", description = "특정 오피스의 리뷰를 조회할 수 있다.")
-  @GetMapping("api/offices/reviews/{officeId}")
+  @GetMapping("/{officeId}/reviews")
   public Page<ReviewDto> getOfficeReviews(@PathVariable @Valid Long officeId,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "20") Integer size
   ) {
-
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
 
     Page<Review> reviews = reviewService.getReviewsByOfficeId(officeId, pageable);

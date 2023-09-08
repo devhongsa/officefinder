@@ -1,6 +1,7 @@
 package com.dokkebi.officefinder.repository.office;
 
 import static com.dokkebi.officefinder.entity.QOfficeOwner.officeOwner;
+import static com.dokkebi.officefinder.entity.office.QOffice.*;
 import static com.dokkebi.officefinder.entity.office.QOffice.office;
 import static com.dokkebi.officefinder.entity.office.QOfficeCondition.officeCondition;
 import static com.dokkebi.officefinder.entity.office.QOfficeLocation.officeLocation;
@@ -112,13 +113,13 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
 
   @Override
   public Optional<Office> findByOfficeId(Long id) {
-    Office office = queryFactory.selectFrom(QOffice.office)
-        .join(QOffice.office.officeLocation, officeLocation).fetchJoin()
-        .join(QOffice.office.officeCondition, officeCondition).fetchJoin()
-        .where(QOffice.office.id.eq(id))
+    Office result = queryFactory.selectFrom(office)
+        .join(office.officeLocation, officeLocation).fetchJoin()
+        .join(office.officeCondition, officeCondition).fetchJoin()
+        .where(office.id.eq(id))
         .fetchOne();
 
-    return Optional.ofNullable(office);
+    return Optional.ofNullable(result);
   }
 
   private BooleanExpression haveParkArea(Boolean haveParkArea) {

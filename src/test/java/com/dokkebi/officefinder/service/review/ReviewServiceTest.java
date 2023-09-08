@@ -10,6 +10,14 @@ import static com.dokkebi.officefinder.exception.CustomErrorCode.USER_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.dokkebi.officefinder.controller.auth.dto.Auth;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.SignUpCustomer;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.SignUpOfficeOwner;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.SignUpResponseCustomer;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.SignUpResponseOfficeOwner;
+import com.dokkebi.officefinder.controller.office.dto.OfficeAddress;
+import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
+import com.dokkebi.officefinder.controller.office.dto.OfficeOption;
 import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.SubmitControllerRequest;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.OfficeOwner;
@@ -26,9 +34,20 @@ import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
 import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
+import com.dokkebi.officefinder.service.auth.AuthService;
+import com.dokkebi.officefinder.service.lease.LeaseService;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
+import com.dokkebi.officefinder.service.office.OfficeService;
 import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -66,6 +85,15 @@ public class ReviewServiceTest {
   private OfficeConditionRepository officeConditionRepository;
   @Autowired
   private OfficePictureRepository officePictureRepository;
+
+  @Autowired
+  private AuthService authService;
+
+  @Autowired
+  private OfficeService officeService;
+
+  @Autowired
+  private LeaseService leaseService;
 
   @AfterEach
   void tearDown() {
@@ -171,12 +199,14 @@ public class ReviewServiceTest {
         .rate(5)
         .description("테스트").build();
 
+    // when
+    Review savedReview = reviewService.submit(submitControllerRequest, infos.customer.getId(),
+        infos.lease.getId());
+
     //then
-    assertThat(
-        reviewService.submit(submitControllerRequest, infos.customer.getId(), infos.lease.getId())
-            .getCustomerId()
-    )
-        .isEqualTo(infos.customer.getId());
+    assertThat(savedReview.getCustomerId()).isEqualTo(infos.customer.getId());
+    assertThat(infos.office.getReviewCount()).isEqualTo(1L);
+    assertThat(infos.office.getTotalRate()).isEqualTo(5L);
   }
 
   @Test
@@ -629,7 +659,7 @@ public class ReviewServiceTest {
 
   private Infos makeInfos(String name, String email, String password, String roles, int point,
       LeaseStatus status) {
-    Customer customer = customerRepository.save(
+    Customer customer = customerRepository.saveAndFlush(
         Customer.builder()
             .name(name)
             .email(email)
@@ -637,10 +667,10 @@ public class ReviewServiceTest {
             .roles(Set.of(roles))
             .point(point).build()
     );
-    Office office = officeRepository.save(
+    Office office = officeRepository.saveAndFlush(
         Office.builder().name(name).build()
     );
-    Lease lease = leaseRepository.save(
+    Lease lease = leaseRepository.saveAndFlush(
         Lease.builder()
             .customer(customer)
             .office(office)
@@ -648,6 +678,65 @@ public class ReviewServiceTest {
     );
 
     return new Infos(customer, office, lease);
+  }
+
+  private void setOfficeInfo(OfficeCreateRequestDto request, String officeName, int maxCapacity,
+      long leaseFee, int maxRoomCount) {
+    request.setOfficeName(officeName);
+    request.setMaxCapacity(maxCapacity);
+    request.setLeaseFee(leaseFee);
+    request.setMaxRoomCount(maxRoomCount);
+  }
+
+  private OfficeAddress setOfficeLocation(String legion, String city, String town, String detail,
+      String street, int zipcode) {
+
+    return OfficeAddress.builder()
+        .legion(legion)
+        .city(city)
+        .town(town)
+        .detail(detail)
+        .street(street)
+        .zipcode(String.valueOf(zipcode))
+        .build();
+  }
+
+  private OfficeOption setOfficeCondition(boolean airCondition, boolean heaterCondition,
+      boolean cafe,
+      boolean printer, boolean packageSendService, boolean doorLock, boolean fax,
+      boolean publicKitchen, boolean publicLounge, boolean privateLocker, boolean tvProjector,
+      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage, boolean parkArea) {
+
+    return OfficeOption.builder()
+        .haveAirCondition(airCondition)
+        .haveHeater(heaterCondition)
+        .haveCafe(cafe)
+        .havePrinter(printer)
+        .packageSendServiceAvailable(packageSendService)
+        .haveDoorLock(doorLock)
+        .faxServiceAvailable(fax)
+        .havePublicKitchen(publicKitchen)
+        .havePublicLounge(publicLounge)
+        .havePrivateLocker(privateLocker)
+        .haveTvProjector(tvProjector)
+        .haveWhiteBoard(whiteboard)
+        .haveWifi(wifi)
+        .haveShowerBooth(showerBooth)
+        .haveStorage(storage)
+        .haveParkArea(parkArea)
+        .build();
+  }
+
+  private LeaseOfficeRequestDto createLeaseRequest(String email, Long officeId, LocalDate startDate,
+      int months, int customerCount) {
+
+    return LeaseOfficeRequestDto.builder()
+        .email(email)
+        .officeId(officeId)
+        .startDate(startDate)
+        .months(months)
+        .customerCount(customerCount)
+        .build();
   }
 
   private static class Infos {
