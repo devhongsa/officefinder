@@ -23,6 +23,7 @@ import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -31,6 +32,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -159,6 +161,23 @@ public class ReviewService {
         lock.unlock();
       }
     }
+  }
+  public Page<Review> getAllReviewsByOfficeOwnerId(Long officeOwnerId, Pageable pageable) {
+    List<Office> list = officeRepository.findByOwnerId(officeOwnerId);
 
+    List<Review> allReviews = list.stream()
+        .flatMap(o -> reviewRepository.findByOfficeId(o.getId()).stream())
+        .sorted((o1, o2) -> Long.compare(o2.getId(), o1.getId()))
+        .collect(Collectors.toList());
+
+    if (allReviews.isEmpty()) {
+      throw new CustomException(REVIEW_NOT_EXISTS);
+    }
+
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), allReviews.size());
+    List<Review> pagedReviews = allReviews.subList(start, end);
+
+    return new PageImpl<>(pagedReviews, pageable, allReviews.size());
   }
 }
