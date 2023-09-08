@@ -99,7 +99,7 @@ public class ReviewController {
 
   @Operation(summary = "리뷰 2개 조회", description = "해당 오피스의 최신 리뷰 2개를 조회한다.")
   @GetMapping("/api/offices/{officeId}/review-overviews")
-  @PreAuthorize("hasRole('CUSTOMER')")
+  @PreAuthorize("hasRole('OFFICE_OWNER')")
   public ReviewResponseDto getOfficeReviewOverview(
       @RequestHeader("Authorization") String jwt,
       @PathVariable("officeId") Long officeId
