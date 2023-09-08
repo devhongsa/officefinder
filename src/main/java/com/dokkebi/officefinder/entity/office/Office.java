@@ -57,6 +57,12 @@ public class Office extends BaseEntity {
   @Column(name = "office_maximum_room_count")
   private int maxRoomCount;
 
+  @Column(name = "office_review_count")
+  private long reviewCount;
+
+  @Column(name = "office_review_rate")
+  private long totalRate;
+
   /*
   엔티티 생성 메서드
    */
@@ -68,6 +74,8 @@ public class Office extends BaseEntity {
         .leaseFee(request.getLeaseFee())
         .maxRoomCount(request.getMaxRoomCount())
         .officeAddress(request.getAddress().getStreet())
+        .reviewCount(0L)
+        .totalRate(0L)
         .build();
   }
 
@@ -90,7 +98,15 @@ public class Office extends BaseEntity {
     this.officeLocation = officeLocation;
   }
 
-  public void setOfficeAddress(String address){
+  public void setReviewCount(long newReviewCount) {
+    this.reviewCount = newReviewCount;
+  }
+
+  public void setReviewRate(long reviewRate) {
+    this.totalRate = reviewRate;
+  }
+
+  public void setOfficeAddress(String address) {
     this.officeAddress = address;
   }
 }

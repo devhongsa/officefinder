@@ -113,7 +113,7 @@ public class LeaseService {
   }
 
   public void acceptLeaseRequest(Long leaseId) {
-    Lease lease = leaseRepository.findById(leaseId)
+    Lease lease = leaseRepository.findByLeaseId(leaseId)
         .orElseThrow(() -> new CustomException(LEASE_NOT_FOUND));
 
     // 변경 후 저장안해도 더티 체킹으로 인해 반영됨
@@ -126,7 +126,7 @@ public class LeaseService {
 
   @Transactional
   public void rejectLeaseRequest(Long leaseId) {
-    Lease lease = leaseRepository.findById(leaseId)
+    Lease lease = leaseRepository.findByLeaseId(leaseId)
         .orElseThrow(() -> new CustomException(LEASE_NOT_FOUND));
 
     // 임대 거절시 포인트를 다시 환급

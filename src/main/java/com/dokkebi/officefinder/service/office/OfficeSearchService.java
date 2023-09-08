@@ -6,6 +6,7 @@ import com.dokkebi.officefinder.controller.office.dto.OfficeSearchCond;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,5 +33,9 @@ public class OfficeSearchService {
 
   public Page<Office> getAllOffices(String ownerEmail, Pageable pageable) {
     return officeRepository.findByOwnerEmail(ownerEmail, pageable);
+  }
+
+  public List<Office> getAllOfficeName(Long ownerId) {
+    return officeRepository.findByOwnerId(ownerId);
   }
 }
