@@ -22,6 +22,7 @@ import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
@@ -48,7 +49,7 @@ public class LeaseService {
   private final CustomerRepository customerRepository;
   private final OfficeRepository officeRepository;
   private final ReviewRepository reviewRepository;
-
+  private final OfficePictureRepository officePictureRepository;
   private final NotificationService notificationService;
 
   /**
@@ -93,7 +94,7 @@ public class LeaseService {
     Page<Lease> leases = leaseRepository.findByCustomerId(customer.getId(), pageable);
 
     return leases.map(lease -> LeaseLookUpServiceResponse.of(lease,
-        reviewRepository.existsByLeaseId(lease.getId())));
+        reviewRepository.existsByLeaseId(lease.getId()), officePictureRepository.findByOfficeId(lease.getOffice().getId())));
   }
 
   // 특정 오피스에 들어온 임대 요청 정보 확인(AWAIT 상태의 임대 정보만)
