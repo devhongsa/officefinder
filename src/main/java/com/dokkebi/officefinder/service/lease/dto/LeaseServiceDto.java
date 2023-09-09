@@ -3,8 +3,12 @@ package com.dokkebi.officefinder.service.lease.dto;
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.LeaseOfficeRequest;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.entity.office.OfficePicture;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +21,7 @@ public class LeaseServiceDto {
   @AllArgsConstructor
   @Builder
   public static class LeaseOfficeRequestDto {
+
     private String email;
 
     private Long officeId;
@@ -27,7 +32,8 @@ public class LeaseServiceDto {
 
     private int customerCount;
 
-    public static LeaseOfficeRequestDto of(String email, Long officeId, LeaseOfficeRequest request){
+    public static LeaseOfficeRequestDto of(String email, Long officeId,
+        LeaseOfficeRequest request) {
       return LeaseOfficeRequestDto.builder()
           .email(email)
           .officeId(officeId)
@@ -58,7 +64,7 @@ public class LeaseServiceDto {
 
     private LocalDate endDate;
 
-    public static LeaseOfficeServiceResponse of(Lease lease){
+    public static LeaseOfficeServiceResponse of(Lease lease) {
       return LeaseOfficeServiceResponse.builder()
           .leaseId(lease.getId())
           .customerEmail(lease.getCustomer().getEmail())
@@ -75,7 +81,8 @@ public class LeaseServiceDto {
   @NoArgsConstructor
   @AllArgsConstructor
   @Builder
-  public static class LeaseLookUpServiceResponse{
+  public static class LeaseLookUpServiceResponse {
+
     private Long leaseId;
 
     private String name;
@@ -90,11 +97,27 @@ public class LeaseServiceDto {
 
     private LocalDate endDate;
 
+    private List<String> officeImagePath;
+
     private boolean isReviewed;
 
-    public static LeaseLookUpServiceResponse of(Lease lease, boolean isReviewed){
+    public static LeaseLookUpServiceResponse of(Lease lease, boolean isReviewed,
+        List<OfficePicture> imagePaths) {
 
+      List<String> imageList = new ArrayList<>();
       Office office = lease.getOffice();
+
+      if (imagePaths == null) {
+        imagePaths = new ArrayList<>();
+      }
+
+      imageList = imagePaths.stream()
+          .map(OfficePicture::getFileName)
+          .collect(Collectors.toList());
+
+      while (imageList.size() < 5) {
+        imageList.add("None");
+      }
 
       return LeaseLookUpServiceResponse.builder()
           .leaseId(lease.getId())
