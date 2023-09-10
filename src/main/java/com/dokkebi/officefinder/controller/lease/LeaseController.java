@@ -3,6 +3,7 @@ package com.dokkebi.officefinder.controller.lease;
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.AgentLeaseLookUpResponse;
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.LeaseOfficeRequest;
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.LeaseSuccessResponse;
+import com.dokkebi.officefinder.security.TokenProvider;
 import com.dokkebi.officefinder.service.lease.LeaseService;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class LeaseController {
 
   private final LeaseService leaseService;
+  private final TokenProvider tokenProvider;
 
   @Operation(summary = "임대 진행", description = "임대를 진행한다.")
   @PreAuthorize("hasRole('CUSTOMER')")
@@ -54,6 +57,17 @@ public class LeaseController {
     Pageable pageable = createPageable(pageableReceived, Sort.by(Sort.Direction.DESC, "createdAt"));
 
     return leaseService.getLeaseList(principal.getName(), pageable);
+  }
+
+  @Operation(summary = "임대 정보 상세 조회", description = "임대 정보를 조회할 수 있다.")
+  @PreAuthorize("hasRole('CUSTOMER')")
+  @GetMapping("/customers/info/leases/{leaseId}")
+  public LeaseLookUpServiceResponse getLeaseDetailInfo(@RequestHeader("Authorization") String jwt,
+      @PathVariable("leaseId") Long leaseId) {
+
+    Long customerId = tokenProvider.getUserIdFromHeader(jwt);
+
+    return leaseService.getLeaseInfo(customerId, leaseId);
   }
 
   @Operation(summary = "오피스에 신청된 임대 요청 조회", description = "자신의 오피스에 신청된 임대 요청들을 조회할 수 있다.")

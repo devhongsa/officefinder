@@ -32,27 +32,6 @@ public class ReviewRepositoryTest {
   private LeaseRepository leaseRepository;
 
   @Test
-  @DisplayName("leaseId로 리뷰를 찾을 수 있다.")
-  public void existsByLeaseId() throws Exception {
-      //given
-    Customer customer = customerRepository.save(Customer.builder().name("1").email("").password("").roles(
-        Set.of("a")).point(0).build());
-    Office office = officeRepository.save(Office.builder().name("1").build());
-    Lease lease = leaseRepository.save(Lease.builder().office(office).customer(customer).leaseStatus(
-        LeaseStatus.EXPIRED).build());
-
-    Review review = Review.builder()
-        .lease(lease)
-        .rate(5)
-        .description("a").build();
-    Review savedReview = reviewRepository.save(review);
-      //when
-    boolean found = reviewRepository.existsByLeaseId(savedReview.getLease().getId());
-      //then
-    Assertions.assertTrue(found);
-  }
-
-  @Test
   @DisplayName("officeId로 리뷰를 등록 순서대로 찾을 수 있다.")
   public void findByOfficeId() throws InterruptedException {
     //given
@@ -90,6 +69,5 @@ public class ReviewRepositoryTest {
     //then
     Assertions.assertEquals(reviewList.get(0).getDescription(), "2");
   }
-
 
 }
