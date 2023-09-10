@@ -104,7 +104,7 @@ public class LeaseServiceDto {
     public static LeaseLookUpServiceResponse of(Lease lease, boolean isReviewed,
         List<OfficePicture> imagePaths) {
 
-      List<String> imageList = new ArrayList<>();
+      List<String> imageList;
       Office office = lease.getOffice();
 
       if (imagePaths == null) {
@@ -128,6 +128,7 @@ public class LeaseServiceDto {
           .startDate(lease.getLeaseStartDate())
           .endDate(lease.getLeaseEndDate())
           .isReviewed(isReviewed)
+          .officeImagePath(imageList)
           .build();
     }
   }
