@@ -30,7 +30,6 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -94,21 +93,12 @@ public class ReviewService {
 
     Page<Review> reviews = reviewRepository.findByCustomerId(customerId, pageable);
 
-    if (reviews.isEmpty()) {
-      throw new CustomException(REVIEW_NOT_EXISTS);
-    }
-
     return reviews;
   }
 
   public ReviewOverviewDto getReviewOverviewByOfficeId(Long officeId) {
     List<Review> reviews = reviewRepository.findByOfficeId(officeId);
     return ReviewOverviewDto.from(reviews);
-  }
-
-  @Cacheable(value = "Review", cacheManager = "redisCacheManager")
-  public List<Review> getAllReviews() {
-    return reviewRepository.findAll();
   }
 
   @CacheEvict(value = "Review", key = "#reviewId", cacheManager = "redisCacheManager")
@@ -131,10 +121,6 @@ public class ReviewService {
         .orElseThrow(() -> new CustomException(OFFICE_NOT_EXISTS));
 
     Page<Review> reviews = reviewRepository.findByOfficeId(officeId, pageable);
-
-    if (reviews.isEmpty()) {
-      throw new CustomException(REVIEW_NOT_EXISTS);
-    }
 
     return reviews;
   }
@@ -170,10 +156,6 @@ public class ReviewService {
         .flatMap(o -> reviewRepository.findByOfficeId(o.getId()).stream())
         .sorted((o1, o2) -> Long.compare(o2.getId(), o1.getId()))
         .collect(Collectors.toList());
-
-    if (allReviews.isEmpty()) {
-      throw new CustomException(REVIEW_NOT_EXISTS);
-    }
 
     int start = (int) pageable.getOffset();
     int end = Math.min((start + pageable.getPageSize()), allReviews.size());

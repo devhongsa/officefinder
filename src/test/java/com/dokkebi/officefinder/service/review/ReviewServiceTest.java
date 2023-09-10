@@ -317,23 +317,6 @@ public class ReviewServiceTest {
   }
 
   @Test
-  @DisplayName("read할때 임대계약은 있지만 리뷰는 없는 경우")
-  public void getReviews2() {
-    //given
-    Infos infos = makeInfos("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
-
-    Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-    //then
-    assertThatThrownBy(() -> reviewService.getReviewsByOfficeId(infos.office.getId(), pageable))
-        .isInstanceOf(CustomException.class)
-        .extracting("errorCode", "errorMessage", "status")
-        .contains(
-            REVIEW_NOT_EXISTS, "리뷰가 존재하지 않습니다.", HttpStatus.BAD_REQUEST
-        );
-  }
-
-  @Test
   @DisplayName("리뷰 CustomerEmail로 가져오기 정상 작동")
   public void getReviews3() {
 
