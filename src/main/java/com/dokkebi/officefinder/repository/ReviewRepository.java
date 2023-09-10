@@ -8,8 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-  boolean existsByLeaseId(Long leaseId);
-
   List<Review> findByOfficeId(Long officeId);
 
   Page<Review> findByCustomerId(Long customerId, Pageable pageable);

@@ -64,41 +64,6 @@ public class LeaseControllerDto {
   @NoArgsConstructor
   @AllArgsConstructor
   @Builder
-  public static class LeaseLookUpResponse{
-    private Long leaseId;
-
-    private String name;
-
-    private String location;
-
-    private LeaseStatus leaseStatus;
-
-    private LocalDate paymentDate;
-
-    private LocalDate startDate;
-
-    private LocalDate endDate;
-
-    private boolean isReviewed;
-
-    public static LeaseLookUpResponse of (LeaseLookUpServiceResponse resp){
-      return LeaseLookUpResponse.builder()
-          .leaseId(resp.getLeaseId())
-          .name(resp.getName())
-          .location(resp.getLocation())
-          .leaseStatus(resp.getLeaseStatus())
-          .paymentDate(resp.getPaymentDate())
-          .startDate(resp.getStartDate())
-          .endDate(resp.getEndDate())
-          .isReviewed(resp.isReviewed())
-          .build();
-    }
-  }
-
-  @Getter
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Builder
   public static class AgentLeaseLookUpResponse{
 
     private Long leaseId;

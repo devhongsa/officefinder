@@ -59,7 +59,7 @@ public class ReviewService {
       throw new CustomException(LEASE_OWNER_NOT_MATCH);
     }
 
-    if (reviewRepository.existsByLeaseId(leaseId)) {
+    if (lease.getLeaseStatus().equals(LeaseStatus.REVIEWED)) {
       throw new CustomException(REVIEW_ALREADY_EXISTS);
     }
 
@@ -68,6 +68,7 @@ public class ReviewService {
     }
 
     Review review = Review.from(lease, customerId, controllerRequest);
+    lease.changeLeaseStatus(LeaseStatus.REVIEWED);
     addReviewRateInfo(lease.getOffice(), review.getRate());
 
     return reviewRepository.save(review);

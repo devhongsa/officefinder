@@ -83,7 +83,7 @@ public class OfficeOwnerController {
   }
 
   @Operation(summary = "임대주 이미지 등록 및 수정", description = "임대주의 프로필 이미지를 등록하거나 수정할 수 있다.")
-  @PutMapping("/info/profileImage")
+  @PostMapping("/info/profileImage")
   public ResponseDto<String> modifyProfileImage(@RequestPart("value") MultipartFile multipartFile,
       Principal principal) {
 
@@ -171,7 +171,7 @@ public class OfficeOwnerController {
   }
 
   @Operation(summary = "오피스 정보 수정", description = "자신의 오피스 정보를 수정할 수 있다.")
-  @PutMapping("/offices/{officeId}")
+  @PostMapping("/offices/{officeId}")
   public void modifyOffice(
       @PathVariable("officeId") Long officeId,
       @RequestPart(value = "request") OfficeModifyRequestDto request,
