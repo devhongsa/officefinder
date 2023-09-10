@@ -1,10 +1,14 @@
 package com.dokkebi.officefinder.service.officeowner;
 
+import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerInfoDto;
+import com.dokkebi.officefinder.controller.officeowner.dto.OfficeOwnerOverViewDto;
+import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
+import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.security.TokenProvider;
@@ -13,13 +17,17 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OfficeOwnerService {
 
+  private final OfficeOwnerRepository officeOwnerRepository;
   private final LeaseRepository leaseRepository;
   private final OfficeRepository officeRepository;
   private final TokenProvider tokenProvider;
@@ -32,32 +40,65 @@ public class OfficeOwnerService {
   private final List<LeaseStatus> leaseStatus = Arrays.asList(LeaseStatus.EXPIRED,
       LeaseStatus.PROCEEDING);
 
-  public HashMap<String, Long> getOfficeRevenue(Long officeId, String jwtHeader) {
-    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+  public OfficeOwnerInfoDto getAgentInfo(Long officeOwnerId) {
+    OfficeOwner officeOwner = officeOwnerRepository.findById(officeOwnerId)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+
+    return OfficeOwnerInfoDto.from(officeOwner);
+  }
+
+  public OfficeOwnerOverViewDto getAgentOverViewInfo(Long officeOwnerId) {
+    OfficeOwner officeOwner = officeOwnerRepository.findById(officeOwnerId)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+
+    return OfficeOwnerOverViewDto.from(officeOwner);
+  }
+
+  @Transactional
+  public void changeAgentProfileImage(String userImagePath, String officeOwnerEmail) {
+    OfficeOwner officeOwner = officeOwnerRepository.findByEmail(officeOwnerEmail)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+
+    officeOwner.changeOfficeOwnerProfileImage(userImagePath);
+  }
+
+  @Transactional
+  public void changeAgentName(String newAgentName, Long officeOwnerId) {
+    OfficeOwner officeOwner = officeOwnerRepository.findById(officeOwnerId)
+        .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+
+    officeOwner.changeOwnerName(newAgentName);
+  }
+
+  public HashMap<String, Long> getOfficeRevenue(Long officeId, String jwt) {
+    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwt);
 
     Office office = officeRepository.findByIdAndOwnerId(officeId, officeOwnerId)
         .orElseThrow(() -> new CustomException(CustomErrorCode.OFFICE_NOT_OWNED_BY_OWNER));
 
-    List<Lease> leases = leaseRepository.findByOfficeIdAndLeaseStartDateBetweenAndLeaseStatusInOrderByLeaseStartDate(
-        office.getId(), startDate, today, leaseStatus);
+    List<Lease> leases = leaseRepository.findOfficeRevenueLastSixMonth(office.getId(), startDate,
+        today, leaseStatus);
 
     return getRevenue(leases);
   }
 
-  public HashMap<String, Long> getOfficesTotalRevenue(String jwtHeader) {
-    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+  public HashMap<String, Long> getOfficesTotalRevenue(String jwt) {
+    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwt);
 
     List<Office> offices = officeRepository.findByOwnerId(officeOwnerId);
 
-    List<Lease> leases = leaseRepository.findByOfficeInAndLeaseStartDateBetweenAndLeaseStatusInOrderByLeaseStartDate(
-        offices, startDate, today, leaseStatus);
+    List<Long> officeIdList = offices.stream()
+        .map(Office::getId)
+        .collect(Collectors.toList());
+
+    List<Lease> leases = leaseRepository.findTotalRevenueLastSixMonth(officeIdList, startDate, today,
+        leaseStatus);
 
     return getRevenue(leases);
-
   }
 
-  public RentalStatusDto getOfficeRentalStatus(Long officeId, String jwtHeader) {
-    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+  public RentalStatusDto getOfficeRentalStatus(Long officeId, String jwt) {
+    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwt);
     Office office = officeRepository.findByIdAndOwnerId(officeId, officeOwnerId)
         .orElseThrow(() -> new CustomException(CustomErrorCode.OFFICE_NOT_OWNED_BY_OWNER));
 
@@ -70,8 +111,8 @@ public class OfficeOwnerService {
     return new RentalStatusDto(office.getMaxRoomCount(), countProceeding, leaseRate);
   }
 
-  public RentalStatusDto getOfficeOverallRentalStatus(String jwtHeader) {
-    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwtHeader);
+  public RentalStatusDto getOfficeOverallRentalStatus(String jwt) {
+    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwt);
 
     List<Office> offices = officeRepository.findByOwnerId(officeOwnerId);
 
@@ -85,7 +126,6 @@ public class OfficeOwnerService {
 
     return new RentalStatusDto(totalRoomCount, countProceeding, leaseRate);
   }
-
 
   private HashMap<String, Long> getRevenue(List<Lease> leases) {
     HashMap<String, Long> revenueMap = new HashMap<>();
@@ -104,5 +144,4 @@ public class OfficeOwnerService {
     }
     return revenueMap;
   }
-
 }

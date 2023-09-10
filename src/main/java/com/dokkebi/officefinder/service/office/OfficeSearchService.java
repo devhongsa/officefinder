@@ -1,8 +1,12 @@
 package com.dokkebi.officefinder.service.office;
 
+import static com.dokkebi.officefinder.exception.CustomErrorCode.OFFICE_NOT_EXISTS;
+
 import com.dokkebi.officefinder.controller.office.dto.OfficeSearchCond;
 import com.dokkebi.officefinder.entity.office.Office;
+import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +22,7 @@ public class OfficeSearchService {
 
   public Office getOfficeInfo(Long officeId) {
     return officeRepository.findByOfficeId(officeId)
-        .orElseThrow(() -> new IllegalArgumentException("해당 오피스는 존재하지 않습니다."));
+        .orElseThrow(() -> new CustomException(OFFICE_NOT_EXISTS));
   }
 
   public Page<Office> searchOfficeByDetailCondition(OfficeSearchCond cond,
@@ -29,5 +33,9 @@ public class OfficeSearchService {
 
   public Page<Office> getAllOffices(String ownerEmail, Pageable pageable) {
     return officeRepository.findByOwnerEmail(ownerEmail, pageable);
+  }
+
+  public List<Office> getAllOfficeName(Long ownerId) {
+    return officeRepository.findByOwnerId(ownerId);
   }
 }

@@ -1,5 +1,10 @@
 package com.dokkebi.officefinder.service.chat;
 
+import static com.dokkebi.officefinder.exception.CustomErrorCode.CHAT_ROOM_ALREADY_EXISTS;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.CHAT_ROOM_NOT_FOUND;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.INVALID_OFFICE_ID;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.USER_NOT_FOUND;
+
 import com.dokkebi.officefinder.controller.chat.dto.ChatRoomDto.ChatMessageResponse;
 import com.dokkebi.officefinder.controller.chat.dto.ChatRoomDto.ChatRoomStatus;
 import com.dokkebi.officefinder.controller.chat.dto.ChatRoomDto.CreateRoomResponse;
@@ -9,7 +14,6 @@ import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.chat.ChatMessage;
 import com.dokkebi.officefinder.entity.chat.ChatRoom;
 import com.dokkebi.officefinder.entity.office.Office;
-import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
@@ -37,15 +41,17 @@ public class ChatService {
   private final ChatMessageRepository chatMessageRepository;
   private final TokenProvider tokenProvider;
 
+  private final String CUSTOMER = "customer";
+
   // 특정 회원의 채팅방 목록 불러오기
   @Transactional(readOnly = true)
   public List<ChatRoomStatus> findAllRoom(String jwt) {
-    Long userId = tokenProvider.getUserId(jwt);
+    Long userId = tokenProvider.getUserIdFromHeader(jwt);
 
     List<ChatRoomStatus> result = new ArrayList<>();
-    if (tokenProvider.getUserType(jwt).equals("customer")) {
+    if (tokenProvider.getUserType(jwt).equals(CUSTOMER)) {
       Customer customer = customerRepository.findById(userId)
-          .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+          .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
       List<ChatRoom> chatRooms = chatRoomRepository.findByCustomer(
           customer);
       HashMap<ChatRoom, ChatMessage> chatMap = getChatMessageHashMap(
@@ -75,7 +81,7 @@ public class ChatService {
       }
     } else {
       OfficeOwner officeOwner = officeOwnerRepository.findById(userId)
-          .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+          .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
       List<ChatRoom> chatRooms = chatRoomRepository.findByOfficeOwner(officeOwner);
       HashMap<ChatRoom, ChatMessage> chatMap = getChatMessageHashMap(
           chatRooms);
@@ -106,13 +112,50 @@ public class ChatService {
     return result;
   }
 
+
+  // 특정 회원에게 새로운 채팅 메세지가 왔는지
+  @Transactional(readOnly = true)
+  public boolean isNewMessage(String jwt) {
+    Long userId = tokenProvider.getUserIdFromHeader(jwt);
+
+    if (tokenProvider.getUserType(jwt).equals(CUSTOMER)) {
+      Customer customer = customerRepository.findById(userId)
+          .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+      List<ChatRoom> chatRooms = chatRoomRepository.findByCustomer(
+          customer);
+      HashMap<ChatRoom, ChatMessage> chatMap = getChatMessageHashMap(
+          chatRooms);
+
+      for (ChatRoom chatRoom : chatMap.keySet()) {
+        if (chatMap.get(chatRoom).getCreatedAt().isAfter(chatRoom.getLastSeenCustomer())) {
+          return true;
+        }
+
+      }
+    } else {
+      OfficeOwner officeOwner = officeOwnerRepository.findById(userId)
+          .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+      List<ChatRoom> chatRooms = chatRoomRepository.findByOfficeOwner(officeOwner);
+      HashMap<ChatRoom, ChatMessage> chatMap = getChatMessageHashMap(
+          chatRooms);
+
+      for (ChatRoom chatRoom : chatMap.keySet()) {
+        if (chatMap.get(chatRoom).getCreatedAt().isAfter(chatRoom.getLastSeenCustomer())) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+
   //특정 채팅방 내용 불러오기
   @Transactional(readOnly = true)
   public List<ChatMessageResponse> roomInfo(String roomUid, String jwt) {
     String userType = tokenProvider.getUserType(jwt);
 
     ChatRoom chatRoom = chatRoomRepository.findByRoomUid(roomUid)
-        .orElseThrow(() -> new CustomException(CustomErrorCode.CHAT_ROOM_NOT_FOUND));
+        .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
     List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoom(chatRoom);
 
     String customerName = chatRoom.getCustomer().getName();
@@ -120,7 +163,7 @@ public class ChatService {
 
     List<ChatMessageResponse> result = new ArrayList<>();
 
-    if (userType.equals("customer")) {
+    if (userType.equals(CUSTOMER)) {
       for (ChatMessage chatMessage : chatMessages) {
         String sender;
         boolean isMyMsg = false;
@@ -154,6 +197,7 @@ public class ChatService {
             .createdAt(chatMessage.getCreatedAt())
             .build());
       }
+
     }
     return result;
   }
@@ -161,16 +205,16 @@ public class ChatService {
   //채팅방 생성
   @Transactional
   public CreateRoomResponse createRoom(Long officeId, String jwt) {
-    Long customerId = tokenProvider.getUserId(jwt);
+    Long customerId = tokenProvider.getUserIdFromHeader(jwt);
     Customer customer = customerRepository.findById(customerId)
-        .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
     Office office = officeRepository.findById(officeId)
-        .orElseThrow(() -> new CustomException(CustomErrorCode.INVALID_OFFICE_ID));
+        .orElseThrow(() -> new CustomException(INVALID_OFFICE_ID));
     OfficeOwner officeOwner = office.getOwner();
 
     if (chatRoomRepository.existsByCustomerAndOfficeOwner(customer, officeOwner)) {
-      throw new CustomException(CustomErrorCode.CHAT_ROOM_ALREADY_EXISTS);
+      throw new CustomException(CHAT_ROOM_ALREADY_EXISTS);
     }
 
     ChatRoom chatRoom = chatRoomRepository.save(ChatRoom.create(customer, officeOwner));
@@ -180,7 +224,7 @@ public class ChatService {
   @Transactional
   public void send(SendMessage message) {
     ChatRoom chatRoom = chatRoomRepository.findByRoomUid(message.getRoomUid())
-        .orElseThrow(() -> new CustomException(CustomErrorCode.CHAT_ROOM_NOT_FOUND));
+        .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
 
     if (message.getSender().equals(chatRoom.getCustomer().getName())) {
       chatMessageRepository.save(
@@ -200,6 +244,18 @@ public class ChatService {
       );
     }
 
+  }
+
+  // 메세지 읽음
+  @Transactional
+  public void readMessage(String roomUid, String jwt) {
+    Long userId = tokenProvider.getUserIdFromHeader(jwt);
+    String userType = tokenProvider.getUserType(jwt);
+
+    ChatRoom chatRoom = chatRoomRepository.findByRoomUid(roomUid)
+        .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
+
+    chatRoom.readMessage(userType.equals(CUSTOMER) ? CUSTOMER : "agent");
   }
 
 

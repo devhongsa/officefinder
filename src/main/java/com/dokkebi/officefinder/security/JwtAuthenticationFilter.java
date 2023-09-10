@@ -3,7 +3,6 @@ package com.dokkebi.officefinder.security;
 import javax.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -21,8 +20,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends
     OncePerRequestFilter { //OncePerRequestFilter는 요청이 올때마다 이 필터가 실행됨.
 
-  @Value("${spring.jwt.token-header}")
-  private String TOKEN_HEADER;
+  private final String TOKEN_HEADER = "Authorization";
 
   private final TokenProvider tokenProvider;
 
@@ -32,8 +30,8 @@ public class JwtAuthenticationFilter extends
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
-    //String token = resolveTokenFromRequest(request); // 요청 헤더에서 jwt 토큰 가져오기
-    String token = resolveTokenFromCookie(request);
+    String token = resolveTokenFromRequest(request); // 요청 헤더에서 jwt 토큰 가져오기
+    //String token = resolveTokenFromCookie(request);
 
     if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) { //토큰이 시간만료되었는지 체크
       Authentication auth = tokenProvider.getAuthentication(token); // 사용자와 사용자권한정보가 포함된 인증토큰 리턴

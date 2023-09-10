@@ -13,7 +13,9 @@ import com.dokkebi.officefinder.entity.type.Address;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
@@ -38,9 +40,6 @@ class OfficeRepositoryImplTest {
   @Autowired
   private OfficeConditionRepository officeConditionRepository;
 
-  private final ReviewOverviewDto reviewOverviewDto = ReviewOverviewDto.builder()
-      .reviewCount(42).reviewRate(4.82).build();
-
   @DisplayName("기본 조건인 도, 시, 군, 구, 수용 인원 수로 오피스를 검색할 수 있다. 지정하지 않으면 모든 오피스를 조회한다.")
   @Test
   public void findByBasicCondition() {
@@ -53,16 +52,16 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
+        .map(content -> OfficeOverViewDto.fromEntity(content, new ArrayList<>()))
         .collect(Collectors.toList());
 
     // then
     assertThat(overViewList).hasSize(3)
         .extracting("name", "location", "reviewCount", "reviewRate", "leasePrice")
         .containsExactlyInAnyOrder(
-            tuple("office", "경상남도 김해시", 42, 4.82, 500000L),
-            tuple("office2", "경상남도 진영시", 42, 4.82, 500000L),
-            tuple("office3", "경상남도 김해시", 42, 4.82, 500000L)
+            tuple("office", "경상남도 김해시", 0L, 0L, 500000L),
+            tuple("office2", "경상남도 진영시", 0L, 0L, 500000L),
+            tuple("office3", "경상남도 김해시", 0L, 0L, 500000L)
         );
   }
 
@@ -80,16 +79,16 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
+        .map(content -> OfficeOverViewDto.fromEntity(content, new ArrayList<>()))
         .collect(Collectors.toList());
 
     // then
     assertThat(overViewList).hasSize(3)
         .extracting("name", "location", "reviewCount", "reviewRate", "leasePrice")
         .containsExactlyInAnyOrder(
-            tuple("office", "경상남도 김해시", 42, 4.82, 500000L),
-            tuple("office2", "경상남도 진영시", 42, 4.82, 500000L),
-            tuple("office3", "경상남도 김해시", 42, 4.82, 500000L)
+            tuple("office", "경상남도 김해시", 0L, 0L, 500000L),
+            tuple("office2", "경상남도 진영시", 0L, 0L, 500000L),
+            tuple("office3", "경상남도 김해시", 0L, 0L, 500000L)
         );
   }
 
@@ -108,15 +107,15 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
+        .map(content -> OfficeOverViewDto.fromEntity(content, new ArrayList<>()))
         .collect(Collectors.toList());
 
     // then
     assertThat(overViewList).hasSize(2)
         .extracting("name", "location", "reviewCount", "reviewRate", "leasePrice")
         .containsExactlyInAnyOrder(
-            tuple("office", "경상남도 김해시", 42, 4.82, 500000L),
-            tuple("office3", "경상남도 김해시", 42, 4.82, 500000L)
+            tuple("office", "경상남도 김해시", 0L, 0L, 500000L),
+            tuple("office3", "경상남도 김해시", 0L, 0L, 500000L)
         );
   }
 
@@ -132,16 +131,16 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
+        .map(content -> OfficeOverViewDto.fromEntity(content, new ArrayList<>()))
         .collect(Collectors.toList());
 
     // then
     assertThat(overViewList).hasSize(3)
         .extracting("name", "location", "reviewCount", "reviewRate", "leasePrice")
         .containsExactlyInAnyOrder(
-            tuple("office", "경상남도 김해시", 42, 4.82, 500000L),
-            tuple("office2", "경상남도 진영시", 42, 4.82, 500000L),
-            tuple("office3", "경상남도 김해시", 42, 4.82, 500000L)
+            tuple("office", "경상남도 김해시", 0L, 0L, 500000L),
+            tuple("office2", "경상남도 진영시", 0L, 0L, 500000L),
+            tuple("office3", "경상남도 김해시", 0L, 0L, 500000L)
         );
   }
 
@@ -159,15 +158,15 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
+        .map(content -> OfficeOverViewDto.fromEntity(content, new ArrayList<>()))
         .collect(Collectors.toList());
 
     // then
     assertThat(overViewList).hasSize(2)
         .extracting("name", "location", "reviewCount", "reviewRate", "leasePrice")
         .containsExactlyInAnyOrder(
-            tuple("office", "경상남도 김해시", 42, 4.82, 500000L),
-            tuple("office2", "경상남도 진영시", 42, 4.82, 500000L)
+            tuple("office", "경상남도 김해시", 0L, 0L, 500000L),
+            tuple("office2", "경상남도 진영시", 0L, 0L, 500000L)
         );
   }
 
@@ -187,15 +186,15 @@ class OfficeRepositoryImplTest {
     // when
     Page<Office> result = officeRepository.findBySearchCond(cond, pageRequest);
     List<OfficeOverViewDto> overViewList = result.getContent().stream()
-        .map(content -> OfficeOverViewDto.fromEntity(content, reviewOverviewDto))
+        .map(content -> OfficeOverViewDto.fromEntity(content, new ArrayList<>()))
         .collect(Collectors.toList());
 
     // then
     assertThat(overViewList).hasSize(2)
         .extracting("name", "location", "reviewCount", "reviewRate", "leasePrice")
         .containsExactlyInAnyOrder(
-            tuple("office", "경상남도 김해시", 42, 4.82, 500000L),
-            tuple("office3", "경상남도 김해시", 42, 4.82, 500000L)
+            tuple("office", "경상남도 김해시", 0L, 0L, 500000L),
+            tuple("office3", "경상남도 김해시", 0L, 0L, 500000L)
         );
   }
 
@@ -233,12 +232,12 @@ class OfficeRepositoryImplTest {
     officeConditionRepository.saveAll(List.of(officeCondition, officeCondition2, officeCondition3));
   }
 
-  private Address createAddress(String legion, String city, String town, String village,
+  private Address createAddress(String legion, String city, String town, String detail,
       String street,int zipcode) {
     return Address.builder()
         .legion(legion)
         .city(city)
-        .village(village)
+        .detail(detail)
         .town(town)
         .zipcode(zipcode)
         .build();

@@ -1,5 +1,14 @@
 package com.dokkebi.officefinder.service.lease;
 
+import static com.dokkebi.officefinder.exception.CustomErrorCode.EMAIL_NOT_REGISTERED;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.INSUFFICIENT_POINTS;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.INVALID_OFFICE_ID;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.LEASE_NOT_FOUND;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.NO_ROOMS_AVAILABLE_FOR_LEASE;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.OFFICE_NOT_OWNED_BY_OWNER;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.OFFICE_OVER_CAPACITY;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.OWNER_NOT_FOUND;
+
 import com.dokkebi.officefinder.controller.lease.dto.LeaseControllerDto.AgentLeaseLookUpResponse;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.OfficeOwner;
@@ -7,13 +16,13 @@ import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.entity.type.NotificationType;
-import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseLookUpServiceResponse;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
@@ -40,7 +49,7 @@ public class LeaseService {
   private final CustomerRepository customerRepository;
   private final OfficeRepository officeRepository;
   private final ReviewRepository reviewRepository;
-
+  private final OfficePictureRepository officePictureRepository;
   private final NotificationService notificationService;
 
   /**
@@ -56,10 +65,10 @@ public class LeaseService {
   @Transactional
   public LeaseOfficeServiceResponse leaseOffice(LeaseOfficeRequestDto leaseOfficeRequestDto) {
     Customer customer = customerRepository.findByEmail(leaseOfficeRequestDto.getEmail())
-        .orElseThrow(() -> new CustomException(CustomErrorCode.EMAIL_NOT_REGISTERED));
+        .orElseThrow(() -> new CustomException(EMAIL_NOT_REGISTERED));
 
     Office office = officeRepository.findById(leaseOfficeRequestDto.getOfficeId())
-        .orElseThrow(() -> new CustomException(CustomErrorCode.INVALID_OFFICE_ID));
+        .orElseThrow(() -> new CustomException(INVALID_OFFICE_ID));
 
     checkAvailableRooms(leaseOfficeRequestDto, office.getMaxRoomCount());
     checkOfficeCapacity(office, leaseOfficeRequestDto.getCustomerCount());
@@ -80,22 +89,22 @@ public class LeaseService {
 
   public Page<LeaseLookUpServiceResponse> getLeaseList(String email, Pageable pageable) {
     Customer customer = customerRepository.findByEmail(email)
-        .orElseThrow(() -> new CustomException(CustomErrorCode.EMAIL_NOT_REGISTERED));
+        .orElseThrow(() -> new CustomException(EMAIL_NOT_REGISTERED));
 
     Page<Lease> leases = leaseRepository.findByCustomerId(customer.getId(), pageable);
 
     return leases.map(lease -> LeaseLookUpServiceResponse.of(lease,
-        reviewRepository.existsByLeaseId(lease.getId())));
+        reviewRepository.existsByLeaseId(lease.getId()), officePictureRepository.findByOfficeId(lease.getOffice().getId())));
   }
 
   // 특정 오피스에 들어온 임대 요청 정보 확인(AWAIT 상태의 임대 정보만)
   public Page<AgentLeaseLookUpResponse> getLeaseRequestList(String email, Long officeId,
       Pageable pageable) {
     OfficeOwner officeOwner = officeOwnerRepository.findByEmail(email)
-        .orElseThrow(() -> new CustomException(CustomErrorCode.OWNER_NOT_FOUND));
+        .orElseThrow(() -> new CustomException(OWNER_NOT_FOUND));
 
     Office office = officeRepository.findByOwnerAndId(officeOwner, officeId)
-        .orElseThrow(() -> new CustomException(CustomErrorCode.OFFICE_NOT_OWNED_BY_OWNER));
+        .orElseThrow(() -> new CustomException(OFFICE_NOT_OWNED_BY_OWNER));
 
     // 수략 대기 상태에 있는 Lease 정보들을 가져옴
     Page<Lease> awaitList = leaseRepository.findByOfficeIdAndLeaseStatus(office.getId(),
@@ -104,9 +113,10 @@ public class LeaseService {
     return awaitList.map(l -> AgentLeaseLookUpResponse.of(l, office.getName()));
   }
 
+  @Transactional
   public void acceptLeaseRequest(Long leaseId) {
-    Lease lease = leaseRepository.findById(leaseId)
-        .orElseThrow(() -> new CustomException(CustomErrorCode.LEASE_NOT_FOUND));
+    Lease lease = leaseRepository.findByLeaseId(leaseId)
+        .orElseThrow(() -> new CustomException(LEASE_NOT_FOUND));
 
     // 변경 후 저장안해도 더티 체킹으로 인해 반영됨
     lease.changeLeaseStatus(LeaseStatus.ACCEPTED);
@@ -118,8 +128,8 @@ public class LeaseService {
 
   @Transactional
   public void rejectLeaseRequest(Long leaseId) {
-    Lease lease = leaseRepository.findById(leaseId)
-        .orElseThrow(() -> new CustomException(CustomErrorCode.LEASE_NOT_FOUND));
+    Lease lease = leaseRepository.findByLeaseId(leaseId)
+        .orElseThrow(() -> new CustomException(LEASE_NOT_FOUND));
 
     // 임대 거절시 포인트를 다시 환급
     refundPayment(lease.getCustomer(), lease.getPrice());
@@ -138,24 +148,25 @@ public class LeaseService {
 
   private void checkOfficeCapacity(Office office, int customerCount) {
     if (office.getMaxCapacity() < customerCount) {
-      throw new CustomException(CustomErrorCode.OFFICE_OVER_CAPACITY);
+      throw new CustomException(OFFICE_OVER_CAPACITY);
     }
   }
 
   private void checkCustomerPoints(Customer customer, long totalPrice) {
     if (customer.getPoint() < totalPrice) {
-      throw new CustomException(CustomErrorCode.INSUFFICIENT_POINTS);
+      throw new CustomException(INSUFFICIENT_POINTS);
     }
   }
 
   private void checkAvailableRooms(LeaseOfficeRequestDto office, int maxRoomCount) {
     LocalDate endDate = office.getStartDate().plusMonths(office.getMonths());
     List<LeaseStatus> leaseStatus = Arrays.asList(LeaseStatus.AWAIT, LeaseStatus.ACCEPTED);
-    int CurrentRoomUsed = leaseRepository.countByOfficeIdAndLeaseStatusInAndLeaseEndDateGreaterThanEqualAndLeaseStartDateLessThanEqualOrderByLeaseStartDate(
-        office.getOfficeId(), leaseStatus, office.getStartDate(), endDate);
 
-    if (CurrentRoomUsed >= maxRoomCount) {
-      throw new CustomException(CustomErrorCode.NO_ROOMS_AVAILABLE_FOR_LEASE);
+    Long roomUsed = leaseRepository.countOfficeRoomInUse(office.getOfficeId(), leaseStatus,
+        office.getStartDate(), endDate);
+
+    if (roomUsed != null && roomUsed >= maxRoomCount) {
+      throw new CustomException(NO_ROOMS_AVAILABLE_FOR_LEASE);
     }
   }
 }

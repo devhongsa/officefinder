@@ -1,11 +1,30 @@
 package com.dokkebi.officefinder.service.review;
 
+import static com.dokkebi.officefinder.exception.CustomErrorCode.LEASE_NOT_EXPIRED;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.LEASE_NOT_FOUND;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.LEASE_OWNER_NOT_MATCH;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.REVIEW_ALREADY_EXISTS;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.REVIEW_NOT_EXISTS;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.REVIEW_OWNER_NOT_MATCH;
+import static com.dokkebi.officefinder.exception.CustomErrorCode.USER_NOT_FOUND;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import com.dokkebi.officefinder.controller.auth.dto.Auth;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.SignUpCustomer;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.SignUpOfficeOwner;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.SignUpResponseCustomer;
+import com.dokkebi.officefinder.controller.auth.dto.Auth.SignUpResponseOfficeOwner;
+import com.dokkebi.officefinder.controller.office.dto.OfficeAddress;
+import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
+import com.dokkebi.officefinder.controller.office.dto.OfficeOption;
 import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.SubmitControllerRequest;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
+import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
@@ -13,11 +32,21 @@ import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.repository.office.condition.OfficeConditionRepository;
 import com.dokkebi.officefinder.repository.office.location.OfficeLocationRepository;
 import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
+import com.dokkebi.officefinder.service.auth.AuthService;
+import com.dokkebi.officefinder.service.lease.LeaseService;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
+import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
+import com.dokkebi.officefinder.service.office.OfficeService;
 import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +56,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -52,6 +82,15 @@ public class ReviewServiceTest {
   @Autowired
   private OfficePictureRepository officePictureRepository;
 
+  @Autowired
+  private AuthService authService;
+
+  @Autowired
+  private OfficeService officeService;
+
+  @Autowired
+  private LeaseService leaseService;
+
   @AfterEach
   void tearDown() {
     reviewRepository.deleteAllInBatch();
@@ -71,10 +110,17 @@ public class ReviewServiceTest {
     SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(5)
         .description("테스트").build();
+
     //then
-    Assertions.assertThatThrownBy(
-        () -> reviewService.submit(submitControllerRequest, infos.customer.getId(), infos.lease.getId()+1)
-    ).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(
+        () -> reviewService.submit(submitControllerRequest, infos.customer.getId(),
+            infos.lease.getId() + 1)
+    )
+        .isInstanceOf(CustomException.class)
+        .extracting("errorCode", "errorMessage", "status")
+        .contains(
+            LEASE_NOT_FOUND, "해당 임대 정보가 조회되지 않습니다.", HttpStatus.BAD_REQUEST
+        );
   }
 
   @Test
@@ -85,10 +131,17 @@ public class ReviewServiceTest {
     SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(5)
         .description("테스트").build();
+
     //then
-    Assertions.assertThatThrownBy(
-        () -> reviewService.submit(submitControllerRequest, infos.customer.getId()+1, infos.lease.getId())
-    ).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(
+        () -> reviewService.submit(submitControllerRequest, infos.customer.getId() + 1,
+            infos.lease.getId())
+    )
+        .isInstanceOf(CustomException.class)
+        .extracting("errorCode", "errorMessage", "status")
+        .contains(
+            LEASE_OWNER_NOT_MATCH, "임대자 본인이 아닙니다.", HttpStatus.BAD_REQUEST
+        );
   }
 
   @Test
@@ -99,11 +152,18 @@ public class ReviewServiceTest {
     SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(5)
         .description("테스트").build();
+
     reviewRepository.save(Review.builder().lease(infos.lease).build());
+
     //then
-    Assertions.assertThatThrownBy(
-        () -> reviewService.submit(submitControllerRequest, infos.customer.getId(), infos.lease.getId())
-    ).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> reviewService.submit(submitControllerRequest, infos.customer.getId(),
+        infos.lease.getId())
+    )
+        .isInstanceOf(CustomException.class)
+        .extracting("errorCode", "errorMessage", "status")
+        .contains(
+            REVIEW_ALREADY_EXISTS, "이미 리뷰가 있습니다.", HttpStatus.BAD_REQUEST
+        );
   }
 
   @Test
@@ -114,10 +174,16 @@ public class ReviewServiceTest {
     SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(5)
         .description("테스트").build();
+
     //then
-    Assertions.assertThatThrownBy(
-        () -> reviewService.submit(submitControllerRequest, infos.customer.getId(), infos.lease.getId())
-    ).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> reviewService.submit(submitControllerRequest, infos.customer.getId(),
+        infos.lease.getId())
+    )
+        .isInstanceOf(CustomException.class)
+        .extracting("errorCode", "errorMessage", "status")
+        .contains(
+            LEASE_NOT_EXPIRED, "계약이 만료되지 않았습니다.", HttpStatus.BAD_REQUEST
+        );
   }
 
   @Test
@@ -128,11 +194,15 @@ public class ReviewServiceTest {
     SubmitControllerRequest submitControllerRequest = SubmitControllerRequest.builder()
         .rate(5)
         .description("테스트").build();
+
+    // when
+    Review savedReview = reviewService.submit(submitControllerRequest, infos.customer.getId(),
+        infos.lease.getId());
+
     //then
-    Assertions.assertThat(reviewService.submit
-                (submitControllerRequest, infos.customer.getId(), infos.lease.getId())
-            .getCustomerId())
-        .isEqualTo(infos.customer.getId());
+    assertThat(savedReview.getCustomerId()).isEqualTo(infos.customer.getId());
+    assertThat(infos.office.getReviewCount()).isEqualTo(1L);
+    assertThat(infos.office.getTotalRate()).isEqualTo(5L);
   }
 
   @Test
@@ -153,9 +223,13 @@ public class ReviewServiceTest {
         .description("테스트").build();
 
     //then
-    Assertions.assertThatThrownBy(() -> reviewService.update(submitControllerRequest,
-            infos.customer.getId(), savedReview.getId() + 1))
-        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> reviewService.update(submitControllerRequest, infos.customer.getId(),
+        savedReview.getId() + 1))
+        .isInstanceOf(CustomException.class)
+        .extracting("errorCode", "errorMessage", "status")
+        .contains(
+            REVIEW_NOT_EXISTS, "리뷰가 존재하지 않습니다.", HttpStatus.BAD_REQUEST
+        );
   }
 
   @Test
@@ -176,9 +250,15 @@ public class ReviewServiceTest {
         .description("테스트").build();
 
     //then
-    Assertions.assertThatThrownBy(() -> reviewService.update(submitControllerRequest,
-            infos.customer.getId()+1, savedReview.getId()))
-        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(
+        () -> reviewService.update(submitControllerRequest, infos.customer.getId() + 1,
+            savedReview.getId())
+    )
+        .isInstanceOf(CustomException.class)
+        .extracting("errorCode", "errorMessage", "status")
+        .contains(
+            REVIEW_OWNER_NOT_MATCH, "리뷰 작성자 본인이 아닙니다.", HttpStatus.BAD_REQUEST
+        );
   }
 
   @Test
@@ -201,9 +281,9 @@ public class ReviewServiceTest {
     Review updatedReview = reviewService.update(submitControllerRequest,
         infos.customer.getId(), savedReview.getId());
     //then
-    Assertions.assertThat(updatedReview.getId()).isEqualTo(savedReview.getId());
-    Assertions.assertThat(updatedReview.getRate()).isEqualTo(1);
-    Assertions.assertThat(updatedReview.getDescription()).isEqualTo("수정 후");
+    assertThat(updatedReview.getId()).isEqualTo(savedReview.getId());
+    assertThat(updatedReview.getRate()).isEqualTo(1);
+    assertThat(updatedReview.getDescription()).isEqualTo("수정 후");
   }
 
   @Test
@@ -223,22 +303,30 @@ public class ReviewServiceTest {
     reviewRepository.save(review1);
 
     //then
-    Assertions.assertThatThrownBy(() -> reviewService.getReviewsByCustomerId(infos.customer.getId() + 1, pageable))
-        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(
+        () -> reviewService.getReviewsByCustomerId(infos.customer.getId() + 1, pageable))
+        .isInstanceOf(CustomException.class)
+        .extracting("errorCode", "errorMessage", "status")
+        .contains(
+            USER_NOT_FOUND, "유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST
+        );
   }
 
   @Test
   @DisplayName("read할때 임대계약은 있지만 리뷰는 없는 경우")
   public void getReviews2() {
-
     //given
     Infos infos = makeInfos("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
 
     Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
 
     //then
-    Assertions.assertThatThrownBy(() -> reviewService.getReviewsByCustomerId(infos.office.getId(), pageable))
-        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> reviewService.getReviewsByOfficeId(infos.office.getId(), pageable))
+        .isInstanceOf(CustomException.class)
+        .extracting("errorCode", "errorMessage", "status")
+        .contains(
+            REVIEW_NOT_EXISTS, "리뷰가 존재하지 않습니다.", HttpStatus.BAD_REQUEST
+        );
   }
 
   @Test
@@ -254,15 +342,18 @@ public class ReviewServiceTest {
             .roles(Set.of("customer"))
             .point(0).build()
     );
+
     Office office = officeRepository.save(
         Office.builder().name("1").build()
     );
+
     Lease lease1 = leaseRepository.save(
         Lease.builder()
             .customer(customer)
             .office(office)
             .leaseStatus(LeaseStatus.EXPIRED).build()
     );
+
     Lease lease2 = leaseRepository.save(
         Lease.builder()
             .customer(customer)
@@ -277,20 +368,24 @@ public class ReviewServiceTest {
         .officeId(office.getId())
         .rate(5)
         .description("test").build();
+
     Review review2 = Review.builder()
         .lease(lease2)
         .customerId(customer.getId())
         .officeId(office.getId())
         .rate(5)
         .description("test").build();
+
     reviewRepository.save(review1);
     reviewRepository.save(review2);
+
     //when
     Page<Review> reviews = reviewService.getReviewsByCustomerId(customer.getId(), pageable);
+
     //then
     List<Review> reviewList = reviews.getContent();
-    Assertions.assertThat(reviewList.get(0).getLease().getCustomer().getName()).isEqualTo("1");
-    Assertions.assertThat(reviewList.get(1).getLease().getCustomer().getName()).isEqualTo("1");
+    assertThat(reviewList.get(0).getLease().getCustomer().getName()).isEqualTo("1");
+    assertThat(reviewList.get(1).getLease().getCustomer().getName()).isEqualTo("1");
   }
 
   @Test
@@ -307,8 +402,13 @@ public class ReviewServiceTest {
     Review savedReview = reviewRepository.save(review);
 
     //then
-    Assertions.assertThatThrownBy(() -> reviewService.delete(infos.customer.getId()+1, savedReview.getId())).message()
-        .isEqualTo("회원이 존재하지 않습니다.");
+    assertThatThrownBy(
+        () -> reviewService.delete(infos.customer.getId() + 1, savedReview.getId())
+    ).isInstanceOf(CustomException.class)
+        .extracting("errorCode", "errorMessage", "status")
+        .contains(
+            USER_NOT_FOUND, "유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST
+        );
   }
 
   @Test
@@ -318,8 +418,12 @@ public class ReviewServiceTest {
     Infos infos = makeInfos("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
 
     //then
-    Assertions.assertThatThrownBy(() -> reviewService.delete(infos.customer.getId(), 1L))
-        .message().isEqualTo("리뷰가 존재하지 않습니다.");
+    assertThatThrownBy(() -> reviewService.delete(infos.customer.getId(), 1L))
+        .isInstanceOf(CustomException.class)
+        .extracting("errorCode", "errorMessage", "status")
+        .contains(
+            REVIEW_NOT_EXISTS, "리뷰가 존재하지 않습니다.", HttpStatus.BAD_REQUEST
+        );
   }
 
   @Test
@@ -333,18 +437,26 @@ public class ReviewServiceTest {
         .officeId(infos1.office.getId())
         .rate(5)
         .description("test").build();
+
     Infos infos2 = makeInfos("2", "test2@naver.com", "2", "customer", 0, LeaseStatus.EXPIRED);
+
     Review review2 = Review.builder()
         .lease(infos2.lease)
         .customerId(infos2.customer.getId())
         .officeId(infos2.office.getId())
         .rate(5)
         .description("test").build();
+
     Review savedReview1 = reviewRepository.save(review1);
     Review savedReview2 = reviewRepository.save(review2);
+
     //when
-    Assertions.assertThatThrownBy(() -> reviewService.delete(infos2.customer.getId(), review1.getId()))
-        .message().isEqualTo("리뷰 작성자 본인이 아닙니다.");
+    assertThatThrownBy(() -> reviewService.delete(infos2.customer.getId(), review1.getId()))
+        .isInstanceOf(CustomException.class)
+        .extracting("errorCode", "errorMessage", "status")
+        .contains(
+            REVIEW_OWNER_NOT_MATCH, "리뷰 작성자 본인이 아닙니다.", HttpStatus.BAD_REQUEST
+        );
   }
 
   @Test
@@ -362,7 +474,7 @@ public class ReviewServiceTest {
     //when
     reviewService.delete(infos.customer.getId(), savedReview.getId());
     //then
-    Assertions.assertThat(reviewRepository.findById(savedReview.getId())).isEmpty();
+    assertThat(reviewRepository.findById(savedReview.getId())).isEmpty();
   }
 
   @Test
@@ -414,11 +526,11 @@ public class ReviewServiceTest {
     List<Review> reviewList = reviews.getContent();
     //then
 
-    for (var element: reviewList){
+    for (var element : reviewList) {
       log.info("element = {}", element.getRate());
     }
 
-    Assertions.assertThat(reviewList.get(0).getDescription()).isEqualTo("test3");
+    assertThat(reviewList.get(0).getDescription()).isEqualTo("test3");
   }
 
   @Test
@@ -463,12 +575,13 @@ public class ReviewServiceTest {
     ReviewOverviewDto dto = reviewService.getReviewOverviewByOfficeId(infos.office.getId());
 
     //then
-    Assertions.assertThat(dto.getReviewCount()).isEqualTo(3);
-    Assertions.assertThat(dto.getReviewRate()).isEqualTo(2);
+    assertThat(dto.getReviewCount()).isEqualTo(3);
+    assertThat(dto.getReviewRate()).isEqualTo(2);
   }
 
-  private Infos makeInfos(String name, String email, String password, String roles, int point, LeaseStatus status) {
-    Customer customer = customerRepository.save(
+  private Infos makeInfos(String name, String email, String password, String roles, int point,
+      LeaseStatus status) {
+    Customer customer = customerRepository.saveAndFlush(
         Customer.builder()
             .name(name)
             .email(email)
@@ -476,10 +589,10 @@ public class ReviewServiceTest {
             .roles(Set.of(roles))
             .point(point).build()
     );
-    Office office = officeRepository.save(
+    Office office = officeRepository.saveAndFlush(
         Office.builder().name(name).build()
     );
-    Lease lease = leaseRepository.save(
+    Lease lease = leaseRepository.saveAndFlush(
         Lease.builder()
             .customer(customer)
             .office(office)
@@ -489,7 +602,67 @@ public class ReviewServiceTest {
     return new Infos(customer, office, lease);
   }
 
+  private void setOfficeInfo(OfficeCreateRequestDto request, String officeName, int maxCapacity,
+      long leaseFee, int maxRoomCount) {
+    request.setOfficeName(officeName);
+    request.setMaxCapacity(maxCapacity);
+    request.setLeaseFee(leaseFee);
+    request.setMaxRoomCount(maxRoomCount);
+  }
+
+  private OfficeAddress setOfficeLocation(String legion, String city, String town, String detail,
+      String street, int zipcode) {
+
+    return OfficeAddress.builder()
+        .legion(legion)
+        .city(city)
+        .town(town)
+        .detail(detail)
+        .street(street)
+        .zipcode(String.valueOf(zipcode))
+        .build();
+  }
+
+  private OfficeOption setOfficeCondition(boolean airCondition, boolean heaterCondition,
+      boolean cafe,
+      boolean printer, boolean packageSendService, boolean doorLock, boolean fax,
+      boolean publicKitchen, boolean publicLounge, boolean privateLocker, boolean tvProjector,
+      boolean whiteboard, boolean wifi, boolean showerBooth, boolean storage, boolean parkArea) {
+
+    return OfficeOption.builder()
+        .haveAirCondition(airCondition)
+        .haveHeater(heaterCondition)
+        .haveCafe(cafe)
+        .havePrinter(printer)
+        .packageSendServiceAvailable(packageSendService)
+        .haveDoorLock(doorLock)
+        .faxServiceAvailable(fax)
+        .havePublicKitchen(publicKitchen)
+        .havePublicLounge(publicLounge)
+        .havePrivateLocker(privateLocker)
+        .haveTvProjector(tvProjector)
+        .haveWhiteBoard(whiteboard)
+        .haveWifi(wifi)
+        .haveShowerBooth(showerBooth)
+        .haveStorage(storage)
+        .haveParkArea(parkArea)
+        .build();
+  }
+
+  private LeaseOfficeRequestDto createLeaseRequest(String email, Long officeId, LocalDate startDate,
+      int months, int customerCount) {
+
+    return LeaseOfficeRequestDto.builder()
+        .email(email)
+        .officeId(officeId)
+        .startDate(startDate)
+        .months(months)
+        .customerCount(customerCount)
+        .build();
+  }
+
   private static class Infos {
+
     Customer customer;
     Office office;
     Lease lease;

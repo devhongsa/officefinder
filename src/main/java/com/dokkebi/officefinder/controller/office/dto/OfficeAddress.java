@@ -16,7 +16,7 @@ public class OfficeAddress {
   private String legion;
   private String city;
   private String town;
-  private String village;
+  private String detail;
   private String street;
   private String zipcode;
 }

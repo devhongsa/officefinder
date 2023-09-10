@@ -45,7 +45,10 @@ public class AuthService {
 
     signupRequest.encodePassword(passwordEncoder);
     Customer customer = customerRepository.save(signupRequest.toEntity());
-    return Auth.SignUpResponseCustomer.builder().customer(customer).build();
+
+    return Auth.SignUpResponseCustomer.builder()
+        .customer(customer)
+        .build();
   }
 
 
@@ -57,7 +60,10 @@ public class AuthService {
 
     signupRequest.encodePassword(passwordEncoder);
     OfficeOwner officeOwner = officeOwnerRepository.save(signupRequest.toEntity());
-    return Auth.SignUpResponseOfficeOwner.builder().officeOwner(officeOwner).build();
+
+    return Auth.SignUpResponseOfficeOwner.builder()
+        .officeOwner(officeOwner)
+        .build();
   }
 
   /*

@@ -28,6 +28,14 @@ public enum CustomErrorCode {
   NO_ROOMS_AVAILABLE_FOR_LEASE(HttpStatus.BAD_REQUEST, "현재 임대예약이 가능한 방이 없습니다."),
   CHAT_ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "채팅방을 찾을 수 없습니다."),
   CHAT_ROOM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "해당 오피스와의 채팅방이 이미 존재합니다."),
+  OFFICE_NOT_EXISTS(HttpStatus.BAD_REQUEST, "해당 오피스는 존재하지 않습니다."),
+  BOOKMARK_NOT_EXISTS(HttpStatus.BAD_REQUEST, "북마크가 존재하지 않습니다."),
+  REVIEW_NOT_EXISTS(HttpStatus.BAD_REQUEST, "리뷰가 존재하지 않습니다."),
+  REVIEW_OWNER_NOT_MATCH(HttpStatus.BAD_REQUEST, "리뷰 작성자 본인이 아닙니다."),
+  LEASE_OWNER_NOT_MATCH(HttpStatus.BAD_REQUEST, "임대자 본인이 아닙니다."),
+  REVIEW_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 리뷰가 있습니다."),
+  LEASE_NOT_EXPIRED(HttpStatus.BAD_REQUEST, "계약이 만료되지 않았습니다."),
+  FILE_IS_NOT_PICTURE(HttpStatus.BAD_REQUEST, "잘못된 확장자입니다. jpg, jpeg, png 확장자의 파일을 보내주세요"),
   SSE_SEND_NOTIFICATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "알림 전송을 실패하였습니다.");
 
   private final HttpStatus httpStatus;

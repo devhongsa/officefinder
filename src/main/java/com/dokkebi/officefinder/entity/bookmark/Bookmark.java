@@ -1,5 +1,6 @@
 package com.dokkebi.officefinder.entity.bookmark;
 
+import com.dokkebi.officefinder.entity.BaseEntity;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.office.Office;
 import javax.persistence.Column;
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @NoArgsConstructor
-public class Bookmark {
+public class Bookmark extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,5 +37,12 @@ public class Bookmark {
     this.id = id;
     this.customer = customer;
     this.office = office;
+  }
+
+  public static Bookmark from(Customer customer, Office office){
+    return Bookmark.builder()
+        .customer(customer)
+        .office(office)
+        .build();
   }
 }
