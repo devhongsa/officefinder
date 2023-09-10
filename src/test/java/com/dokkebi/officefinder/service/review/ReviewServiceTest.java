@@ -153,7 +153,7 @@ public class ReviewServiceTest {
         .rate(5)
         .description("테스트").build();
 
-    reviewRepository.save(Review.builder().lease(infos.lease).build());
+    reviewService.submit(submitControllerRequest, infos.customer.getId(), infos.lease.getId());
 
     //then
     assertThatThrownBy(() -> reviewService.submit(submitControllerRequest, infos.customer.getId(),
