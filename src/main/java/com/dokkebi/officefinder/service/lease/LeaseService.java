@@ -113,6 +113,7 @@ public class LeaseService {
     return awaitList.map(l -> AgentLeaseLookUpResponse.of(l, office.getName()));
   }
 
+  @Transactional
   public void acceptLeaseRequest(Long leaseId) {
     Lease lease = leaseRepository.findByLeaseId(leaseId)
         .orElseThrow(() -> new CustomException(LEASE_NOT_FOUND));
