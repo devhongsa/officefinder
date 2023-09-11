@@ -14,21 +14,20 @@ import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficePicture;
-import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.exception.CustomException;
-import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import com.dokkebi.officefinder.security.TokenProvider;
 import com.dokkebi.officefinder.service.office.OfficeSearchService;
 import com.dokkebi.officefinder.service.office.OfficeService;
+import com.dokkebi.officefinder.service.officeowner.OfficeOwnerService;
 import com.dokkebi.officefinder.service.officeowner.dto.OfficeOwnerServiceDto.RentalStatusDto;
 import com.dokkebi.officefinder.service.review.ReviewService;
 import com.dokkebi.officefinder.service.s3.S3Service;
-import com.dokkebi.officefinder.service.officeowner.OfficeOwnerService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +35,6 @@ import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,7 +45,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -155,10 +152,18 @@ public class OfficeOwnerController {
   @PostMapping("/offices")
   public void addOffice(
       @RequestPart(value = "request") OfficeCreateRequestDto request,
-      @RequestPart(value = "multipartFileList") List<MultipartFile> multipartFileList,
+      @RequestPart(value = "multipartFileList", required = false) List<MultipartFile> multipartFileList,
       Principal principal
   ) {
-    List<String> imagePaths = s3Service.uploadImages(multipartFileList);
+
+    List<String> imagePaths;
+
+    if (multipartFileList != null && !multipartFileList.isEmpty()){
+      imagePaths = s3Service.uploadImages(multipartFileList);
+    } else {
+      imagePaths = new ArrayList<>();
+    }
+
     officeService.createOfficeInfo(request, imagePaths, principal.getName());
   }
 
