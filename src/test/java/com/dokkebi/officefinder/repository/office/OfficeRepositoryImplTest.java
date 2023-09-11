@@ -59,9 +59,9 @@ class OfficeRepositoryImplTest {
     assertThat(overViewList).hasSize(3)
         .extracting("name", "location", "reviewCount", "reviewRate", "leasePrice")
         .containsExactlyInAnyOrder(
-            tuple("office", "경상남도 김해시", 0L, 0L, 500000L),
-            tuple("office2", "경상남도 진영시", 0L, 0L, 500000L),
-            tuple("office3", "경상남도 김해시", 0L, 0L, 500000L)
+            tuple("office", "경상남도 김해시 삼계동", 0L, 0L, 500000L),
+            tuple("office2", "경상남도 진영시 가츠동", 0L, 0L, 500000L),
+            tuple("office3", "경상남도 김해시 내외동", 0L, 0L, 500000L)
         );
   }
 
@@ -86,9 +86,9 @@ class OfficeRepositoryImplTest {
     assertThat(overViewList).hasSize(3)
         .extracting("name", "location", "reviewCount", "reviewRate", "leasePrice")
         .containsExactlyInAnyOrder(
-            tuple("office", "경상남도 김해시", 0L, 0L, 500000L),
-            tuple("office2", "경상남도 진영시", 0L, 0L, 500000L),
-            tuple("office3", "경상남도 김해시", 0L, 0L, 500000L)
+            tuple("office", "경상남도 김해시 삼계동", 0L, 0L, 500000L),
+            tuple("office2", "경상남도 진영시 가츠동", 0L, 0L, 500000L),
+            tuple("office3", "경상남도 김해시 내외동", 0L, 0L, 500000L)
         );
   }
 
@@ -114,8 +114,8 @@ class OfficeRepositoryImplTest {
     assertThat(overViewList).hasSize(2)
         .extracting("name", "location", "reviewCount", "reviewRate", "leasePrice")
         .containsExactlyInAnyOrder(
-            tuple("office", "경상남도 김해시", 0L, 0L, 500000L),
-            tuple("office3", "경상남도 김해시", 0L, 0L, 500000L)
+            tuple("office", "경상남도 김해시 삼계동", 0L, 0L, 500000L),
+            tuple("office3", "경상남도 김해시 내외동", 0L, 0L, 500000L)
         );
   }
 
@@ -138,9 +138,9 @@ class OfficeRepositoryImplTest {
     assertThat(overViewList).hasSize(3)
         .extracting("name", "location", "reviewCount", "reviewRate", "leasePrice")
         .containsExactlyInAnyOrder(
-            tuple("office", "경상남도 김해시", 0L, 0L, 500000L),
-            tuple("office2", "경상남도 진영시", 0L, 0L, 500000L),
-            tuple("office3", "경상남도 김해시", 0L, 0L, 500000L)
+            tuple("office", "경상남도 김해시 삼계동", 0L, 0L, 500000L),
+            tuple("office2", "경상남도 진영시 가츠동", 0L, 0L, 500000L),
+            tuple("office3", "경상남도 김해시 내외동", 0L, 0L, 500000L)
         );
   }
 
@@ -165,8 +165,8 @@ class OfficeRepositoryImplTest {
     assertThat(overViewList).hasSize(2)
         .extracting("name", "location", "reviewCount", "reviewRate", "leasePrice")
         .containsExactlyInAnyOrder(
-            tuple("office", "경상남도 김해시", 0L, 0L, 500000L),
-            tuple("office2", "경상남도 진영시", 0L, 0L, 500000L)
+            tuple("office", "경상남도 김해시 삼계동", 0L, 0L, 500000L),
+            tuple("office2", "경상남도 진영시 가츠동", 0L, 0L, 500000L)
         );
   }
 
@@ -193,8 +193,8 @@ class OfficeRepositoryImplTest {
     assertThat(overViewList).hasSize(2)
         .extracting("name", "location", "reviewCount", "reviewRate", "leasePrice")
         .containsExactlyInAnyOrder(
-            tuple("office", "경상남도 김해시", 0L, 0L, 500000L),
-            tuple("office3", "경상남도 김해시", 0L, 0L, 500000L)
+            tuple("office", "경상남도 김해시 삼계동", 0L, 0L, 500000L),
+            tuple("office3", "경상남도 김해시 내외동", 0L, 0L, 500000L)
         );
   }
 
