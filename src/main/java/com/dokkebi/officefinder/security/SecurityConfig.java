@@ -40,7 +40,7 @@ public class SecurityConfig implements WebMvcConfigurer {
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeHttpRequests((authz) -> authz
-            .antMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
+            .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .antMatchers("/ws/**").permitAll() // 개발환경에서만 우선 설정
             .antMatchers("/webjars/**").permitAll() // 개발환경에서만 우선 설정
             .antMatchers("/swagger*/**","/v3/api-docs", "/v2/api-docs").permitAll()
