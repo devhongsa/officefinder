@@ -230,18 +230,4 @@ public class OfficeOwnerController {
 
     return new ResponseDto<>("success", officeLeaseRate);
   }
-
-  @Operation(summary = "총 리뷰 조회", description = "자신의 오피스들에 달린 리뷰들을 모두 조회할 수 있다.")
-  @GetMapping("/offices/all-reviews")
-  public ResponseDto<Page<Review>> getAllReviews(@RequestHeader("Authorization") String jwt,
-      @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(defaultValue = "20") Integer size) {
-    Long officeOwnerId = tokenProvider.getUserIdFromHeader(jwt);
-    Pageable pageable = PageRequest.of(page, size);
-
-    Page<Review> allReviews = reviewService.getAllReviewsByOfficeOwnerId(
-        officeOwnerId, pageable);
-
-    return new ResponseDto<>("success", allReviews);
-  }
 }
