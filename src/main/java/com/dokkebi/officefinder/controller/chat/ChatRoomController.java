@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,12 +25,12 @@ public class ChatRoomController {
 
   private final ChatService chatService;
 
-//  // 채팅 리스트 화면 (테스트용 api)
-//  @GetMapping("/room")
-//  public ModelAndView rooms() {
-//    ModelAndView model = new ModelAndView("room");
-//    return model;
-//  }
+  // 채팅 리스트 화면 (테스트용 api)
+  @GetMapping("/room")
+  public ModelAndView rooms() {
+    ModelAndView model = new ModelAndView("roomtest");
+    return model;
+  }
 
   // 모든 채팅방 목록 반환
   @GetMapping("/rooms")
@@ -46,13 +47,13 @@ public class ChatRoomController {
     return chatService.createRoom(officeId, jwt);
   }
 
-//  // 채팅방 입장 화면 (테스트용 api)
-//  @GetMapping("/room/enter/{roomUid}")
-//  public ModelAndView roomDetail(@PathVariable String roomUid) {
-//    ModelAndView model = new ModelAndView("roomdetail");
-//    model.addObject("roomUid", roomUid);
-//    return model;
-//  }
+  // 채팅방 입장 화면 (테스트용 api)
+  @GetMapping("/room/enter/{roomUid}")
+  public ModelAndView roomDetail(@PathVariable String roomUid) {
+    ModelAndView model = new ModelAndView("roomdetail");
+    model.addObject("roomUid", roomUid);
+    return model;
+  }
 
   // 특정 채팅방 조회
   @GetMapping("/room/{roomUid}")
