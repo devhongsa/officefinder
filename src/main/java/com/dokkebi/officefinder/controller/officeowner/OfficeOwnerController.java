@@ -180,12 +180,13 @@ public class OfficeOwnerController {
   public void modifyOffice(
       @PathVariable("officeId") Long officeId,
       @RequestPart(value = "request") OfficeModifyRequestDto request,
-      @RequestPart(value = "multipartFileList") List<MultipartFile> multipartFileList,
+      @RequestPart(value = "multipartFileList", required = false) List<MultipartFile> multipartFileList,
       Principal principal
   ) {
 
     // 기존 이미지 삭제
     List<OfficePicture> officePicture = officePictureRepository.findByOfficeId(officeId);
+
     if (officePicture != null && !officePicture.isEmpty()) {
       List<String> fileList = officePicture.stream()
           .map(OfficePicture::getFileName)
@@ -194,8 +195,14 @@ public class OfficeOwnerController {
       s3Service.deleteImages(fileList);
     }
 
+    List<String> imagePaths;
+    if (multipartFileList != null && !multipartFileList.isEmpty()){
+      imagePaths = s3Service.uploadImages(multipartFileList);
+    } else{
+      imagePaths = new ArrayList<>();
+    }
+
     // 들어온 이미지 등록
-    List<String> imagePaths = s3Service.uploadImages(multipartFileList);
     officeService.modifyOfficeInfo(request, imagePaths, principal.getName(), officeId);
   }
 
