@@ -28,6 +28,8 @@ public class ChatRoom extends BaseEntity {
   @Column(name = "chat_room_id")
   private Long id;
 
+  private Long officeId;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "customer_id")
   private Customer customer;
@@ -44,9 +46,10 @@ public class ChatRoom extends BaseEntity {
   private LocalDateTime lastSeenOfficeOwner;
 
   @Builder
-  private ChatRoom(Long id, Customer customer, OfficeOwner officeOwner, String roomUid,
+  private ChatRoom(Long id, Long officeId, Customer customer, OfficeOwner officeOwner, String roomUid,
       LocalDateTime lastSeenCustomer, LocalDateTime lastSeenOfficeOwner) {
     this.id = id;
+    this.officeId = officeId;
     this.customer = customer;
     this.officeOwner = officeOwner;
     this.roomUid = roomUid;
@@ -54,8 +57,9 @@ public class ChatRoom extends BaseEntity {
     this.lastSeenOfficeOwner = lastSeenOfficeOwner;
   }
 
-  public static ChatRoom create(Customer customer, OfficeOwner officeOwner) {
+  public static ChatRoom create(Customer customer, OfficeOwner officeOwner, Long officeId) {
     return ChatRoom.builder()
+        .officeId(officeId)
         .customer(customer)
         .officeOwner(officeOwner)
         .lastSeenCustomer(LocalDateTime.now())
