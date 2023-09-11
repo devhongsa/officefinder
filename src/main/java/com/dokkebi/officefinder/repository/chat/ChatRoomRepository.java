@@ -15,6 +15,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
   Optional<ChatRoom> findByRoomUid(String roomUid);
 
-  boolean existsByCustomerAndOfficeOwner(Customer customer, OfficeOwner officeOwner);
+  boolean existsByCustomerAndOfficeId(Customer customer, Long officeId);
 
 }

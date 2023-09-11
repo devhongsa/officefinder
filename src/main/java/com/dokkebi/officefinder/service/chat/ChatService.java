@@ -213,11 +213,11 @@ public class ChatService {
         .orElseThrow(() -> new CustomException(INVALID_OFFICE_ID));
     OfficeOwner officeOwner = office.getOwner();
 
-    if (chatRoomRepository.existsByCustomerAndOfficeOwner(customer, officeOwner)) {
+    if (chatRoomRepository.existsByCustomerAndOfficeId(customer, officeId)) {
       throw new CustomException(CHAT_ROOM_ALREADY_EXISTS);
     }
 
-    ChatRoom chatRoom = chatRoomRepository.save(ChatRoom.create(customer, officeOwner));
+    ChatRoom chatRoom = chatRoomRepository.save(ChatRoom.create(customer, officeOwner, officeId));
     return CreateRoomResponse.from(chatRoom);
   }
 
