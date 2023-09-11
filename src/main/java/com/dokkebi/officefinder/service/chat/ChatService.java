@@ -49,7 +49,7 @@ public class ChatService {
     Long userId = tokenProvider.getUserIdFromHeader(jwt);
 
     List<ChatRoomStatus> result = new ArrayList<>();
-    if (tokenProvider.getUserType(jwt).equals(CUSTOMER)) {
+    if (tokenProvider.getUserType(tokenProvider.resolveTokenFromHeader(jwt)).equals(CUSTOMER)) {
       Customer customer = customerRepository.findById(userId)
           .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
       List<ChatRoom> chatRooms = chatRoomRepository.findByCustomer(
@@ -118,7 +118,7 @@ public class ChatService {
   public boolean isNewMessage(String jwt) {
     Long userId = tokenProvider.getUserIdFromHeader(jwt);
 
-    if (tokenProvider.getUserType(jwt).equals(CUSTOMER)) {
+    if (tokenProvider.getUserType(tokenProvider.resolveTokenFromHeader(jwt)).equals(CUSTOMER)) {
       Customer customer = customerRepository.findById(userId)
           .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
       List<ChatRoom> chatRooms = chatRoomRepository.findByCustomer(
@@ -152,7 +152,7 @@ public class ChatService {
   //특정 채팅방 내용 불러오기
   @Transactional(readOnly = true)
   public List<ChatMessageResponse> roomInfo(String roomUid, String jwt) {
-    String userType = tokenProvider.getUserType(jwt);
+    String userType = tokenProvider.getUserType(tokenProvider.resolveTokenFromHeader(jwt));
 
     ChatRoom chatRoom = chatRoomRepository.findByRoomUid(roomUid)
         .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
@@ -250,7 +250,7 @@ public class ChatService {
   @Transactional
   public void readMessage(String roomUid, String jwt) {
     Long userId = tokenProvider.getUserIdFromHeader(jwt);
-    String userType = tokenProvider.getUserType(jwt);
+    String userType = tokenProvider.getUserType(tokenProvider.resolveTokenFromHeader(jwt));
 
     ChatRoom chatRoom = chatRoomRepository.findByRoomUid(roomUid)
         .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
