@@ -14,6 +14,7 @@ import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficePicture;
+import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
@@ -35,6 +36,7 @@ import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -45,6 +47,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -63,6 +66,7 @@ public class OfficeOwnerController {
   private final S3Service s3Service;
   private final OfficeOwnerService officeOwnerService;
   private final TokenProvider tokenProvider;
+  private final ReviewService reviewService;
 
   @ApiOperation(value = "임대주 요약 정보 조회", notes = "임대주 요약 정보(이름, 역할, 사진, 포인트)를 가져올 수 있다.")
   @GetMapping("/info-overview")
@@ -79,7 +83,7 @@ public class OfficeOwnerController {
   }
 
   @Operation(summary = "임대주 이미지 등록 및 수정", description = "임대주의 프로필 이미지를 등록하거나 수정할 수 있다.")
-  @PutMapping("/info/profileImage")
+  @PostMapping("/info/profileImage")
   public ResponseDto<String> modifyProfileImage(@RequestPart("value") MultipartFile multipartFile,
       Principal principal) {
 
@@ -167,7 +171,7 @@ public class OfficeOwnerController {
   }
 
   @Operation(summary = "오피스 정보 수정", description = "자신의 오피스 정보를 수정할 수 있다.")
-  @PutMapping("/offices/{officeId}")
+  @PostMapping("/offices/{officeId}")
   public void modifyOffice(
       @PathVariable("officeId") Long officeId,
       @RequestPart(value = "request") OfficeModifyRequestDto request,

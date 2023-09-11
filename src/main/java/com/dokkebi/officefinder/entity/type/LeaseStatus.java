@@ -10,5 +10,5 @@ package com.dokkebi.officefinder.entity.type;
  */
 public enum LeaseStatus {
   AWAIT, ACCEPTED, DENIED,
-  PROCEEDING, CANCELED, EXPIRED
+  PROCEEDING, CANCELED, EXPIRED, REVIEWED
 }

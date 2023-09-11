@@ -1,5 +1,6 @@
 package com.dokkebi.officefinder.service.lease;
 
+import static com.dokkebi.officefinder.exception.CustomErrorCode.*;
 import static com.dokkebi.officefinder.exception.CustomErrorCode.EMAIL_NOT_REGISTERED;
 import static com.dokkebi.officefinder.exception.CustomErrorCode.INSUFFICIENT_POINTS;
 import static com.dokkebi.officefinder.exception.CustomErrorCode.INVALID_OFFICE_ID;
@@ -30,6 +31,7 @@ import com.dokkebi.officefinder.service.notification.NotificationService;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -94,7 +96,20 @@ public class LeaseService {
     Page<Lease> leases = leaseRepository.findByCustomerId(customer.getId(), pageable);
 
     return leases.map(lease -> LeaseLookUpServiceResponse.of(lease,
-        reviewRepository.existsByLeaseId(lease.getId()), officePictureRepository.findByOfficeId(lease.getOffice().getId())));
+        lease.getLeaseStatus().equals(LeaseStatus.REVIEWED),
+        officePictureRepository.findByOfficeId(lease.getOffice().getId())));
+  }
+
+  public LeaseLookUpServiceResponse getLeaseInfo(Long customerId, Long leaseId) {
+    Lease lease = leaseRepository.findById(leaseId)
+        .orElseThrow(() -> new CustomException(LEASE_NOT_FOUND));
+
+    if (!Objects.equals(lease.getCustomer().getId(), customerId)) {
+      throw new CustomException(LEASE_OWNER_NOT_MATCH);
+    }
+
+    return LeaseLookUpServiceResponse.of(lease, lease.getLeaseStatus().equals(LeaseStatus.REVIEWED),
+        officePictureRepository.findByOfficeId(lease.getOffice().getId()));
   }
 
   // 특정 오피스에 들어온 임대 요청 정보 확인(AWAIT 상태의 임대 정보만)
@@ -113,6 +128,7 @@ public class LeaseService {
     return awaitList.map(l -> AgentLeaseLookUpResponse.of(l, office.getName()));
   }
 
+  @Transactional
   public void acceptLeaseRequest(Long leaseId) {
     Lease lease = leaseRepository.findByLeaseId(leaseId)
         .orElseThrow(() -> new CustomException(LEASE_NOT_FOUND));

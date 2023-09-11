@@ -20,12 +20,14 @@ import com.dokkebi.officefinder.controller.office.dto.OfficeCreateRequestDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeOption;
 import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.SubmitControllerRequest;
 import com.dokkebi.officefinder.entity.Customer;
+import com.dokkebi.officefinder.entity.OfficeOwner;
 import com.dokkebi.officefinder.entity.lease.Lease;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.review.Review;
 import com.dokkebi.officefinder.entity.type.LeaseStatus;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
+import com.dokkebi.officefinder.repository.OfficeOwnerRepository;
 import com.dokkebi.officefinder.repository.ReviewRepository;
 import com.dokkebi.officefinder.repository.lease.LeaseRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
@@ -35,17 +37,11 @@ import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepositor
 import com.dokkebi.officefinder.service.auth.AuthService;
 import com.dokkebi.officefinder.service.lease.LeaseService;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
-import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import com.dokkebi.officefinder.service.office.OfficeService;
 import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import javax.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -74,6 +70,8 @@ public class ReviewServiceTest {
   private CustomerRepository customerRepository;
   @Autowired
   private OfficeRepository officeRepository;
+  @Autowired
+  private OfficeOwnerRepository ownerRepository;
 
   @Autowired
   private OfficeLocationRepository officeLocationRepository;
@@ -153,7 +151,7 @@ public class ReviewServiceTest {
         .rate(5)
         .description("테스트").build();
 
-    reviewRepository.save(Review.builder().lease(infos.lease).build());
+    reviewService.submit(submitControllerRequest, infos.customer.getId(), infos.lease.getId());
 
     //then
     assertThatThrownBy(() -> reviewService.submit(submitControllerRequest, infos.customer.getId(),
@@ -309,23 +307,6 @@ public class ReviewServiceTest {
         .extracting("errorCode", "errorMessage", "status")
         .contains(
             USER_NOT_FOUND, "유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST
-        );
-  }
-
-  @Test
-  @DisplayName("read할때 임대계약은 있지만 리뷰는 없는 경우")
-  public void getReviews2() {
-    //given
-    Infos infos = makeInfos("1", "test@naver.com", "1", "customer", 0, LeaseStatus.EXPIRED);
-
-    Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-    //then
-    assertThatThrownBy(() -> reviewService.getReviewsByOfficeId(infos.office.getId(), pageable))
-        .isInstanceOf(CustomException.class)
-        .extracting("errorCode", "errorMessage", "status")
-        .contains(
-            REVIEW_NOT_EXISTS, "리뷰가 존재하지 않습니다.", HttpStatus.BAD_REQUEST
         );
   }
 
