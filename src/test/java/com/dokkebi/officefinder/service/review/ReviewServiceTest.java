@@ -37,17 +37,11 @@ import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepositor
 import com.dokkebi.officefinder.service.auth.AuthService;
 import com.dokkebi.officefinder.service.lease.LeaseService;
 import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeRequestDto;
-import com.dokkebi.officefinder.service.lease.dto.LeaseServiceDto.LeaseOfficeServiceResponse;
 import com.dokkebi.officefinder.service.office.OfficeService;
 import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import javax.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -564,80 +558,6 @@ public class ReviewServiceTest {
     //then
     assertThat(dto.getReviewCount()).isEqualTo(3);
     assertThat(dto.getReviewRate()).isEqualTo(2);
-  }
-
-  @Test
-  @DisplayName("OfficeOwnerId로 리뷰 전체 가져오기 성공")
-  public void getAllReviews() {
-    //given
-    Customer customer = customerRepository.save(
-        Customer.builder()
-            .name("1")
-            .email("test")
-            .password("test")
-            .roles(Set.of("a"))
-            .point(0).build()
-    );
-    OfficeOwner owner = OfficeOwner.builder()
-        .name("1")
-        .email("test")
-        .password("test")
-        .businessNumber("11")
-        .roles(Set.of("a"))
-        .point(0)
-        .build();
-    OfficeOwner saved = ownerRepository.save(owner);
-
-    Office office = officeRepository.save(
-        Office.builder().owner(saved).name("1").build()
-    );
-    Lease lease1 = leaseRepository.save(
-        Lease.builder()
-            .customer(customer)
-            .office(office)
-            .leaseStatus(LeaseStatus.EXPIRED).build()
-    );
-    Lease lease2 = leaseRepository.save(
-        Lease.builder()
-            .customer(customer)
-            .office(office)
-            .leaseStatus(LeaseStatus.EXPIRED).build()
-    );
-    Lease lease3 = leaseRepository.save(
-        Lease.builder()
-            .customer(customer)
-            .office(office)
-            .leaseStatus(LeaseStatus.EXPIRED).build()
-    );
-    Review review = Review.builder()
-        .lease(lease1)
-        .customerId(customer.getId())
-        .officeId(office.getId())
-        .rate(1)
-        .description("test").build();
-    Review review2 = Review.builder()
-        .lease(lease2)
-        .customerId(customer.getId())
-        .officeId(office.getId())
-        .rate(2)
-        .description("test").build();
-    Review review3 = Review.builder()
-        .lease(lease3)
-        .customerId(customer.getId())
-        .officeId(office.getId())
-        .rate(3)
-        .description("test").build();
-    reviewRepository.save(review);
-    reviewRepository.save(review2);
-    reviewRepository.save(review3);
-    //when
-    Pageable pageable = PageRequest.of(0, 20);
-    Page<Review> reviews = reviewService.getAllReviewsByOfficeOwnerId(saved.getId(), pageable);
-    List<Review> content = reviews.getContent();
-    //then
-    assertThat(content.get(0).getRate()).isEqualTo(3);
-    assertThat(content.get(1).getRate()).isEqualTo(2);
-    assertThat(content.get(2).getRate()).isEqualTo(1);
   }
 
   private Infos makeInfos(String name, String email, String password, String roles, int point,

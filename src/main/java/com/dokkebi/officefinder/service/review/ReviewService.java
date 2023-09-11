@@ -149,18 +149,4 @@ public class ReviewService {
       }
     }
   }
-  public Page<Review> getAllReviewsByOfficeOwnerId(Long officeOwnerId, Pageable pageable) {
-    List<Office> list = officeRepository.findByOwnerId(officeOwnerId);
-
-    List<Review> allReviews = list.stream()
-        .flatMap(o -> reviewRepository.findByOfficeId(o.getId()).stream())
-        .sorted((o1, o2) -> Long.compare(o2.getId(), o1.getId()))
-        .collect(Collectors.toList());
-
-    int start = (int) pageable.getOffset();
-    int end = Math.min((start + pageable.getPageSize()), allReviews.size());
-    List<Review> pagedReviews = allReviews.subList(start, end);
-
-    return new PageImpl<>(pagedReviews, pageable, allReviews.size());
-  }
 }
