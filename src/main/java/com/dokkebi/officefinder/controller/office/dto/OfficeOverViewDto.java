@@ -2,6 +2,7 @@ package com.dokkebi.officefinder.controller.office.dto;
 
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficePicture;
+import com.dokkebi.officefinder.entity.type.Address;
 import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,15 +39,16 @@ public class OfficeOverViewDto {
 
   public static OfficeOverViewDto fromEntity(Office office, List<OfficePicture> officeImages) {
 
-    String address = office.getOfficeLocation().getAddress().getLegion() + " "
-        + office.getOfficeLocation().getAddress().getCity();
+    Address location = office.getOfficeLocation().getAddress();
 
-    List<String> imagePathList = new ArrayList<>();
+    String address = location.getLegion() + " " + location.getCity() + " " + location.getTown();
+
+    List<String> imagePathList;
     imagePathList = officeImages.stream()
         .map(OfficePicture::getFileName)
         .collect(Collectors.toList());
 
-    while(imagePathList.size() < 5){
+    while (imagePathList.size() < 5) {
       imagePathList.add("None");
     }
 
