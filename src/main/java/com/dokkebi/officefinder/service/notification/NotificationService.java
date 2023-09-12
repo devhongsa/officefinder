@@ -62,7 +62,7 @@ public class NotificationService {
     emitter.onError((e) -> emitterRepository.deleteById(emitterId));
 
     // 더미 데이터 전송
-    sendToClient(emitter, emitterId, "연결이 성공하였습니다. [email :" + email + "]");
+    sendNotification(emitter, emitterId, "연결이 성공하였습니다. [email :" + email + "]");
 
     // 연결이 끊긴 사이에 전송된 알림들 전송
     if (!lastEventId.isEmpty()) {
@@ -128,6 +128,19 @@ public class NotificationService {
 
       emitter.complete();
       emitterRepository.deleteById(emitterId);
+    } catch (IOException exception) {
+      emitterRepository.deleteById(emitterId);
+      emitter.completeWithError(exception);
+      throw new CustomException(CustomErrorCode.SSE_SEND_NOTIFICATION_FAIL);
+    }
+  }
+
+  private void sendNotification(SseEmitter emitter, String emitterId, Object data) {
+    try {
+      emitter.send(SseEmitter.event()
+          .id(emitterId)
+          .data(data, MediaType.APPLICATION_JSON));
+
     } catch (IOException exception) {
       emitterRepository.deleteById(emitterId);
       emitter.completeWithError(exception);
