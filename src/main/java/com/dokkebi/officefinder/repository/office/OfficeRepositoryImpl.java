@@ -127,15 +127,15 @@ public class OfficeRepositoryImpl implements OfficeRepositoryCustom {
   }
 
   private BooleanExpression legionEquals(String legion) {
-    return legion != null ? office.officeLocation.address.legion.like(legion) : null;
+    return legion != null ? office.officeLocation.address.legion.contains(legion) : null;
   }
 
   private BooleanExpression cityEquals(String city) {
-    return city != null ? office.officeLocation.address.city.like(city) : null;
+    return city != null ? office.officeLocation.address.city.contains(city) : null;
   }
 
   private BooleanExpression townEquals(String town) {
-    return town != null ? office.officeLocation.address.town.like(town) : null;
+    return town != null ? office.officeLocation.address.town.contains(town) : null;
   }
 
   private BooleanExpression maxCapacityLessThan(Integer maxCapacity) {
