@@ -69,7 +69,7 @@ public class NotificationService {
       Map<String, Object> events = emitterRepository.findAllEventCacheStartsWithEmail(email);
       events.entrySet().stream()
           .filter(e -> lastEventId.compareTo(e.getKey()) < 0)
-          .forEach(e -> sendToClient(emitter, e.getKey(), e.getValue()));
+          .forEach(e -> sendNotification(emitter, e.getKey(), e.getValue()));
     }
 
     return emitter;
