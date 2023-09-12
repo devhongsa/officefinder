@@ -117,6 +117,7 @@ public class NotificationService {
           .data(data));
     } catch (IOException exception) {
       emitterRepository.deleteById(emitterId);
+      exception.printStackTrace();
       throw new CustomException(CustomErrorCode.SSE_SEND_NOTIFICATION_FAIL);
     }
   }
