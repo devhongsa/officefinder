@@ -23,14 +23,15 @@ import com.dokkebi.officefinder.repository.office.OfficeRepository;
 import com.dokkebi.officefinder.service.review.dto.ReviewOverviewDto;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,21 +93,12 @@ public class ReviewService {
 
     Page<Review> reviews = reviewRepository.findByCustomerId(customerId, pageable);
 
-    if (reviews.isEmpty()) {
-      throw new CustomException(REVIEW_NOT_EXISTS);
-    }
-
     return reviews;
   }
 
   public ReviewOverviewDto getReviewOverviewByOfficeId(Long officeId) {
     List<Review> reviews = reviewRepository.findByOfficeId(officeId);
     return ReviewOverviewDto.from(reviews);
-  }
-
-  @Cacheable(value = "Review", cacheManager = "redisCacheManager")
-  public List<Review> getAllReviews() {
-    return reviewRepository.findAll();
   }
 
   @CacheEvict(value = "Review", key = "#reviewId", cacheManager = "redisCacheManager")
@@ -129,10 +121,6 @@ public class ReviewService {
         .orElseThrow(() -> new CustomException(OFFICE_NOT_EXISTS));
 
     Page<Review> reviews = reviewRepository.findByOfficeId(officeId, pageable);
-
-    if (reviews.isEmpty()) {
-      throw new CustomException(REVIEW_NOT_EXISTS);
-    }
 
     return reviews;
   }
@@ -160,6 +148,5 @@ public class ReviewService {
         lock.unlock();
       }
     }
-
   }
 }
