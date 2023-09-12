@@ -124,8 +124,7 @@ public class NotificationService {
     try {
       emitter.send(SseEmitter.event()
           .id(emitterId)
-          .data(data, MediaType.APPLICATION_JSON)
-          .reconnectTime(5000L));
+          .data(data, MediaType.APPLICATION_JSON));
 
       emitter.complete();
       emitterRepository.deleteById(emitterId);
