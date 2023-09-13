@@ -34,15 +34,6 @@ public class BookmarkController {
   private final BookmarkService bookmarkService;
   private final OfficePictureRepository officePictureRepository;
 
-  @PostMapping("/submit")
-  public ResponseDto<Long> submitBookmark(@RequestHeader("Authorization") String jwt,
-      @RequestBody @Valid SubmitDto request) {
-    Long customerId = tokenProvider.getUserIdFromHeader(jwt);
-    bookmarkService.submitBookmark(customerId, Long.parseLong(request.getOfficeId()));
-
-    return new ResponseDto<>("success", Long.parseLong(request.getOfficeId()));
-  }
-
   @GetMapping
   public Page<BookmarkDto> getBookmarks(@RequestHeader("Authorization") String jwt,
       @RequestParam(defaultValue = "0") Integer page,
@@ -54,15 +45,6 @@ public class BookmarkController {
 
     return bookmarks.map(content -> BookmarkDto.from(content,
         officePictureRepository.findByOfficeId(content.getOffice().getId())));
-  }
-
-  @DeleteMapping("/{bookmarkId}")
-  public ResponseDto<Long> deleteBookmark(@RequestHeader("Authorization") String jwt,
-      @PathVariable("bookmarkId") Long bookmarkId) {
-    Long customerId = tokenProvider.getUserIdFromHeader(jwt);
-    bookmarkService.deleteBookmark(bookmarkId);
-
-    return new ResponseDto<>("success", bookmarkId);
   }
 
   @DeleteMapping

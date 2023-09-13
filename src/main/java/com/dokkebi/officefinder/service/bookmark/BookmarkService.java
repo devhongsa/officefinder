@@ -42,8 +42,8 @@ public class BookmarkService {
     return bookmarkRepository.findByCustomerId(customerId, pageable);
   }
 
-  public void deleteBookmark(Long bookmarkId) {
-    bookmarkRepository.deleteById(bookmarkId);
+  public void deleteBookmark(Long customerId, Long officeId) {
+    bookmarkRepository.deleteBookmarkByOfficeIdAndCustomerId(customerId, officeId);
   }
 
   public void deleteAllBookMark(Long customerId){

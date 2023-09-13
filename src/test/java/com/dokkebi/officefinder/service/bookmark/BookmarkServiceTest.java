@@ -21,8 +21,6 @@ class BookmarkServiceTest {
   @Autowired
   private BookmarkService bookmarkService;
   @Autowired
-  private BookmarkRepository bookmarkRepository;
-  @Autowired
   private CustomerRepository customerRepository;
   @Autowired
   private OfficeRepository officeRepository;

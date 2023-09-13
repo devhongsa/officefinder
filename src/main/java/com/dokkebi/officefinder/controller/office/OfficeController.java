@@ -1,9 +1,11 @@
 package com.dokkebi.officefinder.controller.office;
 
+import com.dokkebi.officefinder.controller.bookmark.dto.SubmitDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeDetailResponseDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeOverViewDto;
 import com.dokkebi.officefinder.controller.office.dto.OfficeSearchCond;
 import com.dokkebi.officefinder.controller.review.dto.ReviewControllerDto.ReviewDto;
+import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.office.Office;
 import com.dokkebi.officefinder.entity.office.OfficePicture;
 import com.dokkebi.officefinder.entity.review.Review;
@@ -11,6 +13,8 @@ import com.dokkebi.officefinder.exception.CustomErrorCode;
 import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
+import com.dokkebi.officefinder.security.TokenProvider;
+import com.dokkebi.officefinder.service.bookmark.BookmarkService;
 import com.dokkebi.officefinder.service.office.OfficeSearchService;
 import com.dokkebi.officefinder.service.review.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,8 +27,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,6 +47,8 @@ public class OfficeController {
   private final OfficePictureRepository officePictureRepository;
   private final CustomerRepository customerRepository;
   private final ReviewService reviewService;
+  private final TokenProvider tokenProvider;
+  private final BookmarkService bookmarkService;
 
   @Operation(summary = "오피스 검색", description = "오피스를 특정 조건에 맞게 검색할 수 있다.")
   @GetMapping
@@ -90,5 +101,25 @@ public class OfficeController {
     return reviews.map(content -> ReviewDto.from(content,
         customerRepository.findById(content.getCustomerId()).orElseThrow(() -> new CustomException(
             CustomErrorCode.USER_NOT_FOUND))));
+  }
+
+  @PreAuthorize("hasRole('CUSTOMER')")
+  @PostMapping("/{officeId}/bookmarks")
+  public ResponseDto<Long> submitBookmark(@RequestHeader("Authorization") String jwt,
+      @RequestBody @Valid SubmitDto request) {
+    Long customerId = tokenProvider.getUserIdFromHeader(jwt);
+    bookmarkService.submitBookmark(customerId, Long.parseLong(request.getOfficeId()));
+
+    return new ResponseDto<>("success", Long.parseLong(request.getOfficeId()));
+  }
+
+  @PreAuthorize("hasRole('CUSTOMER')")
+  @DeleteMapping("{officeId}/bookmarks")
+  public ResponseDto<Long> deleteBookmark(@RequestHeader("Authorization") String jwt,
+      @PathVariable("officeId") Long officeId) {
+    Long customerId = tokenProvider.getUserIdFromHeader(jwt);
+    bookmarkService.deleteBookmark(customerId, officeId);
+
+    return new ResponseDto<>("success", officeId);
   }
 }
