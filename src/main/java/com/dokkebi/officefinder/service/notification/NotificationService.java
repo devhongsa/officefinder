@@ -129,6 +129,7 @@ public class NotificationService {
       emitter.complete();
       emitterRepository.deleteById(emitterId);
     } catch (IOException exception) {
+      exception.printStackTrace();
       emitterRepository.deleteById(emitterId);
       emitter.completeWithError(exception);
       throw new CustomException(CustomErrorCode.SSE_SEND_NOTIFICATION_FAIL);
@@ -139,9 +140,10 @@ public class NotificationService {
     try {
       emitter.send(SseEmitter.event()
           .id(emitterId)
-          .data(data));
+          .data(data, MediaType.APPLICATION_JSON));
 
     } catch (IOException exception) {
+      exception.printStackTrace();
       emitterRepository.deleteById(emitterId);
       emitter.completeWithError(exception);
       throw new CustomException(CustomErrorCode.SSE_SEND_NOTIFICATION_FAIL);
