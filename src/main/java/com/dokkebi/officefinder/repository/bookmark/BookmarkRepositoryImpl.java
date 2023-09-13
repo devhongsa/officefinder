@@ -29,7 +29,6 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryCustom{
   public Page<Bookmark> findByCustomerId(long customerId, Pageable pageable) {
     List<Bookmark> result = queryFactory.selectFrom(bookmark)
         .join(bookmark.customer, customer)
-        .join(bookmark.office, office)
         .where(
             customer.id.eq(customerId)
         )
@@ -40,7 +39,6 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryCustom{
     JPAQuery<Long> countQuery = queryFactory.select(bookmark.count())
         .from(bookmark)
         .join(bookmark.customer, customer)
-        .join(bookmark.office, office)
         .where(
             customer.id.eq(customerId)
         );
