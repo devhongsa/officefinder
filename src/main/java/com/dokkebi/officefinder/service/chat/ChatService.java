@@ -24,6 +24,7 @@ import com.dokkebi.officefinder.security.TokenProvider;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -54,8 +55,9 @@ public class ChatService {
           .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
       List<ChatRoom> chatRooms = chatRoomRepository.findByCustomer(
           customer);
+      List<Long> chatRoomIds = chatRooms.stream().map(ChatRoom::getId).collect(Collectors.toList());
       HashMap<ChatRoom, ChatMessage> chatMap = getChatMessageHashMap(
-          chatRooms);
+          chatRoomIds);
 
       for (ChatRoom chatRoom : chatRooms) {
         if (chatMap.containsKey(chatRoom)) {
@@ -85,8 +87,9 @@ public class ChatService {
       OfficeOwner officeOwner = officeOwnerRepository.findById(userId)
           .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
       List<ChatRoom> chatRooms = chatRoomRepository.findByOfficeOwner(officeOwner);
+      List<Long> chatRoomIds = chatRooms.stream().map(ChatRoom::getId).collect(Collectors.toList());
       HashMap<ChatRoom, ChatMessage> chatMap = getChatMessageHashMap(
-          chatRooms);
+          chatRoomIds);
 
       for (ChatRoom chatRoom : chatRooms) {
         if (chatMap.containsKey(chatRoom)) {
@@ -127,8 +130,9 @@ public class ChatService {
           .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
       List<ChatRoom> chatRooms = chatRoomRepository.findByCustomer(
           customer);
+      List<Long> chatRoomIds = chatRooms.stream().map(ChatRoom::getId).collect(Collectors.toList());
       HashMap<ChatRoom, ChatMessage> chatMap = getChatMessageHashMap(
-          chatRooms);
+          chatRoomIds);
 
       for (ChatRoom chatRoom : chatMap.keySet()) {
         if (chatMap.get(chatRoom).getCreatedAt().isAfter(chatRoom.getLastSeenCustomer())) {
@@ -140,8 +144,9 @@ public class ChatService {
       OfficeOwner officeOwner = officeOwnerRepository.findById(userId)
           .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
       List<ChatRoom> chatRooms = chatRoomRepository.findByOfficeOwner(officeOwner);
+      List<Long> chatRoomIds = chatRooms.stream().map(ChatRoom::getId).collect(Collectors.toList());
       HashMap<ChatRoom, ChatMessage> chatMap = getChatMessageHashMap(
-          chatRooms);
+          chatRoomIds);
 
       for (ChatRoom chatRoom : chatMap.keySet()) {
         if (chatMap.get(chatRoom).getCreatedAt().isAfter(chatRoom.getLastSeenCustomer())) {
@@ -263,9 +268,9 @@ public class ChatService {
   }
 
 
-  private HashMap<ChatRoom, ChatMessage> getChatMessageHashMap(List<ChatRoom> chatRooms) {
+  private HashMap<ChatRoom, ChatMessage> getChatMessageHashMap(List<Long> chatRoomIds) {
     List<ChatMessage> chatMessages = chatMessageRepository.findTopByChatRoomInOrderByCreatedAtDesc(
-        chatRooms);
+        chatRoomIds);
 
     HashMap<ChatRoom, ChatMessage> chatMap = new HashMap<>();
 
