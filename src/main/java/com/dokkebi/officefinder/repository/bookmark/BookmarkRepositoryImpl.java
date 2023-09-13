@@ -2,9 +2,11 @@ package com.dokkebi.officefinder.repository.bookmark;
 
 import static com.dokkebi.officefinder.entity.QCustomer.*;
 import static com.dokkebi.officefinder.entity.bookmark.QBookmark.*;
+import static com.dokkebi.officefinder.entity.office.QOffice.*;
 
 import com.dokkebi.officefinder.entity.QCustomer;
 import com.dokkebi.officefinder.entity.bookmark.Bookmark;
+import com.dokkebi.officefinder.entity.office.QOffice;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
@@ -27,6 +29,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryCustom{
   public Page<Bookmark> findByCustomerId(long customerId, Pageable pageable) {
     List<Bookmark> result = queryFactory.selectFrom(bookmark)
         .join(bookmark.customer, customer).fetchJoin()
+        .join(bookmark.office, office).fetchJoin()
         .where(
             customer.id.eq(customerId)
         )
@@ -37,6 +40,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryCustom{
     JPAQuery<Long> countQuery = queryFactory.select(bookmark.count())
         .from(bookmark)
         .join(bookmark.customer, customer).fetchJoin()
+        .join(bookmark.office, office).fetchJoin()
         .where(
             customer.id.eq(customerId)
         );
