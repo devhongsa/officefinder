@@ -38,9 +38,9 @@ public class BookmarkController {
   public ResponseDto<Long> submitBookmark(@RequestHeader("Authorization") String jwt,
       @RequestBody @Valid SubmitDto request) {
     Long customerId = tokenProvider.getUserIdFromHeader(jwt);
-    bookmarkService.submitBookmark(customerId, request.getOfficeId());
+    bookmarkService.submitBookmark(customerId, Long.parseLong(request.getOfficeId()));
 
-    return new ResponseDto<>("success", request.getOfficeId());
+    return new ResponseDto<>("success", Long.parseLong(request.getOfficeId()));
   }
 
   @GetMapping
