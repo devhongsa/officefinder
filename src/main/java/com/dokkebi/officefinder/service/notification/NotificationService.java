@@ -124,7 +124,7 @@ public class NotificationService {
     try {
       emitter.send(SseEmitter.event()
           .id(emitterId)
-          .data(data, MediaType.APPLICATION_JSON));
+          .data(data));
 
       emitter.complete();
       emitterRepository.deleteById(emitterId);
@@ -139,7 +139,7 @@ public class NotificationService {
     try {
       emitter.send(SseEmitter.event()
           .id(emitterId)
-          .data(data, MediaType.APPLICATION_JSON));
+          .data(data));
 
     } catch (IOException exception) {
       emitterRepository.deleteById(emitterId);
