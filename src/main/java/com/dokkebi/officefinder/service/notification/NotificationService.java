@@ -57,18 +57,13 @@ public class NotificationService {
       emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
     }
 
-    log.info("EMITTER_ID = {}", emitterId);
-
     emitter.onCompletion(() -> {
-      log.info("on Complete");
       emitterRepository.deleteById(emitterId);
     });
     emitter.onTimeout(() -> {
-      log.info("on Timeout");
       emitterRepository.deleteById(emitterId);
     });
     emitter.onError((e) -> {
-      log.error("on Error = ");
       emitterRepository.deleteById(emitterId);
     });
 
