@@ -23,19 +23,37 @@ public class NotificationResponseDto {
 
   // CustomerNotification을 NotificationResponseDto로 변환
   public static NotificationResponseDto from(CustomerNotification notification) {
+    LocalDate result;
+    LocalDateTime createdTime = notification.getCreatedAt();
+
+    if (createdTime == null){
+      result = null;
+    } else{
+      result = createdTime.toLocalDate();
+    }
+
     return NotificationResponseDto.builder()
         .title(notification.getTitle())
         .content(notification.getContent())
-        .createdAt(notification.getCreatedAt().toLocalDate())
+        .createdAt(result)
         .build();
   }
 
   // OfficeOwnerNotification을 NotificationResponseDto로 변환
   public static NotificationResponseDto from(OfficeOwnerNotification notification) {
+    LocalDate result;
+    LocalDateTime createdTime = notification.getCreatedAt();
+
+    if (createdTime == null){
+      result = null;
+    } else{
+      result = createdTime.toLocalDate();
+    }
+
     return NotificationResponseDto.builder()
         .title(notification.getTitle())
         .content(notification.getContent())
-        .createdAt(notification.getCreatedAt().toLocalDate())
+        .createdAt(result)
         .build();
   }
 }
