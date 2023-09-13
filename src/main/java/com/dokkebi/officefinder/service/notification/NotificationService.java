@@ -57,9 +57,20 @@ public class NotificationService {
       emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
     }
 
-    emitter.onCompletion(() -> emitterRepository.deleteById(emitterId));
-    emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
-    emitter.onError((e) -> emitterRepository.deleteById(emitterId));
+    log.info("EMITTER_ID = {}", emitterId);
+
+    emitter.onCompletion(() -> {
+      log.info("on Complete");
+      emitterRepository.deleteById(emitterId);
+    });
+    emitter.onTimeout(() -> {
+      log.info("on Timeout");
+      emitterRepository.deleteById(emitterId);
+    });
+    emitter.onError((e) -> {
+      log.error("on Error = ");
+      emitterRepository.deleteById(emitterId);
+    });
 
     // 더미 데이터 전송
     sendNotification(emitter, emitterId, "연결이 성공하였습니다. [email :" + email + "]");
@@ -129,6 +140,7 @@ public class NotificationService {
       emitter.complete();
       emitterRepository.deleteById(emitterId);
     } catch (IOException exception) {
+      exception.printStackTrace();
       emitterRepository.deleteById(emitterId);
       emitter.completeWithError(exception);
       throw new CustomException(CustomErrorCode.SSE_SEND_NOTIFICATION_FAIL);
@@ -142,6 +154,7 @@ public class NotificationService {
           .data(data, MediaType.APPLICATION_JSON));
 
     } catch (IOException exception) {
+      exception.printStackTrace();
       emitterRepository.deleteById(emitterId);
       emitter.completeWithError(exception);
       throw new CustomException(CustomErrorCode.SSE_SEND_NOTIFICATION_FAIL);
