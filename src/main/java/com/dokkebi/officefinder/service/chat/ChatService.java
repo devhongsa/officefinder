@@ -63,6 +63,7 @@ public class ChatService {
               .roomUid(chatRoom.getRoomUid())
               .roomName(chatRoom.getOfficeOwner().getName())
               .userName(chatRoom.getCustomer().getName())
+              .profileImageUrl(chatRoom.getOfficeOwner().getOfficeOwnerProfileImage())
               .lastMessage(chatMap.get(chatRoom).getMessage())
               .lastMessageTime(chatMap.get(chatRoom).getCreatedAt())
               .newMessage(
@@ -73,6 +74,7 @@ public class ChatService {
               .roomUid(chatRoom.getRoomUid())
               .roomName(chatRoom.getOfficeOwner().getName())
               .userName(chatRoom.getCustomer().getName())
+              .profileImageUrl(chatRoom.getOfficeOwner().getOfficeOwnerProfileImage())
               .lastMessage("")
               .lastMessageTime(chatRoom.getLastSeenCustomer())
               .newMessage(false)
@@ -92,6 +94,7 @@ public class ChatService {
               .roomUid(chatRoom.getRoomUid())
               .roomName(chatRoom.getCustomer().getName())
               .userName(chatRoom.getOfficeOwner().getName())
+              .profileImageUrl(chatRoom.getCustomer().getProfileImage())
               .lastMessage(chatMap.get(chatRoom).getMessage())
               .lastMessageTime(chatMap.get(chatRoom).getCreatedAt())
               .newMessage(
@@ -102,6 +105,7 @@ public class ChatService {
               .roomUid(chatRoom.getRoomUid())
               .roomName(chatRoom.getCustomer().getName())
               .userName(chatRoom.getOfficeOwner().getName())
+              .profileImageUrl(chatRoom.getCustomer().getProfileImage())
               .lastMessage("")
               .lastMessageTime(chatRoom.getLastSeenCustomer())
               .newMessage(false)
