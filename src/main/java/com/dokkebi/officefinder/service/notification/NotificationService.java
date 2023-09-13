@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -46,20 +47,29 @@ public class NotificationService {
   // LastEvenId가 포함된 경우, 연결이 끊긴 이후의 Event들을 전송
   public SseEmitter subscribe(String email, String lastEventId) {
     String emitterId = email + "_" + System.currentTimeMillis();
-    SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
+
+    SseEmitter emitter;
+
+    if (emitterRepository.findAllEmitterStartsWithEmail(email) != null){
+      emitterRepository.deleteAllEmitterStartWithEmail(email);
+      emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
+    } else{
+      emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
+    }
 
     emitter.onCompletion(() -> emitterRepository.deleteById(emitterId));
     emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
+    emitter.onError((e) -> emitterRepository.deleteById(emitterId));
 
     // 더미 데이터 전송
-    sendToClient(emitter, emitterId, "연결이 성공하였습니다. [email :" + email + "]");
+    sendNotification(emitter, emitterId, "연결이 성공하였습니다. [email :" + email + "]");
 
     // 연결이 끊긴 사이에 전송된 알림들 전송
     if (!lastEventId.isEmpty()) {
       Map<String, Object> events = emitterRepository.findAllEventCacheStartsWithEmail(email);
       events.entrySet().stream()
           .filter(e -> lastEventId.compareTo(e.getKey()) < 0)
-          .forEach(e -> sendToClient(emitter, e.getKey(), e.getValue()));
+          .forEach(e -> sendNotification(emitter, e.getKey(), e.getValue()));
     }
 
     return emitter;
@@ -114,9 +124,26 @@ public class NotificationService {
     try {
       emitter.send(SseEmitter.event()
           .id(emitterId)
-          .data(data));
+          .data(data, MediaType.APPLICATION_JSON));
+
+      emitter.complete();
+      emitterRepository.deleteById(emitterId);
     } catch (IOException exception) {
       emitterRepository.deleteById(emitterId);
+      emitter.completeWithError(exception);
+      throw new CustomException(CustomErrorCode.SSE_SEND_NOTIFICATION_FAIL);
+    }
+  }
+
+  private void sendNotification(SseEmitter emitter, String emitterId, Object data) {
+    try {
+      emitter.send(SseEmitter.event()
+          .id(emitterId)
+          .data(data, MediaType.APPLICATION_JSON));
+
+    } catch (IOException exception) {
+      emitterRepository.deleteById(emitterId);
+      emitter.completeWithError(exception);
       throw new CustomException(CustomErrorCode.SSE_SEND_NOTIFICATION_FAIL);
     }
   }
