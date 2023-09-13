@@ -5,6 +5,7 @@ import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.office.Office;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,11 +26,11 @@ public class Bookmark extends BaseEntity {
   @Column(name = "bookmark_id")
   private Long id;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "customer_id")
   private Customer customer;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id")
   private Office office;
 
