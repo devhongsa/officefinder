@@ -43,11 +43,12 @@ public class SecurityConfig implements WebMvcConfigurer {
             .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .antMatchers("/ws/**").permitAll() // 개발환경에서만 우선 설정
             .antMatchers("/webjars/**").permitAll() // 개발환경에서만 우선 설정
-            .antMatchers("/swagger*/**","/v3/api-docs", "/v2/api-docs").permitAll()
+            .antMatchers("/swagger*/**", "/v3/api-docs", "/v2/api-docs").permitAll()
             .antMatchers("/**/signup", "/**/login/**").permitAll()
             .anyRequest().authenticated()
         )
-        .addFilterBefore(new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(new JwtAuthenticationFilter(tokenProvider),
+            UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
 
@@ -61,10 +62,12 @@ public class SecurityConfig implements WebMvcConfigurer {
   @Override
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**")
-        .allowedOrigins("http://127.0.0.1:5173", "http://localhost:5173")
+        .allowedOrigins("http://127.0.0.1:5173", "http://localhost:5173", "https://127.0.0.1:5173",
+            "https://localhost:5173")
         .allowedMethods("*")
         .allowedHeaders("*")
-        .exposedHeaders("Content-Disposition","X-AUTH-TOKEN","Authorization","Access-Control-Allow-Origin","Access-Control-Allow-Credentials")
+        .exposedHeaders("Content-Disposition", "X-AUTH-TOKEN", "Authorization",
+            "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials")
         .allowCredentials(true);
   }
 }
