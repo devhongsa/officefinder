@@ -8,7 +8,6 @@ import com.dokkebi.officefinder.service.chat.ChatService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,13 +22,6 @@ import org.springframework.web.servlet.ModelAndView;
 public class ChatRoomController {
 
   private final ChatService chatService;
-
-  // 채팅 리스트 화면 (테스트용 api)
-  @GetMapping("/room")
-  public ModelAndView rooms() {
-    ModelAndView model = new ModelAndView("roomtest");
-    return model;
-  }
 
   // 모든 채팅방 목록 반환
   @GetMapping("/rooms")
@@ -45,14 +36,6 @@ public class ChatRoomController {
   public CreateRoomResponse createRoom(@PathVariable Long officeId,
       @RequestHeader("Authorization") String jwt) {
     return chatService.createRoom(officeId, jwt);
-  }
-
-  // 채팅방 입장 화면 (테스트용 api)
-  @GetMapping("/room/enter/{roomUid}")
-  public ModelAndView roomDetail(@PathVariable String roomUid) {
-    ModelAndView model = new ModelAndView("roomdetail");
-    model.addObject("roomUid", roomUid);
-    return model;
   }
 
   // 특정 채팅방 조회
