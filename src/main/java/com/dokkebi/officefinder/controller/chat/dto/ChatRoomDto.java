@@ -33,6 +33,7 @@ public class ChatRoomDto {
     private String roomUid;
     private String roomName;
     private String userName;
+    private String profileImageUrl;
     private String lastMessage;
     private LocalDateTime lastMessageTime;
     private boolean newMessage;
