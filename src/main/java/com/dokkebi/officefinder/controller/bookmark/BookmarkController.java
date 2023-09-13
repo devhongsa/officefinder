@@ -32,7 +32,6 @@ public class BookmarkController {
 
   private final TokenProvider tokenProvider;
   private final BookmarkService bookmarkService;
-  private final OfficePictureRepository officePictureRepository;
 
   @GetMapping
   public Page<BookmarkDto> getBookmarks(@RequestHeader("Authorization") String jwt,
@@ -41,10 +40,7 @@ public class BookmarkController {
     Long customerId = tokenProvider.getUserIdFromHeader(jwt);
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-    Page<Bookmark> bookmarks = bookmarkService.getBookmarks(customerId, pageable);
-
-    return bookmarks.map(content -> BookmarkDto.from(content,
-        officePictureRepository.findByOfficeId(content.getOffice().getId())));
+    return bookmarkService.getBookmarks(customerId, pageable);
   }
 
   @DeleteMapping
