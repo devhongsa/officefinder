@@ -50,7 +50,7 @@ public class BookmarkService {
   }
 
   public void deleteBookmark(Long customerId, Long officeId) {
-    Bookmark bookmark = bookmarkRepository.findByCustomerIdAndOfficeId(customerId, officeId)
+    Bookmark bookmark = bookmarkRepository.findByCustomerIdAndOfficeId(officeId, customerId)
         .orElseThrow(() -> new CustomException(BOOKMARK_NOT_EXISTS));
 
     bookmarkRepository.delete(bookmark);
