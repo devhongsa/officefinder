@@ -1,6 +1,7 @@
 package com.dokkebi.officefinder.controller.bookmark;
 
 import com.dokkebi.officefinder.controller.bookmark.dto.BookmarkDto;
+import com.dokkebi.officefinder.controller.bookmark.dto.SubmitDto;
 import com.dokkebi.officefinder.dto.ResponseDto;
 import com.dokkebi.officefinder.entity.bookmark.Bookmark;
 import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
@@ -35,11 +36,11 @@ public class BookmarkController {
 
   @PostMapping("/submit")
   public ResponseDto<Long> submitBookmark(@RequestHeader("Authorization") String jwt,
-      @RequestBody @Valid Long officeId) {
+      @RequestBody @Valid SubmitDto request) {
     Long customerId = tokenProvider.getUserIdFromHeader(jwt);
-    bookmarkService.submitBookmark(customerId, officeId);
+    bookmarkService.submitBookmark(customerId, request.getOfficeId());
 
-    return new ResponseDto<>("success", officeId);
+    return new ResponseDto<>("success", request.getOfficeId());
   }
 
   @GetMapping
