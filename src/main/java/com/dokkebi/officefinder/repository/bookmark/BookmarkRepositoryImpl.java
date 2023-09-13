@@ -10,6 +10,7 @@ import com.dokkebi.officefinder.entity.office.QOffice;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,5 +55,18 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryCustom{
 
     em.clear();
     em.flush();
+  }
+
+  @Override
+  public Optional<Bookmark> findByCustomerIdAndOfficeId(long officeId, long customerId) {
+    Bookmark result = queryFactory.selectFrom(bookmark)
+        .join(bookmark.customer, customer)
+        .where(
+            customer.id.eq(customerId),
+            bookmark.office.id.eq(officeId)
+        )
+        .fetchOne();
+
+    return Optional.ofNullable(result);
   }
 }
