@@ -3,6 +3,7 @@ package com.dokkebi.officefinder.service.bookmark;
 import static com.dokkebi.officefinder.exception.CustomErrorCode.OFFICE_NOT_EXISTS;
 import static com.dokkebi.officefinder.exception.CustomErrorCode.USER_NOT_FOUND;
 
+import com.dokkebi.officefinder.controller.bookmark.dto.BookmarkDto;
 import com.dokkebi.officefinder.entity.Customer;
 import com.dokkebi.officefinder.entity.bookmark.Bookmark;
 import com.dokkebi.officefinder.entity.office.Office;
@@ -10,6 +11,7 @@ import com.dokkebi.officefinder.exception.CustomException;
 import com.dokkebi.officefinder.repository.CustomerRepository;
 import com.dokkebi.officefinder.repository.bookmark.BookmarkRepository;
 import com.dokkebi.officefinder.repository.office.OfficeRepository;
+import com.dokkebi.officefinder.repository.office.picture.OfficePictureRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +26,7 @@ public class BookmarkService {
   private final BookmarkRepository bookmarkRepository;
   private final CustomerRepository customerRepository;
   private final OfficeRepository officeRepository;
+  private final OfficePictureRepository officePictureRepository;
 
   public Bookmark submitBookmark(Long customerId, Long officeId) {
     Customer customer = customerRepository.findById(customerId)
@@ -38,8 +41,11 @@ public class BookmarkService {
   }
 
   @Transactional(readOnly = true)
-  public Page<Bookmark> getBookmarks(Long customerId, Pageable pageable) {
-    return bookmarkRepository.findByCustomerId(customerId, pageable);
+  public Page<BookmarkDto> getBookmarks(Long customerId, Pageable pageable) {
+    Page<Bookmark> bookmarks = bookmarkRepository.findByCustomerId(customerId, pageable);
+
+    return bookmarks.map(content -> BookmarkDto.from(content,
+        officePictureRepository.findByOfficeId(content.getOffice().getId())));
   }
 
   public void deleteBookmark(Long customerId, Long officeId) {
