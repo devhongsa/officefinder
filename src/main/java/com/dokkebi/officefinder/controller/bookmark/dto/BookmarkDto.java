@@ -31,8 +31,14 @@ public class BookmarkDto {
       representImagePath = imagePaths.get(0).getFileName();
     }
 
-    double totalRate = (double)(office.getTotalRate() / office.getReviewCount());
-    totalRate = Math.round(totalRate * 100.0) / 100.0;
+    double totalRate;
+
+    if (office.getReviewCount() == 0 || office.getTotalRate() == 0){
+      totalRate = 0d;
+    } else {
+      totalRate = (double)(office.getTotalRate() / office.getReviewCount());
+      totalRate = Math.round(totalRate * 100.0) / 100.0;
+    }
 
     return BookmarkDto.builder()
         .id(bookmark.getId())
