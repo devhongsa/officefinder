@@ -75,8 +75,9 @@ public class OfficeOwnerController {
 
   @ApiOperation(value = "임대주 정보 조회", notes = "임대주 정보를 가져올 수 있다.")
   @GetMapping("/info")
-  public OfficeOwnerInfoDto getOfficeOwnerInfo(@RequestHeader("Authorization") String jwt) {
-    return officeOwnerService.getAgentInfo(tokenProvider.getUserIdFromHeader(jwt));
+  public ResponseDto<OfficeOwnerInfoDto> getOfficeOwnerInfo(@RequestHeader("Authorization") String jwt) {
+    OfficeOwnerInfoDto officeOwnerInfoDto = officeOwnerService.getAgentInfo(tokenProvider.getUserIdFromHeader(jwt));
+    return new ResponseDto<>("success", officeOwnerInfoDto);
   }
 
   @Operation(summary = "임대주 이미지 등록 및 수정", description = "임대주의 프로필 이미지를 등록하거나 수정할 수 있다.")

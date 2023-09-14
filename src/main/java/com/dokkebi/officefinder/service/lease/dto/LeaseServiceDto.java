@@ -85,6 +85,8 @@ public class LeaseServiceDto {
 
     private Long leaseId;
 
+    private Long officeId;
+
     private String name;
 
     private String location;
@@ -121,6 +123,7 @@ public class LeaseServiceDto {
 
       return LeaseLookUpServiceResponse.builder()
           .leaseId(lease.getId())
+          .officeId(office.getId())
           .name(office.getName())
           .location(office.getOfficeAddress())
           .leaseStatus(lease.getLeaseStatus())
