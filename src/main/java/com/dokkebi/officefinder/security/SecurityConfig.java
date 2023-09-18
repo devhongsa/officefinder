@@ -63,7 +63,7 @@ public class SecurityConfig implements WebMvcConfigurer {
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**")
         .allowedOrigins("http://127.0.0.1:5173", "http://localhost:5173", "https://127.0.0.1:5173",
-            "https://localhost:5173")
+            "https://localhost:5173", "https://office-finder-front-git-develop-fefdfea1.vercel.app")
         .allowedMethods("*")
         .allowedHeaders("*")
         .exposedHeaders("Content-Disposition", "X-AUTH-TOKEN", "Authorization",
