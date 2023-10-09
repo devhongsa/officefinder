@@ -67,8 +67,8 @@
 
      
 ## 4. 담당 역할
-1. 회원 가입 및 로그인 기능 (OAuth 2.0 구글 로그인 포함)
-   Spring Security, jwt 기반의 회원 가입 및 로그인 기능 구현 
+1. 회원 가입 및 로그인 기능 (OAuth 2.0 구글 로그인 포함)   
+   - Spring Security, jwt 기반의 회원 가입 및 로그인 기능 구현 
 2. 임대주의 오피스 월별 매출 및 임대 현황 조회 기능
    - 특정 오피스의 매출 및 임대 현황
    - 임대주가 보유한 모든 오피스의 총 매출 및 임대 현황 
@@ -79,3 +79,23 @@
    WebSocket(SockJS) 사용
 4. GlobalExceptionHandler 구현
 5. 기타 프론트-백엔드 연결 작업시 나타나는 오류 해결 작업
+
+## 5. Trouble Shooting
+1. Filter 단계에서 CustomException 사용 불가   
+   Filter 단계에서 jwt 토큰으로 회원 인증을 하는데, jwt토큰이 올바르지 않거나 만료된 토큰일 때 CustomException으로 에러를 응답해주려고 코드를 작성했다.
+   그런데 CustomException이 Null로 처리되서 에러를 제대로 응답해주지 못하는 현상이 발생했다. 원인을 찾아보니 Filter단계는 아직 Spring Context 범위 밖이기 때문에
+   Spring에서 구현해준 CustomException을 인식하지 못해서 발생하는 현상이었다. 그래서 CustomException을 사용하려면 Interceptor 단계에서 처리를 해줘야 했다.
+
+2. JwtAuthenticationFilter가 디폴트 필터로 설정되는 현상
+   Jwt 인증 필터는 회원 인증이 필요한 api url에서만 필터를 거쳐야 하는데, SecurityConfig에서 permit해준 url이 계속 JwtAuthenticationFilter를 거치는 현상을 발견했다.
+   원인을 찾아보니 필터를 @Component로 스프링 빈으로 등록해주면 Security의 filterChain이 아닌 default filterChain에 등록되기 때문에 어떤 요청이든지 필터를 거치는 현상이
+   생기게 된 것이다. 그래서 스프링 빈으로 등록하지 않고 직접 객체를 생성해서 필터에 등록해주니 permit한 url은 필터를 거치지 않게 되었다.
+
+3. Cors 문제
+   Cors 에러가 발생하였다. 스프링 백엔드 서버와 리액트 프론트 서버 연동시에 Origin이 달라서 발생기는 오류였다. Port가 달랐기 때문에 로컬서버 환경에서 테스트할때 Cors에러가 생겼고,
+   http://localhost:5137 를 허용해주니 문제가 해결되었다. 이후 서버 배포시에 프론트 서버의 주소도 허용해주었다.
+
+4. 웹소켓으로 채팅 구현시 Jwt 필터를 계속 거치는 현상
+   채팅 구현시 웹소켓으로 구현했는데, 테스트 도중 서버 로그를 보니 ws:// url 루트로 jwt 필터를 과도하게 거치는 현상을 발견했다. 웹소켓 연결시 처음에는 http 프로토콜로 연결을 하기 때문에
+   이때는 필터를 거쳐야 하지만 그 이후에 ws:// 통신은 거칠 필요가 없을거 같아서 ws:// 로 오는 모든 요청들을 jwt필터를 거치지 않게 설정해 주었다.
+   
